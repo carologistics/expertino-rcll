@@ -1,0 +1,65 @@
+clips_executive:
+  ros__parameters:
+    # If CLIPS debugging is enabled, certain rules and facts can be excluded
+    # from watching, e.g. if they are showing up at too high frequencies or
+    # are not of interest.
+    unwatch_facts: ["time"]
+    unwatch_rules: ["time-retract"]
+
+    # If set to true, will trigger the assertion of a (time (now)) fact in
+    # each loop. This can be used to trigger loop events in CLIPS.
+    assert_time_each_loop: true
+
+    # Sets the frequency, in which the clips agenda is being refresh
+    # inside the CX (in HZ)
+    refresh_rate: 1
+
+    # If set to true, goals will be cleaned automatically when they
+    # reach the RETRACTED state. Disabling be useful for debugging.
+    # You need to manually cleanup goals (and associated data such as
+    # plans) to keep things tidy.
+    automatic-goal-retraction: true
+
+    init:
+      # Files are relative pathes to the share directory of the cx_clips_executive
+      # and the path specified through agent_dir
+      # These files are loaded from the cx_clips_executive package
+      - name: clips-executive
+        files:
+          - core/plan.clp
+          - core/goal.clp
+          - core/domain.clp
+          - core/skills.clp
+          - core/skills-actions.clp
+      - name: domain
+        file: domain.clp
+      - name: goal-reasoner
+        file: goal-reasoner.clp
+      - name: fixed-sequence
+        file: fixed-sequence.clp
+      - name: action-selection
+        file: action-selection.clp
+      - name: refbox-comm
+        file: refbox-comm-init.clp
+       # Map plan actions to skill strings.
+    action_mapping:
+      move:
+        mapped_to: say{text="hello world"}
+        executor: dummy_skiller
+
+    parameters:
+      simtest:
+        enabled: false
+        testbed: FULL  # defined in simtest.clp
+      rcll:
+        peer-address: 172.26.255.255
+        peer-recv-port: 4444
+        peer-send-port: 4445
+        cyan-recv-port: 4441
+        magenta-recv-port: 4442
+        cyan-send-port: 4446
+        magenta-send-port: 4447
+
+        team-name: Carologistics
+        crypto-key: randomkey
+        cipher: "aes-128-cbc"
