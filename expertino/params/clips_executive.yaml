@@ -27,6 +27,7 @@ clips_executive:
       - name: utils
         files:
           - defglobals.clp
+          - deftemplates.clp
       - name: clips-executive
         files:
           - core/plan.clp
@@ -49,7 +50,9 @@ clips_executive:
       - name: action-selection
         file: action-selection.clp
       - name: refbox-comm
-        file: refbox-comm-init.clp
+        files:
+          - refbox-comm-init.clp
+          - refbox-recv.clp
        # Map plan actions to skill strings.
     action_mapping:
       move:
@@ -61,14 +64,14 @@ clips_executive:
         enabled: false
         testbed: FULL  # defined in simtest.clp
       rcll:
-        peer-address: 172.26.255.255
-        peer-recv-port: 4444
-        peer-send-port: 4445
-        cyan-recv-port: 4441
-        magenta-recv-port: 4442
-        cyan-send-port: 4446
-        magenta-send-port: 4447
+        peer_address: 127.0.0.1
+        peer_recv_port: 4444
+        peer_send_port: 4445
+        cyan_recv_port: 4441
+        magenta_recv_port: 4442
+        cyan_send_port: 4446
+        magenta_send_port: 4447
 
-        team-name: Carologistics
-        crypto-key: randomkey
+        team_name: Carologistics
+        crypto_key: randomkey
         cipher: "aes-128-cbc"
