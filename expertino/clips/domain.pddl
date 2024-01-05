@@ -1,4 +1,8 @@
 
+; Copyright (C) 2024 Team Carologistics
+;
+; Licensed under GPLv2+ license, cf. LICENSE file in project root directory.
+
 (define (domain rcll-production)
 (:requirements :strips :typing)
 
