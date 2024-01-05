@@ -24,19 +24,28 @@ clips_executive:
       # Files are relative pathes to the share directory of the cx_clips_executive
       # and the path specified through agent_dir
       # These files are loaded from the cx_clips_executive package
+      - name: utils
+        files:
+          - defglobals.clp
       - name: clips-executive
         files:
           - core/plan.clp
-          - core/goal.clp
           - core/domain.clp
           - core/skills.clp
+          - core/pddl.clp
           - core/skills-actions.clp
-      - name: domain
-        file: domain.clp
+      - name: init
+        files:
+         - deffunctions.clp
+         - init.clp
       - name: goal-reasoner
-        file: goal-reasoner.clp
-      - name: fixed-sequence
-        file: fixed-sequence.clp
+        files:
+          - goal-formulation.clp
+          - goal-selection.clp
+          - goal-expansion.clp
+          - goal-commitment.clp
+          - goal-dispatch.clp
+          - goal-evaluation.clp
       - name: action-selection
         file: action-selection.clp
       - name: refbox-comm

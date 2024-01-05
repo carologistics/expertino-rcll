@@ -1,8 +1,26 @@
+; Copyright (C) 2024 Team Carologistics
+;
+; Licensed under GPLv2+ license, cf. LICENSE file in project root directory.
+
+(deffunction deg-to-rad (?deg)
+  "Converts an angle in degree to radiant
+  @param ?deg angle in degree
+
+  @return angle in radiant
+  "
+  (bind ?bigrad (* (/ ?deg 360) ?*2PI*))
+  (if (> ?bigrad ?*PI*) then
+    (return (* -1 (- ?*2PI* ?bigrad)))
+  else
+    (return ?bigrad)
+  )
+)
+
 (deffunction plan-assert-action (?name $?param-values)
 " Assert an action with a unique id."
 	(bind ?id-sym (gensym*))
 	(bind ?id-str (sub-string 4 (length$ ?id-sym) (str-cat ?id-sym)))
-	(assert (plan-action (id (string-to-field ?id-str)) (action-name ?name) (param-values $?param-values) (robot "robot1")))
+	(assert (plan-action (id (string-to-field ?id-str)) (action-name ?name) (param-values $?param-values) (robot "ROBOT1")))
 )
 
 (deffunction plan-assert-sequential (?plan-name ?goal-id ?robot $?action-tuples)
@@ -20,15 +38,3 @@
 	)
 )
 
-(defrule fixed-sequence-expand-demo-goal
-	?g <- (goal (id ?goal-id) (class DEMO-GOAL) (mode SELECTED) (parent ?parent)
-	            (params target-pos ?zone robot ?robot))
-
-	(domain-fact (name at) (param-values ?robot ?curr-loc ?curr-side))
-	=>
-	(plan-assert-sequential (sym-cat DEMO-GOAL-PLAN- (gensym*)) ?goal-id robot1
-		(plan-assert-action move  ?robot ?curr-loc ?curr-side ?zone INPUT)
-		;(plan-assert-action wp-put ?robot ?wp ?mps INPUT (get-wp-complexity ?wp))
-	)
-	(modify ?g (mode EXPANDED))
-)

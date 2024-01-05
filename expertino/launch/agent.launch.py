@@ -21,7 +21,7 @@ def generate_launch_description():
     clips_executive_params_file = LaunchConfiguration(
         'clips_executive_params_file')
 
-    lc_nodes = ["clips_features_manager", "clips_executive"]
+    lc_nodes = ["clips_features_manager", "clips_executive", "domain_expert","problem_expert", "planner"]
 
     declare_model_file_cmd = DeclareLaunchArgument(
         'model_file',
@@ -59,6 +59,9 @@ def generate_launch_description():
             {"agent_dir":expertino_dir},
             {"clips_executive_config": clips_executive_params_file},
             {"clips_features_manager_config": clips_features_manager_file},
+            {
+                'model_file': model_file,
+            },
             clips_features_manager_file,
             clips_executive_params_file,
             clips_manager_params_file,
@@ -86,6 +89,16 @@ def generate_launch_description():
         emulate_tty=True,
         parameters=[{"robot_id": "robot1"}]
     )
+    plansys2_node_cmd = Node(
+        package='cx_bringup',
+        executable='plansys_node',
+        output='screen',
+        parameters=[
+            {
+                'model_file': model_file,
+            },
+            clips_features_manager_file,
+        ])
 
     cx_lifecycle_manager = Node(
         package='cx_lifecycle_nodes_manager',
@@ -105,10 +118,11 @@ def generate_launch_description():
     ld.add_action(declare_clips_executive_params_file)
     ld.add_action(declare_clips_manager_params_file)
     ld.add_action(declare_model_file_cmd)
+    ld.add_action(plansys2_node_cmd)
 
     ld.add_action(robot1_dummy_node)
     ld.add_action(cx_node)
     ld.add_action(cx_lifecycle_manager)
-    ld.add_action(refbox_node)
+    #ld.add_action(refbox_node)
 
     return ld
