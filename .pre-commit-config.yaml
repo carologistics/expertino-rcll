@@ -1,0 +1,53 @@
+# See https://pre-commit.com for more information
+# See https://pre-commit.com/hooks.html for more hooks
+repos:
+-   repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.5.0
+    hooks:
+    #-   id: trailing-whitespace
+    #-   id: end-of-file-fixer
+    -   id: check-yaml
+        args: [--unsafe]
+    -   id: check-added-large-files
+    -   id: check-executables-have-shebangs
+    -   id: check-shebang-scripts-are-executable
+-   repo: https://github.com/pre-commit/mirrors-clang-format
+    rev: v17.0.6
+    hooks:
+    -   id: clang-format
+        types_or: [c++, c]
+-   repo: https://github.com/jorisroovers/gitlint
+    rev: v0.19.1
+    hooks:
+    - id: gitlint
+-   repo: https://github.com/cheshirekow/cmake-format-precommit
+    rev: v0.6.13
+    hooks:
+    - id: cmake-format
+    - id: cmake-lint
+      args: [-c=.cmakelint.py]
+      exclude: etc/cmake/
+
+- repo: https://github.com/Lucas-C/pre-commit-hooks
+  rev: v1.5.4
+  hooks:
+    - id: forbid-crlf
+    - id: remove-crlf
+    - id: insert-license
+      stages: [push]
+      files: \.(clp|pddl)$
+      args:
+        - --license-filepath
+        - .license_header
+        - --comment-style
+        - ;
+        - --use-current-year
+        - --allow-past-years
+    - id: insert-license
+      stages: [push]
+      files: \.(cpp|hpp)$
+      args:
+        - --license-filepath
+        - .license_header
+        - --use-current-year
+        - --allow-past-years
