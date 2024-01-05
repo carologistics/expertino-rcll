@@ -37,7 +37,7 @@ ignore=body-is-missing
 # Whether to use Python `search` instead of `match` semantics in rules that use
 # regexes. Context: https://github.com/jorisroovers/gitlint/issues/254
 # Disabled by default, but will be enabled by default in the future.
-# regex-style-search=true
+regex-style-search=true
 
 # Enable debug mode (prints more output). Disabled by default.
 # debug=true
@@ -118,10 +118,11 @@ files=expertino/rcll-protobuf-msgs
 # Use 'all' to ignore all rules
 # ignore=T1,body-min-length
 
-# [ignore-body-lines]
+[ignore-body-lines]
 # Ignore certain lines in a commit body that match a regex.
 # E.g. Ignore all lines that start with 'Co-Authored-By'
-# regex=^Co-Authored-By
+regex=(Co-Authored-By|Co-authored-by|http[s]?://)
+# .gitlint configuration file
 
 # [ignore-by-author-name]
 # Ignore certain rules for commits of which the author name matches a regex
