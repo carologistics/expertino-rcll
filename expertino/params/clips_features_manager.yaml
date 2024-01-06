@@ -1,6 +1,6 @@
 clips_features_manager:
   ros__parameters:
-    clips_features_list: ["clips_pddl_parser", "skill_execution", "clips_protobuf", "plansys2"]
+    clips_features_list: ["clips_pddl_parser", "skill_execution", "clips_protobuf", "plansys2", "navgraph_compute", "navgraph_set_bounding_box"]
     clips_features:
       mock_feature:
         plugin: "cx::MockFeature"
@@ -17,5 +17,12 @@ clips_features_manager:
           # This path assumes relativeness to agent_dir
           value: "rcll-protobuf-msgs"
           type: "string"
-
+      navgraph_compute:
+        plugin: "cx::NavGraphCompute"
+      navgraph_set_bounding_box:
+        plugin: "cx::NavGraphSetBoundingBox"
+      navgraph_generate_waitzones:
+        plugin: "cx::NavGraphGenerateWaitzones"
+      navgraph_update_station_by_tag:
+        plugin: "cx::NavGraphUpdateStationByTag"
 
