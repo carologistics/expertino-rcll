@@ -4,8 +4,6 @@ project(expertino_msgs)
 # find dependencies
 find_package(ament_cmake REQUIRED)
 find_package(rosidl_default_generators REQUIRED)
-find_package(std_msgs REQUIRED)
-find_package(std_srvs REQUIRED)
 find_package(builtin_interfaces REQUIRED)
 find_package(action_msgs REQUIRED)
 
@@ -22,15 +20,9 @@ set(SERVICES
 
 # )
 rosidl_generate_interfaces(
-  ${PROJECT_NAME}
-  ${MSGS}
-  ${SERVICES}
+  ${PROJECT_NAME} ${MSGS} ${SERVICES}
   # ${actions}
-  DEPENDENCIES
-  std_msgs
-  std_srvs
-  builtin_interfaces
-  action_msgs)
+  DEPENDENCIES builtin_interfaces action_msgs)
 
 ament_export_dependencies(rosidl_default_runtime)
 

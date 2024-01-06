@@ -170,12 +170,15 @@ void NavGraphCompute::service_callback(
   // assert the newest responses
   auto result = response.get();
   CLIPS::Template::pointer fact_template =
-      envs_[env_name]->get_template("ros-nav_graph_compute-message");
+      envs_[env_name]->get_template("ros-nav_graph_compute-response");
   CLIPS::Fact::pointer fact =
       CLIPS::Fact::create(*(envs_[env_name].get_obj()), fact_template);
 
   fact->set_slot("success", result->success ? "TRUE" : "FALSE");
   fact->set_slot("service", service_name);
+  RCLCPP_INFO(rclcpp::get_logger(clips_feature_name),
+              "Assert for service %s %s", service_name.c_str(),
+              env_name.c_str());
 
   envs_[env_name]->assert_fact(fact);
 }

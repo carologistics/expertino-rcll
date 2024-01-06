@@ -4,7 +4,7 @@
       <description>Clips Feature providing access to NavGraphInterfaceCompute ROS2 services</description>
     </class>
   </library>
-  <library path="navgraph_set_boundingBox">
+  <library path="navgraph_set_bounding_box">
     <class type="cx::NavGraphSetBoundingBox" base_class_type="cx::ClipsFeature">
       <description>Clips Feature providing access to NavGraphInterfaceSetBoundingBox ROS2 services</description>
     </class>

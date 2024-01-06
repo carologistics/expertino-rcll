@@ -25,7 +25,8 @@ pkg_check_modules(CLIPSMM REQUIRED IMPORTED_TARGET clipsmm-1.0)
 
 include_directories(include)
 
-pluginlib_export_plugin_description_file(cx_core features_plugin.xml)
+pluginlib_export_plugin_description_file(ros_comm_interfaces
+                                         features_plugin.xml)
 
 add_library(navgraph_compute SHARED src/ros_comm_interfaces/NavGraphCompute.cpp)
 ament_target_dependencies(navgraph_compute ${DEPENDENCIES})
@@ -53,9 +54,8 @@ install(DIRECTORY include/ DESTINATION include/)
 install(FILES features_plugin.xml DESTINATION share/${PROJECT_NAME})
 
 install(
-  TARGETS # navgraph_compute
-          navgraph_set_bounding_box
-          # navgraph_generate_waitzones navgraph_update_station_by_tag
+  TARGETS navgraph_compute navgraph_set_bounding_box navgraph_generate_waitzones
+          navgraph_update_station_by_tag
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION lib/${PROJECT_NAME})
