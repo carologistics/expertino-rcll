@@ -12,7 +12,12 @@ endif()
 
 # find dependencies
 find_package(ament_cmake REQUIRED)
-
+find_package(rcll_protobuf_msgs REQUIRED)
+execute_process(
+  COMMAND
+    ${CMAKE_COMMAND} -E create_symlink
+    ${rcll_protobuf_msgs_DIR}/rcll-protobuf-msgs
+    ${CMAKE_INSTALL_PREFIX}/share/${PROJECT_NAME}/rcll-protobuf-msgs)
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
@@ -21,7 +26,6 @@ endif()
 
 install(FILES launch/refbox.py DESTINATION lib/${PROJECT_NAME})
 install(DIRECTORY clips launch params DESTINATION share/${PROJECT_NAME})
-install(DIRECTORY rcll-protobuf-msgs DESTINATION share/${PROJECT_NAME})
 
 ament_export_dependencies(${dependencies})
 

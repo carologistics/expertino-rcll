@@ -3,7 +3,7 @@
 <package format="3">
   <name>rcll_protobuf_msgs</name>
   <version>0.0.0</version>
-  <description>Wrapper to provide protobuf messages for the rcll</description>
+  <description>Wrapper to provide protobuf messages for the RCLL</description>
   <maintainer email="viehmann@kbsg.rwth-aachen.de">Tarik Viehmann</maintainer>
   <license>GPLv2+ license</license>
 

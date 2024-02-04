@@ -14,6 +14,7 @@
   <build_depend>launch_ros</build_depend>
 
   <depend>rclcpp</depend>
+  <depend>rcll_protobuf_msgs</depend>
   <depend>plansys2_domain_expert</depend>
   <depend>plansys2_problem_expert</depend>
   <depend>plansys2_planner</depend>
