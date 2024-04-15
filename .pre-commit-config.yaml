@@ -33,21 +33,21 @@ repos:
   hooks:
     - id: forbid-crlf
     - id: remove-crlf
-    - id: insert-license
-      stages: [push]
-      files: \.(clp|pddl)$
-      args:
-        - --license-filepath
-        - .license_header
-        - --comment-style
-        - ;
-        - --use-current-year
-        - --allow-past-years
-    - id: insert-license
-      stages: [push]
-      files: \.(cpp|hpp)$
-      args:
-        - --license-filepath
-        - .license_header
-        - --use-current-year
-        - --allow-past-years
+      #- id: insert-license
+      #  stages: [push]
+      #  files: \.(clp|pddl)$
+      #  args:
+      #    - --license-filepath
+      #    - .license_header
+      #    - --comment-style
+      #    - ;
+      #    - --use-current-year
+      #    - --allow-past-years
+      #- id: insert-license
+      #  stages: [push]
+      #  files: \.(cpp|hpp)$
+      #  args:
+      #    - --license-filepath
+      #    - .license_header
+      #    - --use-current-year
+      #    - --allow-past-years
