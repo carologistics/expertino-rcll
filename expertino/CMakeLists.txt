@@ -25,7 +25,8 @@ if(BUILD_TESTING)
 endif()
 
 install(FILES launch/refbox.py DESTINATION lib/${PROJECT_NAME})
-install(DIRECTORY clips launch params DESTINATION share/${PROJECT_NAME})
+install(DIRECTORY launch params DESTINATION share/${PROJECT_NAME})
+install(DIRECTORY clips/ DESTINATION share/${PROJECT_NAME}/clips/expertino/)
 
 ament_export_dependencies(${dependencies})
 

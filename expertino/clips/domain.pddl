@@ -10,6 +10,7 @@
 	robot - object
 	location - object
 	mps - location
+	zone - location
 	mps-side - object
 )
 

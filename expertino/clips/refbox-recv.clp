@@ -45,7 +45,7 @@
   (if (and (neq ?new-team-color ?team-color) (neq ?team-color NOT-SET)) then
     (printout warn "Switching team color from " ?team-color " to " ?new-team-color crlf)
   )
-  (bind ?new-info (assert (game-state
+  (modify ?gs
     (team ?team)
     (team-other ?new-team-other)
     (team-color ?new-team-color)
@@ -56,8 +56,7 @@
     (field-height (pb-field-value ?p "field_height"))
     (field-width (pb-field-value ?p "field_width"))
     (field-mirrored (pb-field-value ?p "field_mirrored"))
-  )))
-  (if ?new-info then (retract ?gs))
+  )
   (retract ?pb-msg)
 )
 
@@ -65,11 +64,13 @@
   ?pb-msg <- (protobuf-msg (type "llsf_msgs.MachineInfo") (ptr ?p))
   (game-state (team-color ?team-color))
   =>
-  (foreach ?m (pb-field-list ?p "machines")
+  (bind ?list (pb-field-list ?p "machines"))
+  (foreach ?m ?list
     (bind ?m-name (sym-cat (pb-field-value ?m "name")))
     (bind ?m-type (sym-cat (pb-field-value ?m "type")))
     (bind ?m-team (sym-cat (pb-field-value ?m "team_color")))
     (bind ?m-state (sym-cat (pb-field-value ?m "state")))
+
     ; ground truth info
     (bind ?rot  FALSE)
     (bind ?zone NOT-SET)

@@ -4,51 +4,21 @@ from ament_index_python.packages import get_package_share_directory
 
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument, SetEnvironmentVariable
+from launch.actions import OpaqueFunction
 from launch.substitutions import LaunchConfiguration
 from launch_ros.actions import Node
 
 
-def generate_launch_description():
-    bringup_dir = get_package_share_directory('cx_bringup')
-    cx_dir = get_package_share_directory('cx_clips_executive')
+def launch_with_context(context, *args, **kwargs):
     expertino_dir = get_package_share_directory('expertino')
-
-    clips_features_manager_file = LaunchConfiguration('clips_features_manager_file')
-    clips_manager_params_file = LaunchConfiguration('clips_manager_params_file')
+    manager_config = LaunchConfiguration("manager_config")
     log_level = LaunchConfiguration('log_level')
-    model_file = LaunchConfiguration('model_file')
-
-    clips_executive_params_file = LaunchConfiguration(
-        'clips_executive_params_file')
-
-    lc_nodes = ["clips_features_manager", "clips_executive", "domain_expert","problem_expert", "planner"]
-
+    manager_config_file = os.path.join(expertino_dir, "params", manager_config.perform(context))
     declare_model_file_cmd = DeclareLaunchArgument(
         'model_file',
         default_value=os.path.join(expertino_dir + "/clips/domain.pddl"),
         description='PDDL Model file')
 
-    declare_log_level_ = DeclareLaunchArgument(
-        "log_level",
-        default_value='info',
-        description="Logging level for cx_node executable",
-    )
-
-    declare_clips_features_manager_file = DeclareLaunchArgument(
-        'clips_features_manager_file',
-        default_value=os.path.join(expertino_dir, 'params', 'clips_features_manager.yaml'),
-        description='Path to the ROS2 clips_features_manager.yaml file')
-
-    declare_clips_manager_params_file = DeclareLaunchArgument(
-        'clips_manager_params_file',
-        default_value=os.path.join(expertino_dir, 'params', 'clips_manager.yaml'),
-        description='Path to the ROS2 clips_manager.yaml file')
-
-    declare_clips_executive_params_file = DeclareLaunchArgument(
-        'clips_executive_params_file',
-        default_value=os.path.join(
-            expertino_dir, 'params', 'clips_executive.yaml'),
-        description='Path to Clips Executive params file')
 
     cx_node = Node(
         package='cx_bringup',
@@ -56,17 +26,26 @@ def generate_launch_description():
         output='screen',
         emulate_tty=True,
         parameters=[
-            {"agent_dir":expertino_dir},
-            {"clips_executive_config": clips_executive_params_file},
-            {"clips_features_manager_config": clips_features_manager_file},
-            {
-                'model_file': model_file,
-            },
-            clips_features_manager_file,
-            clips_executive_params_file,
-            clips_manager_params_file,
+            manager_config_file,
         ],
         arguments=['--ros-args', '--log-level', log_level]
+    )
+    return [cx_node]
+
+def generate_launch_description():
+
+    model_file = LaunchConfiguration('model_file')
+
+
+    declare_log_level_ = DeclareLaunchArgument(
+        "log_level",
+        default_value='info',
+        description="Logging level for cx_node executable",
+    )
+    declare_manager_config = DeclareLaunchArgument(
+        "manager_config",
+        default_value="clips_env_manager.yaml",
+        description="Name of the CLIPS environment manager configuration",
     )
 
     refbox_node = Node(
@@ -81,48 +60,25 @@ def generate_launch_description():
             ],
         )
 
-    robot1_dummy_node = Node(
-        package='cx_example_skill_nodes',
-        executable='dummy_skill_node',
-        name='robot1_skills_node',
-        output='screen',
-        emulate_tty=True,
-        parameters=[{"robot_id": "robot1"}]
-    )
-    plansys2_node_cmd = Node(
-        package='cx_bringup',
-        executable='plansys_node',
-        output='screen',
-        parameters=[
-            {
-                'model_file': model_file,
-            },
-            clips_features_manager_file,
-        ])
-
-    cx_lifecycle_manager = Node(
-        package='cx_lifecycle_nodes_manager',
-        executable='lifecycle_manager_node',
-        name='cx_lifecycle_manager',
-        output='screen',
-        emulate_tty=True,
-        parameters=[{"node_names_to_manage": lc_nodes}]
-    )
+    # plansys2_node_cmd = Node(
+    #     package='cx_bringup',
+    #     executable='plansys_node',
+    #     output='screen',
+    #     parameters=[
+    #         {
+    #             'model_file': model_file,
+    #         },
+    #         clips_features_manager_file,
+    #     ])
 
     # The lauchdescription to populate with defined CMDS
     ld = LaunchDescription()
 
     ld.add_action(declare_log_level_)
+    ld.add_action(declare_manager_config)
+    # ld.add_action(plansys2_node_cmd)
 
-    ld.add_action(declare_clips_features_manager_file)
-    ld.add_action(declare_clips_executive_params_file)
-    ld.add_action(declare_clips_manager_params_file)
-    ld.add_action(declare_model_file_cmd)
-    ld.add_action(plansys2_node_cmd)
-
-    ld.add_action(robot1_dummy_node)
-    ld.add_action(cx_node)
-    ld.add_action(cx_lifecycle_manager)
+    ld.add_action(OpaqueFunction(function=launch_with_context))
     #ld.add_action(refbox_node)
 
     return ld

@@ -89,3 +89,49 @@
   (slot delivery-end (type INTEGER))
   (slot competitive (type SYMBOL))
 )
+
+(deftemplate protobuf-peer
+  (slot name (type SYMBOL))
+  (slot peer-id (type INTEGER))
+)
+
+(deftemplate current-rcll-agent-task-id
+   (slot robot (type SYMBOL))
+   (slot task-id (type INTEGER))
+)
+
+(deftemplate action-task-executor-enable
+" Define this for plan actions that should be handled by the protobuf
+  executor that sends agent task messages to a suitable simulator.
+  The messages are created based on the agent task descriptions that are used
+  in beacon signals.
+"
+  (slot name (type SYMBOL) (default ?NONE))
+)
+
+
+(deftemplate rcll-agent-task
+  (slot task-id (type INTEGER))
+  (slot robot (type SYMBOL))
+  (slot robot-id (type INTEGER) (allowed-values  1 2 3) (default 1))
+  (slot task-type (type SYMBOL)
+    (allowed-values UNSET Move Retrieve Deliver BufferStation ExploreWaypoint)
+    (default UNSET))
+  (slot machine (type SYMBOL)
+   (allowed-values UNSET
+    C-BS C-CS1 C-CS2 C-RS1 C-RS2 C-DS C-SS
+    M-BS M-CS1 M-CS2 M-RS1 M-RS2 M-DS M-SS
+   )
+   (default UNSET))
+  (slot order (type SYMBOL) (default UNSET))
+  (slot side (type SYMBOL)
+    (allowed-values UNSET INPUT OUTPUT LEFT MIDDLE RIGHT SLIDE)
+    (default UNSET))
+  (slot waypoint (type SYMBOL) (default UNSET))
+  (slot workpiece (type SYMBOL) (default UNSET))
+  (multislot workpiece-colors (type SYMBOL) (default (create$)))
+  (slot outcome (type SYMBOL) (allowed-values UNKNOWN FAILED CANCELLED SUCCEEDED))
+  (slot goal-id (type SYMBOL) (default UNSET))
+  (slot plan-id (type SYMBOL) (default UNSET))
+  (slot action-id (type INTEGER))
+)

@@ -1,0 +1,56 @@
+clips_manager:
+  ros__parameters:
+    environments: ["main"]
+    main:
+      plugins: ["executive",
+                "clips_pddl_parser",
+                "plansys2",
+                "ament_index",
+                "config",
+                "protobuf",
+                "files"]
+      log_clips_to_file: true
+      watch: ["facts", "rules"]
+
+    ament_index:
+      plugin: "cx::AmentIndexPlugin"
+    protobuf:
+      plugin: "cx::ProtobufPlugin"
+      package_share_dirs: ["rcll_protobuf_msgs"]
+      proto_paths: ["rcll-protobuf-msgs"]
+
+    config:
+      plugin: "cx::ConfigPlugin"
+    clips_pddl_parser:
+      plugin: "cx::PddlParserPlugin"
+    plansys2:
+      plugin: "cx::Plansys2Plugin"
+    executive:
+      plugin: "cx::ExecutivePlugin"
+      publish_on_refresh: false
+      assert_time: true
+      refresh_rate: 10
+    files:
+      plugin: "cx::FileLoadPlugin"
+      pkg_share_dirs: ["expertino", "cx_goal_reasoning"]
+      load: [
+        "clips/expertino/defglobals.clp",
+        "clips/expertino/deftemplates.clp",
+        "clips/cx_goal_reasoning/plan.clp",
+        "clips/cx_goal_reasoning/pddl-action.clp",
+        "clips/cx_goal_reasoning/pddl.clp",
+        "clips/expertino/deffunctions.clp",
+        "clips/expertino/init.clp",
+        "clips/expertino/action-selection.clp",
+        "clips/expertino/goal-formulation.clp",
+        "clips/expertino/goal-selection.clp",
+        "clips/expertino/goal-expansion.clp",
+        "clips/expertino/goal-commitment.clp",
+        "clips/expertino/goal-dispatch.clp",
+        "clips/expertino/goal-evaluation.clp",
+        "clips/expertino/refbox-comm-init.clp",
+        "clips/expertino/refbox-recv.clp",
+        "clips/expertino/sim-interface.clp",
+        "clips/expertino/action-sim-bindings.clp"
+        ]
+

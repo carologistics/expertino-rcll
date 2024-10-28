@@ -1,6 +1,6 @@
-#Copyright(C) 2024 Team Carologistics
-#
-#Licensed under GPLv2 + license, cf.LICENSE file in project root directory.
+// Copyright(C) 2024 Team Carologistics
+//
+// Licensed under GPLv2 + license, cf.LICENSE file in project root directory.
 
 #include "rcll_map_publisher/rcll_map_publisher.hpp"
 #include "rcll_protobuf_cpp/MachineInfo.pb.h"

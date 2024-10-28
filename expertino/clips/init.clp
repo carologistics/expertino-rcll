@@ -3,10 +3,14 @@
 ; Licensed under GPLv2+ license, cf. LICENSE file in project root directory.
 
 (defrule init-load-domain
-  (executive-initialized)
   (not (domain-loaded))
 =>
-  (parse-pddl-domain (path-resolve "domain.pddl"))
+  (unwatch facts time)
+  (unwatch rules time-retract)
+  (bind ?share-dir (ament-index-get-package-share-directory "expertino"))
+  (parse-pddl-domain (str-cat ?share-dir "/clips/expertino/domain.pddl"))
+  (config-load (str-cat ?share-dir "/params/agent_config.yaml") "/")
+
   (assert (domain-loaded))
 )
 
@@ -26,8 +30,10 @@
     (domain-object (name INPUT) (type mps-side))
     (domain-object (name OUTPUT) (type mps-side))
     (domain-object (name WAIT) (type mps-side))
-    (domain-object (name START) (type mps))
-    (domain-object (name MZ43) (type mps))
+    (domain-object (name START) (type zone))
+    (domain-object (name M-Z43) (type zone))
+    (domain-object (name M-BS) (type mps))
+    (domain-object (name C-BS) (type mps))
   )
   (assert (game-state (team "Carologistics")))
   (assert (game-time 0.))
