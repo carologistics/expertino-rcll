@@ -5,12 +5,12 @@ game:
         testbed: FULL  # defined in simtest.clp
       rcll:
         peer_address: 127.0.0.1
-        peer_recv_port: 4412
-        peer_send_port: 4422
-        cyan_recv_port: 4452
-        magenta_recv_port: 4462
-        cyan_send_port: 4472
-        magenta_send_port: 4482
+        peer_recv_port: 4444
+        peer_send_port: 4445
+        cyan_recv_port: 4441
+        magenta_recv_port: 4442
+        cyan_send_port: 4446
+        magenta_send_port: 4447
 
         team_name: Carologistics
         crypto_key: randomkey
