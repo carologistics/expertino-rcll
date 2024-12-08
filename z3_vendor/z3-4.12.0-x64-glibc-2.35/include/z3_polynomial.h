@@ -23,30 +23,30 @@ Notes:
 extern "C" {
 #endif // __cplusplus
 
-/** \defgroup capi C API */
-/**@{*/
+    /** \defgroup capi C API */
+    /**@{*/
 
-/** @name Polynomials */
-/**@{*/
 
-/**
-   \brief Return the nonzero subresultants of \c p and \c q with respect to the
-   "variable" \c x.
+    /** @name Polynomials */
+    /**@{*/
 
-   \pre \c p, \c q and \c x are Z3 expressions where \c p and \c q are
-   arithmetic terms. Note that, any subterm that cannot be viewed as a
-   polynomial is assumed to be a variable. Example: \ccode{f(a)} is a considered
-   to be a variable in the polynomial \ccode{ f(a)*f(a) + 2*f(a) + 1}
+    /**
+       \brief Return the nonzero subresultants of \c p and \c q with respect to the "variable" \c x.
 
-   def_API('Z3_polynomial_subresultants', AST_VECTOR, (_in(CONTEXT), _in(AST),
-   _in(AST), _in(AST)))
-*/
-Z3_ast_vector Z3_API Z3_polynomial_subresultants(Z3_context c, Z3_ast p,
-                                                 Z3_ast q, Z3_ast x);
+       \pre \c p, \c q and \c x are Z3 expressions where \c p and \c q are arithmetic terms.
+       Note that, any subterm that cannot be viewed as a polynomial is assumed to be a variable.
+       Example: \ccode{f(a)} is a considered to be a variable in the polynomial \ccode{
+       f(a)*f(a) + 2*f(a) + 1}
 
-/**@}*/
-/**@}*/
+       def_API('Z3_polynomial_subresultants', AST_VECTOR, (_in(CONTEXT), _in(AST), _in(AST), _in(AST)))
+    */
+    Z3_ast_vector Z3_API Z3_polynomial_subresultants(Z3_context c, Z3_ast p, Z3_ast q, Z3_ast x);
+
+
+    /**@}*/
+    /**@}*/
 
 #ifdef __cplusplus
 }
 #endif // __cplusplus
+

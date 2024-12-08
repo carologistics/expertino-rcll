@@ -16,6 +16,7 @@ repos:
     hooks:
     -   id: clang-format
         types_or: [c++, c]
+        exclude: ^z3_vendor/
 -   repo: https://github.com/jorisroovers/gitlint
     rev: v0.19.1
     hooks:
