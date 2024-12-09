@@ -4,7 +4,6 @@ clips_manager:
     main:
       plugins: ["executive",
                 "clips_pddl_parser",
-                "plansys2",
                 "ament_index",
                 "config",
                 "protobuf",
@@ -16,15 +15,13 @@ clips_manager:
       plugin: "cx::AmentIndexPlugin"
     protobuf:
       plugin: "cx::ProtobufPlugin"
-      package_share_dirs: ["rcll_protobuf_msgs"]
+      pkg_share_dirs: ["rcll_protobuf_msgs"]
       proto_paths: ["rcll-protobuf-msgs"]
 
     config:
       plugin: "cx::ConfigPlugin"
     clips_pddl_parser:
       plugin: "cx::PddlParserPlugin"
-    plansys2:
-      plugin: "cx::Plansys2Plugin"
     executive:
       plugin: "cx::ExecutivePlugin"
       publish_on_refresh: false
@@ -36,18 +33,8 @@ clips_manager:
       load: [
         "clips/expertino/defglobals.clp",
         "clips/expertino/deftemplates.clp",
-        "clips/cx_goal_reasoning/plan.clp",
-        "clips/cx_goal_reasoning/pddl-action.clp",
-        "clips/cx_goal_reasoning/pddl.clp",
         "clips/expertino/deffunctions.clp",
         "clips/expertino/init.clp",
-        "clips/expertino/action-selection.clp",
-        "clips/expertino/goal-formulation.clp",
-        "clips/expertino/goal-selection.clp",
-        "clips/expertino/goal-expansion.clp",
-        "clips/expertino/goal-commitment.clp",
-        "clips/expertino/goal-dispatch.clp",
-        "clips/expertino/goal-evaluation.clp",
         "clips/expertino/refbox-comm-init.clp",
         "clips/expertino/refbox-recv.clp",
         "clips/expertino/sim-interface.clp",

@@ -2,36 +2,6 @@
 ;
 ; Licensed under GPLv2+ license, cf. LICENSE file in project root directory.
 
-(deftemplate goal
-	"Goal specification. Extends the one from core
-  "
-  (slot id (type SYMBOL))
-  (slot class (type SYMBOL))
-  (slot type (type SYMBOL) (allowed-values ACHIEVE MAINTAIN) (default ACHIEVE))
-  (slot sub-type (type SYMBOL))
-  (slot parent (type SYMBOL))
-  (slot mode (type SYMBOL)
-             (allowed-values FORMULATED SELECTED EXPANDED COMMITTED
-     	                       DISPATCHED FINISHED EVALUATED RETRACTED))
-  (slot outcome (type SYMBOL)
-                (allowed-values UNKNOWN COMPLETED FAILED REJECTED))
-  (multislot error)
-  (slot message (type STRING))
-  (slot priority (type FLOAT) (default 0.0))
-  (multislot params)
-
-  ;(multislot required-resources (type SYMBOL))
-  ;(multislot acquired-resources (type SYMBOL))
-  ;(slot committed-to (type SYMBOL))
-  (slot verbosity (type SYMBOL) (allowed-values QUIET DEFAULT) (default DEFAULT))
-  ; --- definitions deviating from the core:
-  (slot assigned-to (type SYMBOL) (allowed-values nil robot1 robot2 robot3 central) (default nil))
-  (slot restricted-to (type SYMBOL) (allowed-values nil robot1 robot2 robot3 central) (default nil))
-  (slot order-id (type SYMBOL))
-  (slot retries (default 0) (type INTEGER))
-
-)
-
 (deftemplate game-state
   (slot state (type SYMBOL) (allowed-values INIT WAIT-START RUNNING PAUSED))
   (slot phase (type SYMBOL) (allowed-values PRE_GAME SETUP EXPLORATION PRODUCTION POST_GAME))

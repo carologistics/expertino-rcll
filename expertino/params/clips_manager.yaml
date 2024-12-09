@@ -1,6 +1,0 @@
-clips_manager:
-  ros__parameters:
-    # logs clips activities in a file at the location of ros logs.
-    log_clips_to_file: true
-    # CLIPS events to log.
-    watch: [rules, facts]
