@@ -1,0 +1,6 @@
+expertino_msgs/Fluent action
+---
+bool success
+bool sat
+string error
+string[] unsatisfied_conditions
