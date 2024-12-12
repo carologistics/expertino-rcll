@@ -111,44 +111,44 @@ class AddFluentLifecycleNode(LifecycleNode):
         # Create the service when the node enters the 'inactive' state
         self.add_fluent_srv = self.create_service(
             AddFluent,
-            "add_fluent",
+            f"{self.get_name()}/add_fluent",
             self.handle_add_fluent,
             callback_group=self.srv_cb_group,
         )
         self.add_pddl_instance_srv = self.create_service(
             AddPddlInstance,
-            "add_pddl_instance",
+            f"{self.get_name()}/add_pddl_instance",
             self.handle_add_pddl_instance,
             callback_group=self.srv_cb_group,
         )
         self.check_action_precondition_srv = self.create_service(
             CheckActionPrecondition,
-            "check_action_precondition",
+            f"{self.get_name()}/check_action_precondition",
             self.handle_check_action_precondition,
             callback_group=self.srv_cb_group,
         )
         self.get_action_effects_srv = self.create_service(
             GetActionEffects,
-            "get_action_effects",
+            f"{self.get_name()}/get_action_effects",
             self.handle_get_action_effects,
             callback_group=self.srv_cb_group,
         )
         self.get_fluents_srv = self.create_service(
             GetFluents,
-            "get_fluents",
+            f"{self.get_name()}/get_fluents",
             self.handle_get_fluents,
             callback_group=self.srv_cb_group,
         )
         self.get_functions_srv = self.create_service(
             GetFunctions,
-            "get_functions",
+            f"{self.get_name()}/get_functions",
             self.handle_get_functions,
             callback_group=self.srv_cb_group,
         )
         self.plan_action_server = ActionServer(
             self,
             CallPddlPlanner,
-            "pddl_plan",
+            f"{self.get_name()}/pddl_plan",
             self.plan_callback,
             callback_group=self.action_cb_group,
         )
