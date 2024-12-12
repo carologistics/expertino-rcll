@@ -3,7 +3,6 @@ clips_manager:
     environments: ["main"]
     main:
       plugins: ["executive",
-                "clips_pddl_parser",
                 "ament_index",
                 "config",
                 "protobuf",
@@ -20,8 +19,6 @@ clips_manager:
 
     config:
       plugin: "cx::ConfigPlugin"
-    clips_pddl_parser:
-      plugin: "cx::PddlParserPlugin"
     executive:
       plugin: "cx::ExecutivePlugin"
       publish_on_refresh: false

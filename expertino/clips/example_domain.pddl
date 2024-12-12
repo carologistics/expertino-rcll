@@ -1,114 +1,120 @@
 (define (domain workpiece_flow)
-
+  ; standalone parser of nextflap crashes when you both have an
+  ; instance of an object and a sub-object of the same type!
+  ; e.g., "inner - object" and "outer - inner" means that no object should have
+  ; type "inner"
+  ; This is fixed by using the parser from the unified planning framework
   (:types
-    workpiece place side req machine - object
+    interactable place side task - object
+    workpiece machine - interactable
     carrier product payment - workpiece
-    shelfSlot - object
-    meta base ring cap - req
-    baseStation capStation ringStation storageStation deliveryStation - machine
-    slide bsPlace csPlace rsPlace ssPlace dsPlace - place
+    shelf-slot - object
+    meta base ring cap - task
+    base-station cap-station ring-station storage-station delivery-station - machine
+    slide bs-place cs-place rs-place ss-place ds-place - place
   )
   (:constants 
-    BS - baseStation
-    CS1 CS2 - capStation
-    RS1 RS2 - ringStation
-    SS - storageStation
-    DS - deliveryStation
-    BSInput BSOutput - bsPlace
-    CS1Input CS1Output CS2Input CS2Output - csPlace
-    RS1Slide RS2Slide - slide
-    RS1Input RS1Output RS2Input RS2Output - rsPlace
-    SSInput SSOutput - ssPlace
-    DSInput - dsPlace
-    PAY DELIVER DONE - meta
-    BASE_RED BASE_SILVER BASE_BLACK - base
-    RING_BLUE1 RING_YELLOW1 RING_GREEN1 RING_ORANGE1 RING_BLUE2 RING_YELLOW2 RING_GREEN2 RING_ORANGE2 RING_BLUE3 RING_YELLOW3 RING_GREEN3 RING_ORANGE3 - ring
-    ;CAP_GREY CAP_BLACK - req
-    CAP_GREY CAP_BLACK - cap
+    bs - base-station
+    cs1 cs2 - cap-station
+    rs1 rs2 - ring-station
+    ss - storage-station
+    ds - delivery-station
+    bs-input bs-output - bs-place
+    cs1-input cs1-output cs2-input cs2-output - cs-place
+    rs1-slide rs2-slide - slide
+    rs1-input rs1-output rs2-input rs2-output - rs-place
+    ss-input ss-output - ss-place
+    ds-input - ds-place
+    dispose deliver done - meta
+    base-red base-silver base-black - base
+    ring-blue1 ring-yellow1 ring-green1 ring-orange1 ring-blue2 ring-yellow2 ring-green2 ring-orange2 ring-blue3 ring-yellow3 ring-green3 ring-orange3 - ring
+    cap-grey cap-black - cap
   )
   (:predicates
      ;; Locations of workpieces
      (at ?wp - workpiece ?p - place) ; Workpiece is at a machine side
  
-     ;; Workpiece reqs
-     (currentRequirement ?wp - workpiece ?r - req) ; Current active req
-     (nextRequirement ?wp - workpiece ?req1 - req ?req2 - req) ; Requirement order
+     ;; Workpiece tasks
+     (step ?wp - workpiece ?r - task) ; Current active task
+     (next-step ?wp - workpiece ?task1 - task ?task2 - task) ; Requirement order
  
      ;; Machine capabilities
-     (processPlace ?p - place ?req - req) ; Machine can process a req
+     (step-place ?task - task ?p - place) ; Machine can process a task
  
      ;; Side availability
      (free ?p - place)
      (spawnable ?wp - workpiece)
-     (available ?m - machine)
-     (blocked ?p - place)
-     (usable ?wp - workpiece)
+     (usable ?i - interactable)
      (in ?m - machine ?p - place)
      (out ?m - machine ?p - place)
  
- 	(pay-at ?m - ringStation ?s - slide)
- 
- 	(buffered ?m - capStation ?c - req)
- 	(can-buffer ?m - capStation ?c - req)
- 
- 	(on-shelf ?c - workpiece ?m - capStation)
+     (rs-slide ?m - ring-station ?s - slide)
+
+     (buffered ?m - cap-station ?c - cap)
+     (can-buffer ?m - cap-station ?c - cap)
+
+     (on-shelf ?c - workpiece ?m - cap-station)
+     (next-payment ?curr - payment ?next -payment)
   )
+  ; make sure functions are defined after predicates
   (:functions
-    (pay-req ?r - ring)
-    (pay-count ?rs - ringStation)
+    (price ?r - ring)
+    (pay-count ?rs - ring-station)
   )
 
    ;; Dispense a workpiece to the initial location
-   (:durative-action dispense
-     :parameters (?wp - product ?m - baseStation ?p - bsPlace ?req - req ?next - req)
+   (:durative-action bs-dispense
+     :parameters (?wp - product ?m - base-station ?p - bs-place ?task - task ?next - task)
      :duration (= ?duration 5)
      :condition (and
        (at start (spawnable ?wp))
-       (at start (free BSInput))
-       (at start (free BSOutput))
-       (at start (currentRequirement ?wp ?req))
-       (at start (nextRequirement ?wp ?req ?next))
-       (at start (available ?m))
+       (at start (free bs-input))
+       (at start (free bs-output))
+       (at start (step ?wp ?task))
+       (at start (next-step ?wp ?task ?next))
+       (at start (usable ?m))
      )
      :effect (and
        (at start (not (spawnable ?wp)))
-       (at start (not (available ?m)))
-       (at end (available ?m))
+       (at start (not (usable ?m)))
+       (at end (usable ?m))
        (at end (usable ?wp))
        (at end (at ?wp ?p))
-       (at end (not (currentRequirement ?wp ?req)))
-       (at end (currentRequirement ?wp ?next))
+       (at end (not (step ?wp ?task)))
+       (at end (step ?wp ?next))
        (at end (not (free ?p)))
      )
    )
-   (:durative-action dispensePay
-     :parameters (?wp - payment ?m - baseStation ?p - bsPlace)
+   (:durative-action dispense-pay
+     :parameters (?wp - payment ?next - payment ?m - base-station ?p - bs-place)
      :duration (= ?duration 5)
      :condition (and
        (at start (spawnable ?wp))
-       (at start (currentRequirement ?wp PAY))
-       (at start (free BSInput))
-       (at start (free BSOutput))
-       (at start (available ?m))
+       (at start (next-payment ?wp ?next))
+       (at start (step ?wp dispose))
+       (at start (free bs-input))
+       (at start (free bs-output))
+       (at start (usable ?m))
      )
      :effect (and
        (at start (not (spawnable ?wp)))
-       (at start (not (available ?m)))
-       (at end (available ?m))
+       (at start (not (usable ?m)))
+       (at end (usable ?m))
        (at end (usable ?wp))
        (at end (at ?wp ?p))
+       (at end (spawnable ?next))
        (at end (not (free ?p)))
      )
    )
  
    ;; Transport a workpiece from one machine side to another
    (:durative-action transport
-     :parameters (?wp - workpiece ?from - place ?to - place ?r - req)
+     :parameters (?wp - workpiece ?from - place ?to - place ?r - task)
      :duration (= ?duration 5)
      :condition (and
        (at start (at ?wp ?from))
-       (at start (currentRequirement ?wp ?r))
-       (at start (processPlace ?to ?r))
+       (at start (step ?wp ?r))
+       (at start (step-place ?r ?to))
        (at start (free ?to))
        (at start (usable ?wp))
        (over all (free ?to))
@@ -123,73 +129,73 @@
      )
    )
  
-   ;; Process a workpiece for its current req
-   (:durative-action processCSMount
-     :parameters (?wp - product ?m - capStation ?in - place ?out - place ?req - cap ?next - req)
+   ;; Process a workpiece for its current task
+   (:durative-action cs-mount-cap
+     :parameters (?wp - product ?m - cap-station ?in - place ?out - place ?task - cap ?next - task)
      :duration (= ?duration 10)
      :condition (and
        (at start (at ?wp ?in))
-       (at start (currentRequirement ?wp ?req))
-       (at start (nextRequirement ?wp ?req ?next))
+       (at start (step ?wp ?task))
+       (at start (next-step ?wp ?task ?next))
        (at start (in ?m ?in))
-       (at start (processPlace ?in ?req))
-       (at start (buffered ?m ?req))
+       (at start (step-place ?task ?in))
+       (at start (buffered ?m ?task))
        (at start (out ?m ?out))
-       (over all (available ?m))
+       (over all (usable ?m))
        (at start (usable ?wp))
        (at start (free ?out))
      )
      :effect (and
        (at start (not (usable ?wp)))
        (at end (usable ?wp))
-       (at end (not (currentRequirement ?wp ?req)))
-       (at end (currentRequirement ?wp ?next))
+       (at end (not (step ?wp ?task)))
+       (at end (step ?wp ?next))
        (at end (free ?in))
-       (at end (not (buffered ?m ?req)))
-       (at end (can-buffer ?m ?req))
+       (at end (not (buffered ?m ?task)))
+       (at end (can-buffer ?m ?task))
        (at end (not (free ?out)))
        (at end (not (at ?wp ?in)))
        (at end (at ?wp ?out))
      )
    )
-   (:durative-action processCSBuffer
-     :parameters (?wp - carrier ?m - capStation ?in - place ?out - place ?req - cap)
+   (:durative-action cs-buffer
+     :parameters (?wp - carrier ?m - cap-station ?in - place ?out - place ?task - cap)
      :duration (= ?duration 10)
      :condition (and
        (at start (at ?wp ?in))
-       (at start (currentRequirement ?wp ?req))
-       (at start (nextRequirement ?wp ?req PAY))
+       (at start (step ?wp ?task))
+       (at start (next-step ?wp ?task dispose))
        (at start (in ?m ?in))
-       (at start (processPlace ?in ?req))
-       (at start (can-buffer ?m ?req))
+       (at start (step-place ?task ?in))
+       (at start (can-buffer ?m ?task))
        (at start (out ?m ?out))
-       (over all (available ?m))
+       (over all (usable ?m))
        (at start (usable ?wp))
        (at start (free ?out))
      )
      :effect (and
        (at start (not (usable ?wp)))
        (at end (usable ?wp))
-       (at end (not (currentRequirement ?wp ?req)))
-       (at end (currentRequirement ?wp PAY))
+       (at end (not (step ?wp ?task)))
+       (at end (step ?wp dispose))
        (at end (free ?in))
-       (at end (not (can-buffer ?m ?req)))
-       (at end (buffered ?m ?req))
+       (at end (not (can-buffer ?m ?task)))
+       (at end (buffered ?m ?task))
        (at end (not (free ?out)))
        (at end (not (at ?wp ?in)))
        (at end (at ?wp ?out))
      )
    )
-   (:durative-action carrierToInput
-     :parameters (?wp - carrier ?req - cap  ?m - capStation ?in - place)
+   (:durative-action carrier-to-input
+     :parameters (?wp - carrier ?task - cap  ?m - cap-station ?in - place)
      :duration (= ?duration 10)
      :condition (and
-       (at start (currentRequirement ?wp ?req))
+       (at start (step ?wp ?task))
        (at start (in ?m ?in))
        (at start (free ?in))
        (at start (usable ?wp))
-       (at start (processPlace ?in ?req))
-       (at start (can-buffer ?m ?req))
+       (at start (step-place ?task ?in))
+       (at start (can-buffer ?m ?task))
        (at start (on-shelf ?wp ?m))
      )
      :effect (and
@@ -200,27 +206,27 @@
        (at end (not (on-shelf ?wp ?m)))
      )
    )
-   (:durative-action processRS
-     :parameters (?wp - product ?m - ringStation ?in - place ?out - place ?req - ring ?next - req)
+   (:durative-action rs-mount-ring
+     :parameters (?wp - product ?m - ring-station ?in - place ?out - place ?task - ring ?next - task)
      :duration (= ?duration 10)
      :condition (and
        (at start (at ?wp ?in))
-       (at start (currentRequirement ?wp ?req))
-       (at start (nextRequirement ?wp ?req ?next))
+       (at start (step ?wp ?task))
+       (at start (next-step ?wp ?task ?next))
        (at start (in ?m ?in))
-       (at start (>= (pay-count ?m) (pay-req ?req)))
-       (at start (processPlace ?in ?req))
+       (at start (>= (pay-count ?m) (price ?task)))
+       (at start (step-place ?task ?in))
        (at start (out ?m ?out))
-       (over all (available ?m))
+       (over all (usable ?m))
        (at start (usable ?wp))
        (at start (free ?out))
      )
      :effect (and
        (at start (not (usable ?wp)))
-       (at end (decrease (pay-count ?m) (pay-req ?req)))
+       (at end (decrease (pay-count ?m) (price ?task)))
        (at end (usable ?wp))
-       (at end (not (currentRequirement ?wp ?req)))
-       (at end (currentRequirement ?wp ?next))
+       (at end (not (step ?wp ?task)))
+       (at end (step ?wp ?next))
        (at end (free ?in))
        (at end (not (free ?out)))
        (at end (not (at ?wp ?in)))
@@ -229,71 +235,70 @@
    )
    ;; Finalize a workpiece
    (:durative-action finalize
-     :parameters (?wp - product ?m - machine ?in - place ?req - req)
+     :parameters (?wp - product ?m - machine ?in - place ?task - task)
      :duration (= ?duration 10)
      :condition (and
        (at start (at ?wp ?in))
-       (at start (currentRequirement ?wp ?req))
-       (at start (nextRequirement ?wp ?req DONE))
+       (at start (step ?wp ?task))
+       (at start (next-step ?wp ?task done))
        (at start (in ?m ?in))
-       (at start (processPlace ?in ?req))
-       (at start (available ?m))
+       (at start (step-place ?task ?in))
+       (at start (usable ?m))
        (at start (usable ?wp))
      )
      :effect (and
-       (at start (not (available ?m)))
+       (at start (not (usable ?m)))
        (at start (not (usable ?wp)))
-       (at end (available ?m))
+       (at end (usable ?m))
        ;(at end (usable ?wp))
-       (at end (not (currentRequirement ?wp ?req)))
-       (at end (currentRequirement ?wp DONE))
+       (at end (not (step ?wp ?task)))
+       (at end (step ?wp done))
        (at end (free ?in))
        (at end (not (at ?wp ?in)))
      )
    )
  
-   ;; Commit Payment
-   (:durative-action pay-at-rs
-     :parameters (?wp - product ?req - ring ?pay - payment ?m - ringStation ?slide - slide)
+   (:durative-action rs-pay
+     :parameters (?wp - product ?task - ring ?pay - payment ?m - ring-station ?slide - slide)
      :duration (= ?duration 0.5)
      :condition (and
-       (at start (currentRequirement ?pay PAY))
+       (at start (step ?pay dispose))
        (at start (at ?pay ?slide))
-       (at start (pay-at ?m ?slide))
+       (at start (rs-slide ?m ?slide))
        (at start (usable ?pay))
-       (at start (available ?m))
+       (at start (usable ?m))
        (at start (<= (pay-count ?m) 2))
-       (at start (currentRequirement ?wp ?req))
-       (at start (>= (pay-count ?m) (pay-req ?req)))
+       (at start (step ?wp ?task))
+       (at start (>= (pay-count ?m) (price ?task)))
      )
      :effect (and
-       (at start (not (available ?m)))
+       (at start (not (usable ?m)))
        (at start (not (usable ?pay)))
        (at end (not (at ?pay ?slide)))
        (at end (free ?slide))
-       (at end (available ?m))
+       (at end (usable ?m))
        (at end (increase (pay-count ?m) 1))
      )
    )
-   ;; Commit Payment
-   (:durative-action pay-wit-cc-at-rs
-     :parameters (?wp - product ?curr - req ?next - cap ?pay - carrier ?m - ringStation ?slide - slide)
+
+   (:durative-action rs-pay-with-cc
+     :parameters (?wp - product ?curr - task ?next - cap ?pay - carrier ?m - ring-station ?slide - slide)
      :duration (= ?duration 0.5)
      :condition (and
-       (at start (currentRequirement ?wp ?curr))
-       (at start (nextRequirement ?wp ?curr ?next))
-       (at start (currentRequirement ?pay PAY))
+       (at start (step ?wp ?curr))
+       (at start (next-step ?wp ?curr ?next))
+       (at start (step ?pay dispose))
        (at start (at ?pay ?slide))
-       (at start (pay-at ?m ?slide))
+       (at start (rs-slide ?m ?slide))
        (at start (usable ?pay))
-       (at start (available ?m))
+       (at start (usable ?m))
        (at start (<= (pay-count ?m) 2))
      )
      :effect (and
-       (at start (not (available ?m)))
+       (at start (not (usable ?m)))
        (at start (not (usable ?pay)))
        (at end (not (at ?pay ?slide)))
-       (at end (available ?m))
+       (at end (usable ?m))
        (at end (increase (pay-count ?m) 1))
      )
    )
