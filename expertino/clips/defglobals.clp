@@ -7,4 +7,5 @@
   ?*2PI* = 6.2831853
   ?*PI-HALF* = 1.5707963
   ?*GOAL-MAX-TRIES* = 2
+  ?*SALIENCE-LOW* = -5000
 )

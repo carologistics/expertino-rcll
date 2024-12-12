@@ -8,6 +8,7 @@ clips_manager:
                 "protobuf",
                 "files"]
       log_clips_to_file: true
+      redirect_stdout_to_debug: true
       watch: ["facts", "rules"]
 
     ament_index:
