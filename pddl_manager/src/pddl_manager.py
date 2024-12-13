@@ -485,20 +485,31 @@ def run_planner_process(env, dom, prob):
         print("No plan found!")
 
     return tPlan
+
 def main(args=None):
     rclpy.init(args=args)
-    node = AddFluentLifecycleNode()
-
-    executor = MultiThreadedExecutor(num_threads=4)
-    executor.add_node(node)
+    node = None
 
     try:
-        executor.spin()
-    except KeyboardInterrupt:
-        node.get_logger().info("KeyboardInterrupt, shutting down.\n")
-    node.destroy_node()
-    rclpy.shutdown()
+        # Initialize the node
+        node = AddFluentLifecycleNode()
 
+        # Use a multi-threaded executor
+        executor = MultiThreadedExecutor(num_threads=4)
+        executor.add_node(node)
+
+        # Spin the executor
+        executor.spin()
+
+    except KeyboardInterrupt:
+        pass
+    finally:
+        # Ensure proper cleanup
+        if node:
+            executor.remove_node(node)
+            node.destroy_node()
+        if rclpy.ok():
+          rclpy.shutdown()
 
 if __name__ == "__main__":
     main()
