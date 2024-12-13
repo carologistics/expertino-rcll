@@ -19,7 +19,7 @@ from expertino_msgs.srv import (
     GetFluents,
     GetFunctions,
 )
-from expertino_msgs.msg import Fluent, FluentEffect, FunctionEffect, Function
+from expertino_msgs.msg import Fluent as FluentMsg, FluentEffect, FunctionEffect, Function
 from expertino_msgs.action import CallPddlPlanner
 
 from unified_planning.engines import PlanGenerationResultStatus
@@ -247,7 +247,7 @@ class AddFluentLifecycleNode(LifecycleNode):
                 args.append(f"{arg}")
             if val.is_bool_constant() and val.bool_constant_value():
                 # this is a normal fluent
-                fluent = Fluent(
+                fluent = FluentMsg(
                     pddl_instance=request.pddl_instance,
                     name=f.fluent().name,
                     args=args,
@@ -395,7 +395,7 @@ class AddFluentLifecycleNode(LifecycleNode):
                     args = []
                     for arg in val.fluent.args:
                         args.append(f"{arg}")
-                    fluent = Fluent(
+                    fluent = FluentMsg(
                         pddl_instance=action.pddl_instance,
                         name=val.fluent.fluent().name,
                         args=args,
