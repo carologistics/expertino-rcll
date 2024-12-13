@@ -36,6 +36,8 @@ clips_manager:
         "clips/expertino/refbox-comm-init.clp",
         "clips/expertino/refbox-recv.clp",
         "clips/expertino/sim-interface.clp",
-        "clips/expertino/action-sim-bindings.clp"
+        "clips/expertino/action-sim-bindings.clp",
+        # Finalize
+        "clips/expertino/shutdown/finalize-ros.clp",
         ]
 
