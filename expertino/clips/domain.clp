@@ -20,16 +20,6 @@
 
 
 
-(deftemplate pddl-fluent
-  (slot name (type SYMBOL))
-  (multislot params (type SYMBOL))
-)
-(deftemplate pddl-numeric-fluent
-  (slot name (type SYMBOL))
-  (multislot params (type SYMBOL))
-  (slot value (type FLOAT))
-)
-
 (deftemplate pddl-action
   (slot id (type SYMBOL))
   (slot name (type SYMBOL))
@@ -65,4 +55,3 @@
   (slot id (type SYMBOL))
   (slot sub-action (type SYMBOL))
 )
-

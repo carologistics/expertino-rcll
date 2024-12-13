@@ -7,7 +7,7 @@
      grey1 grey2 grey3 - carrier
      black1 black2 black3 - carrier
    )
- 
+
    (:init
      ;; Machine side mapping
      (in bs bs-input)
@@ -23,7 +23,7 @@
      (in ss ss-input)
      (out ss ss-output)
      (in ds ds-input)
- 
+
      (free bs-input)
      (free bs-output)
      (free cs1-input)
@@ -37,10 +37,10 @@
      (free ss-input)
      (free ss-output)
      (free ds-input)
- 
+
      (free rs1-slide)
      (free rs2-slide)
- 
+
      (spawnable wp1)
      (spawnable wp2)
      (spawnable pay1)
@@ -56,7 +56,7 @@
      (next-payment pay7 pay10)
      (next-payment pay8 pay11)
      (next-payment pay9 pay12)
- 
+
      (step pay1 dispose)
      (step pay2 dispose)
      (step pay3 dispose)
@@ -69,7 +69,7 @@
      (step pay10 dispose)
      (step pay11 dispose)
      (step pay12 dispose)
- 
+
      (step grey1 cap-grey)
      (next-step grey1 cap-grey dispose)
      (step grey2 cap-grey)
@@ -88,7 +88,7 @@
      (usable black1)
      (usable black2)
      (usable black3)
- 
+
      (= (order) 0)
      (= (pay-count rs1) 0)
      (= (pay-count rs2) 0)
@@ -104,7 +104,7 @@
      (= (price ring-green1) 0)
      (= (price ring-green2) 0)
      (= (price ring-green3) 0)
- 
+
     (on-shelf grey1 cs1)
     (on-shelf grey2 cs1); SHELF-MID)
     (on-shelf grey3 cs1); SHELF-RIGHT)
@@ -178,4 +178,3 @@
     )
   )
 )
-

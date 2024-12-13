@@ -1,4 +1,4 @@
-{% extends "domain.jinja.pddl" %}
+{% extends "domain_base.jinja.pddl" %}
 {% block actions %}
    ;; Dispense a workpiece to the initial location
    (:durative-action bs-dispense
@@ -44,7 +44,7 @@
        (at end (not (free ?p)))
      )
    )
- 
+
    ;; Transport a workpiece from one machine side to another
    (:durative-action transport
      :parameters (?wp - workpiece ?from - place ?to - place ?r - task)
@@ -66,7 +66,7 @@
        (at end (not (at ?wp ?from)))
      )
    )
- 
+
    ;; Process a workpiece for its current task
    (:durative-action cs-mount-cap
      :parameters (?wp - product ?m - cap-station ?in - place ?out - place ?task - cap ?next - task)
@@ -195,7 +195,7 @@
        (at end (not (at ?wp ?in)))
      )
    )
- 
+
    (:durative-action rs-pay
      :parameters (?wp - product ?task - ring ?pay - payment ?m - ring-station ?slide - slide)
      :duration (= ?duration 0.5)

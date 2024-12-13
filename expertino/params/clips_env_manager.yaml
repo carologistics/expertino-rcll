@@ -6,6 +6,7 @@ clips_manager:
                 "ament_index",
                 "config",
                 "protobuf",
+                "ros_msgs",
                 "files"]
       log_clips_to_file: true
       redirect_stdout_to_debug: true
@@ -29,9 +30,15 @@ clips_manager:
       plugin: "cx::FileLoadPlugin"
       pkg_share_dirs: ["expertino", "cx_goal_reasoning"]
       load: [
+        # Specific isolated concepts
+        "clips/expertino/start-tasks/start-tasks.clp",
+        # General utility stuff
         "clips/expertino/defglobals.clp",
         "clips/expertino/deftemplates.clp",
         "clips/expertino/deffunctions.clp",
+        # Startup
+        "clips/expertino/start-tasks/init-pddl.clp",
+        # Actual Reasoning
         "clips/expertino/init.clp",
         "clips/expertino/refbox-comm-init.clp",
         "clips/expertino/refbox-recv.clp",
@@ -40,4 +47,5 @@ clips_manager:
         # Finalize
         "clips/expertino/shutdown/finalize-ros.clp",
         ]
-
+    ros_msgs:
+      plugin: "cx::RosMsgsPlugin"

@@ -105,3 +105,23 @@
   (slot plan-id (type SYMBOL) (default UNSET))
   (slot action-id (type INTEGER))
 )
+
+
+(deftemplate service-request-meta
+  (slot service (type STRING))
+  (slot request-id (type INTEGER))
+  (slot meta (type SYMBOL))
+)
+
+(deftemplate pddl-fluent
+  (slot name (type SYMBOL))
+  (multislot params (type SYMBOL))
+  (slot instance (type SYMBOL))
+)
+
+(deftemplate pddl-numeric-fluent
+  (slot name (type SYMBOL))
+  (multislot params (type SYMBOL))
+  (slot value (type FLOAT))
+  (slot instance (type SYMBOL))
+)

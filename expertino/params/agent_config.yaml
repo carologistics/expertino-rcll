@@ -20,4 +20,9 @@ rcll-simulator:
   host: 127.0.0.1
   robot-send-ports: [2126, 2127, 2128]
   robot-recv-ports: [2116, 2117, 2118]
-
+pddl:
+  manager_node: "/pddl_manager"
+  pddl_dir: "pddl"
+  problem_instance: "rcll"
+  init_domain_file: "domain.jinja.pddl"
+  init_problem_file: "problem.jinja.pddl"

@@ -13,7 +13,7 @@
     base-station cap-station ring-station storage-station delivery-station - machine
     slide bs-place cs-place rs-place ss-place ds-place - place
   )
-  (:constants 
+  (:constants
     bs - base-station
     cs1 cs2 - cap-station
     rs1 rs2 - ring-station
@@ -33,21 +33,21 @@
   (:predicates
      ;; Locations of workpieces
      (at ?wp - workpiece ?p - place) ; Workpiece is at a machine side
- 
+
      ;; Workpiece tasks
      (step ?wp - workpiece ?r - task) ; Current active task
      (next-step ?wp - workpiece ?task1 - task ?task2 - task) ; Requirement order
- 
+
      ;; Machine capabilities
      (step-place ?task - task ?p - place) ; Machine can process a task
- 
+
      ;; Side availability
      (free ?p - place)
      (spawnable ?wp - workpiece)
      (usable ?i - interactable)
      (in ?m - machine ?p - place)
      (out ?m - machine ?p - place)
- 
+
      (rs-slide ?m - ring-station ?s - slide)
 
      (buffered ?m - cap-station ?c - cap)
@@ -66,4 +66,3 @@
 
 {% endblock %}
 )
-
