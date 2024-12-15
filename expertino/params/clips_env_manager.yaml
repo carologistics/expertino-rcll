@@ -33,6 +33,7 @@ clips_manager:
       pkg_share_dirs: ["expertino", "cx_goal_reasoning"]
       load: [
         # Specific isolated concepts
+        "clips/expertino/unwatch.clp",
         "clips/expertino/start-tasks/start-tasks.clp",
         # General utility stuff
         "clips/expertino/defglobals.clp",
