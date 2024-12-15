@@ -19,7 +19,7 @@ from expertino_msgs.srv import (
     GetFluents,
     GetFunctions,
 )
-from expertino_msgs.msg import Fluent as FluentMsg, FluentEffect, FunctionEffect, Function, TimedPlanAction
+from expertino_msgs.msg import Fluent as FluentMsg, FluentEffect, FunctionEffect, Function, TimedPlanAction, Action as ActionMsg
 from expertino_msgs.action import PlanTemporal
 
 from unified_planning.engines import PlanGenerationResultStatus
