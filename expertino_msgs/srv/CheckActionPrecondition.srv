@@ -1,4 +1,4 @@
-expertino_msgs/Fluent action
+expertino_msgs/Action action
 ---
 bool success
 bool sat
