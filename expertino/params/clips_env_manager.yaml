@@ -7,6 +7,8 @@ clips_manager:
                 "config",
                 "protobuf",
                 "ros_msgs",
+                "plan_temporal_action",
+                "timed_plan_action_msg",
                 "files"]
       log_clips_to_file: true
       redirect_stdout_to_debug: true
@@ -44,8 +46,14 @@ clips_manager:
         "clips/expertino/refbox-recv.clp",
         "clips/expertino/sim-interface.clp",
         "clips/expertino/action-sim-bindings.clp",
+        "clips/expertino/action/plan.clp",
+        "clips/expertino/action/action-precond-check.clp",
         # Finalize
         "clips/expertino/shutdown/finalize-ros.clp",
         ]
     ros_msgs:
       plugin: "cx::RosMsgsPlugin"
+    plan_temporal_action:
+      plugin: "cx::CXExpertinoMsgsPlanTemporalPlugin"
+    timed_plan_action_msg:
+      plugin: "cx::CXExpertinoMsgsTimedPlanActionPlugin"

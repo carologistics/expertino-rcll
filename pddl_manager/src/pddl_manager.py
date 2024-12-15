@@ -19,8 +19,8 @@ from expertino_msgs.srv import (
     GetFluents,
     GetFunctions,
 )
-from expertino_msgs.msg import Fluent as FluentMsg, FluentEffect, FunctionEffect, Function
-from expertino_msgs.action import CallPddlPlanner
+from expertino_msgs.msg import Fluent as FluentMsg, FluentEffect, FunctionEffect, Function, TimedPlanAction
+from expertino_msgs.action import PlanTemporal
 
 from unified_planning.engines import PlanGenerationResultStatus
 from unified_planning.shortcuts import (
@@ -68,7 +68,7 @@ from rclpy.lifecycle import State
 from rclpy.lifecycle import TransitionCallbackReturn
 
 
-class AddFluentLifecycleNode(LifecycleNode):
+class PddlManagerLifecycleNode(LifecycleNode):
     def __init__(self):
         super().__init__("pddl_problem_manager")
         self.my_executor = cf.ProcessPoolExecutor(max_workers=4)
@@ -147,8 +147,8 @@ class AddFluentLifecycleNode(LifecycleNode):
         )
         self.plan_action_server = ActionServer(
             self,
-            CallPddlPlanner,
-            f"{self.get_name()}/pddl_plan",
+            PlanTemporal,
+            f"{self.get_name()}/temp_plan",
             self.plan_callback,
             callback_group=self.action_cb_group,
         )
@@ -447,26 +447,47 @@ class AddFluentLifecycleNode(LifecycleNode):
 
     def plan_callback(self, goal_handle):
       self.get_logger().info("Start planning...")
-      response = CallPddlPlanner.Result()
+      response = PlanTemporal.Result()
       request = goal_handle.request
 
-      if request.instance not in self.problems.keys():
+      if request.pddl_instance not in self.problems.keys():
           response.success = False
           return response
 
-      problem = self.problems[request.instance]
+      problem = self.problems[request.pddl_instance]
       writer = PDDLWriter(problem)
       dom = writer.get_domain()
       prob = writer.get_problem()
       future = self.my_executor.submit(run_planner_process, self.env, dom, prob)
       result = future.result()
-      response.success = True
+      response.actions = []
+      if result:
+        response.success = True
+        for time, act, duration in result.timed_actions:
+          plan_action = TimedPlanAction()
+          plan_action.pddl_instance = request.pddl_instance
+          if f"{act.action.name}" in writer.nto_renamings.keys():
+            plan_action.name=f"{writer.get_item_named(f"{act.action.name}").name}"
+          else:
+            plan_action.name = f"{act.action.name}"
+          plan_action.args = []
+          for arg in act.actual_parameters:
+            if f"{arg}" in writer.nto_renamings.keys():
+              plan_action.args.append(f"{writer.get_item_named(arg.__str__())}")
+            else:
+              plan_action.args.append(f"{arg}")
+          plan_action.start_time = float(time)
+          plan_action.duration = float(duration)
+          response.actions.append(plan_action)
+      else:
+        response.success = False
       goal_handle.succeed()
       return response
 
 
 def run_planner_process(env, dom, prob):
   env = get_environment()
+  env.credits_stream = None
   reader = PDDLReader()
   problem = reader.parse_problem_string(dom,prob)
   env.factory.add_engine("nextflap", __name__, "NextFLAPImpl")
@@ -475,14 +496,13 @@ def run_planner_process(env, dom, prob):
     tPlan=None
     # result = planner.solve(problem, timeout=60.0)
     if result.status == PlanGenerationResultStatus.SOLVED_SATISFICING:
-        print(f"; {planner.name} found a plan!")
         if result.plan.kind == PlanKind.TIME_TRIGGERED_PLAN:
             tPlan = result.plan.convert_to(
                 PlanKind.TIME_TRIGGERED_PLAN, result.plan
             )
             plan = result.plan
     else:
-        print("No plan found!")
+        return False
 
     return tPlan
 
@@ -492,7 +512,7 @@ def main(args=None):
 
     try:
         # Initialize the node
-        node = AddFluentLifecycleNode()
+        node = PddlManagerLifecycleNode()
 
         # Use a multi-threaded executor
         executor = MultiThreadedExecutor(num_threads=4)

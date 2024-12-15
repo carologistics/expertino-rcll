@@ -19,12 +19,13 @@
 ;  - init-problem: setup an initial pddl domain
 ;  - init-fluents: retrieve fluents from pddl domain and store them
 ;  - init-functions: retrieve numeric fluents from pddl domain and store them
+;  - init-plan-server: create a client for the planner server
 ;
 
 (deffacts pddl-task
   (start-task (name pddl)
     (wait-for)
-    (parts init-clients init-problem init-fluents init-functions)
+    (parts init-clients init-problem init-fluents init-functions init-planner)
   )
 )
 
@@ -51,7 +52,10 @@
   (while (< ?index ?length)
      (bind ?service-name (nth$ ?index ?services))
      (bind ?service-type (nth$ (+ ?index 1) ?services))
-     (ros-msgs-create-client (str-cat ?node "/" ?service-name) (str-cat "expertino_msgs/srv/" ?service-type))
+     (ros-msgs-create-client
+       (str-cat ?node "/" ?service-name)
+       (str-cat "expertino_msgs/srv/" ?service-type)
+     )
      (bind ?index (+ ?index 2))
   )
   (modify ?st (parts $?rest-parts))
@@ -126,7 +130,7 @@
   (confval (path "/pddl/manager_node") (value ?node))
   (ros-msgs-client (service ?s&:(eq ?s (str-cat ?node "/get_fluents"))) (type ?type))
   ?msg-f <- (ros-msgs-response (service ?s) (msg-ptr ?ptr) (request-id ?id))
-  ?req-meta <- (service-request-meta (service ?) (request-id ?id) (meta init-fluents))
+  ?req-meta <- (service-request-meta (service ?s) (request-id ?id) (meta init-fluents))
   ?st <- (start-task (name pddl) (state ACTIVE) (parts init-fluents $?rest-parts))
 =>
   (bind ?success (ros-msgs-get-field ?ptr "success"))
@@ -191,7 +195,8 @@
       (foreach ?arg ?args
         (bind ?arg-syms (create$ ?arg-syms (sym-cat ?arg)))
       )
-      (assert (pddl-numeric-fluent (name (sym-cat ?name)) (params ?arg-syms) (value ?value) (instance ?instance)))
+      (assert (pddl-numeric-fluent (name (sym-cat ?name)) (params ?arg-syms)
+       (value ?value) (instance ?instance)))
     )
     (modify ?st (parts $?rest-parts))
    else
@@ -201,3 +206,20 @@
   (retract ?msg-f)
   (retract ?req-meta)
 )
+
+(defrule pddl-init-plan-client
+  (confval (path "/pddl/manager_node") (value ?node))
+  (start-task (name pddl) (state ACTIVE) (parts init-planner $?rest-parts))
+  =>
+  (expertino-msgs-plan-temporal-create-client (str-cat ?node "/temp_plan"))
+)
+
+(defrule pddl-init-plan-client-successful
+  (confval (path "/pddl/manager_node") (value ?node))
+  (expertino-msgs-plan-temporal-client (server ?s&:(eq ?s (str-cat ?node "/temp_plan"))))
+  ?st <- (start-task (name pddl) (state ACTIVE) (parts init-planner $?rest-parts))
+  =>
+  (modify ?st (parts ?rest-parts))
+)
+
+

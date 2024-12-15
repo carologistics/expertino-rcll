@@ -13,6 +13,13 @@ endif()
 # find dependencies
 find_package(ament_cmake REQUIRED)
 find_package(rcll_protobuf_msgs REQUIRED)
+find_package(cx_plugin REQUIRED)
+find_package(cx_ros_comm_gen REQUIRED)
+
+# plugins for pddl planner action client and nested message of it
+cx_generate_msg_bindings("expertino_msgs" "TimedPlanAction")
+cx_generate_action_bindings("expertino_msgs" "PlanTemporal")
+
 execute_process(
   COMMAND
     ${CMAKE_COMMAND} -E create_symlink

@@ -33,14 +33,6 @@
 
 
 
-
-(deftemplate pddl-action
-  (slot id (type SYMBOL))
-  (slot name (type SYMBOL))
-  (multislot params (type SYMBOL))
-  (slot state (type SYMBOL)) ; initial, check-precond, precond-sat, exec-wait, exec, exec-done, effects-applied, failed final
-)
-
 (deftemplate pddl-fluent-apply-effect
   (slot fluent-name (type SYMBOL))
   (slot automatic-apply (type SYMBOL) (allowed-values FALSE TRUE) (default FALSE))

@@ -135,3 +135,12 @@
   (slot value (type FLOAT))
   (slot instance (type SYMBOL))
 )
+
+(deftemplate pddl-action
+  (slot id (type SYMBOL)) ; this should be a globally unique ID
+  (slot instance (type SYMBOL))
+  (slot name (type SYMBOL))
+  (multislot params (type SYMBOL))
+  (slot state (type SYMBOL)) ; initial, check-precond, precond-sat, exec-wait, exec, exec-done, effects-applied, failed final
+)
+

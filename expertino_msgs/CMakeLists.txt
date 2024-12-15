@@ -8,7 +8,7 @@ find_package(builtin_interfaces REQUIRED)
 find_package(action_msgs REQUIRED)
 
 set(MSGS "msg/Fluent.msg" "msg/Function.msg" "msg/FunctionEffect.msg"
-         "msg/FluentEffect.msg")
+         "msg/FluentEffect.msg" "msg/TimedPlanAction.msg")
 set(SERVICES
     "srv/CheckActionPrecondition.srv"
     "srv/GetActionEffects.srv"
@@ -17,7 +17,7 @@ set(SERVICES
     "srv/GetFluents.srv"
     "srv/GetFunctions.srv"
     "srv/AddFluents.srv")
-set(ACTIONS "action/CallPddlPlanner.action")
+set(ACTIONS "action/PlanTemporal.action")
 
 # set(ACTIONS
 
