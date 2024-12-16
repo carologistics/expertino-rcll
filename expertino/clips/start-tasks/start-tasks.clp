@@ -36,3 +36,9 @@
   =>
   (modify ?st (state DONE))
 )
+(defrule start-task-startup-completed
+  " All start-tasks are done, mark startup as completed."
+  (not (start-task (state ~DONE)))
+  =>
+  (assert (startup-completed))
+)
