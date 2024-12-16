@@ -30,6 +30,7 @@
   )
   (assert (requested))
   (ros-msgs-destroy-message ?new-req)
+  (ros-msgs-destroy-message ?action-msg)
 )
 
 (defrule action-precond-check-response
