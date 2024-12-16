@@ -28,7 +28,6 @@
     (status (client-status-to-sym ?status))
     (client-goal-handle ?cgh-ptr)
   )
-  (printout green "got goal response " (client-status-to-sym ?status) crlf)
 )
 
 (defrule plan-update-plan-status
@@ -47,6 +46,7 @@
   ?wr-f <- (expertino-msgs-plan-temporal-wrapped-result (server "/pddl_manager/temp_plan") (goal-id ?goal-id) (code SUCCEEDED) (result-ptr ?res-ptr))
   =>
   (bind ?plan-found (expertino-msgs-plan-temporal-result-get-field ?res-ptr "success"))
+  (printout green "planning done" crlf)
   (if ?plan-found then
     (bind ?plan (expertino-msgs-plan-temporal-result-get-field ?res-ptr "actions"))
 	(foreach ?action ?plan
