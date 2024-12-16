@@ -156,13 +156,14 @@
      )
    )
    (:durative-action carrier-to-input
-     :parameters (?wp - carrier ?task - cap  ?m - cap-station ?in - place)
+     :parameters (?wp - carrier ?next - carrier ?task - cap  ?m - cap-station ?in - place)
      :duration (= ?duration 10)
      :condition (and
        (at start (step ?wp ?task))
        (at start (in ?m ?in))
        (at start (free ?in))
        (at start (usable ?wp))
+       (at start (next-shelf ?wp ?next))
        (at start (step-place ?task ?in))
        (at start (can-buffer ?m ?task))
        (at start (on-shelf ?wp ?m))
@@ -173,6 +174,7 @@
        (at end (at ?wp ?in))
        (at end (not (free ?in)))
        (at end (not (on-shelf ?wp ?m)))
+       (at end (on-shelf ?next ?m))
      )
    )
    (:durative-action rs-mount-ring
@@ -250,11 +252,9 @@
    )
 
    (:durative-action rs-pay-with-cc
-     :parameters (?wp - product ?curr - task ?next - cap ?pay - carrier ?m - ring-station ?slide - slide)
+     :parameters (?pay - carrier ?m - ring-station ?slide - slide)
      :duration (= ?duration 0.5)
      :condition (and
-       (at start (step ?wp ?curr))
-       (at start (next-step ?wp ?curr ?next))
        (at start (step ?pay dispose))
        (at start (at ?pay ?slide))
        (at start (rs-slide ?m ?slide))

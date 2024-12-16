@@ -118,12 +118,12 @@
      (= (price ring-green3) 0)
 
     (on-shelf grey1 cs1)
-    (on-shelf grey2 cs1); SHELF-MID)
-    (on-shelf grey3 cs1); SHELF-RIGHT)
+    (next-shelf grey1 grey2)
+    (next-shelf grey2 grey3)
 
     (on-shelf black1 cs2)
-    (on-shelf black2 cs2); SHELF-MID)
-    (on-shelf black3 cs2); SHELF-RIGHT)
+    (next-shelf black1 black2)
+    (next-shelf black2 black3)
 
     (step wp1 base-red)
     (next-step wp1 base-red ring-blue1)

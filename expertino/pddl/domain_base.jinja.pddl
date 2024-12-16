@@ -68,6 +68,7 @@
      (can-buffer ?m - cap-station ?c - cap)
 
      (on-shelf ?c - workpiece ?m - cap-station)
+     (next-shelf ?c - carrier ?next-c - carrier)
      (next-payment ?curr - payment ?next -payment)
   )
   ; make sure functions are defined after predicates
