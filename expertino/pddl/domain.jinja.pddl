@@ -144,11 +144,11 @@
      )
      :effect (and
        (at start (not (usable ?wp)))
+       (at start (not (can-buffer ?m ?task)))
        (at end (usable ?wp))
        (at end (not (step ?wp ?task)))
        (at end (step ?wp dispose))
        (at end (free ?in))
-       (at end (not (can-buffer ?m ?task)))
        (at end (buffered ?m ?task))
        (at end (not (free ?out)))
        (at end (not (at ?wp ?in)))
