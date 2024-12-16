@@ -8,7 +8,6 @@
 )
 
 (deffunction wp-part-to-pddl (?refbox-name $?number)
-  (printout blue ?refbox-name crlf)
   (bind ?converted-name (str-replace (lowcase ?refbox-name) "_" "-"))
   (if (neq ?number (create$)) then
     (return (sym-cat ?converted-name (nth$ 1 ?number)))

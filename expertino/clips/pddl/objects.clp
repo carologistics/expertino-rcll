@@ -49,7 +49,6 @@
       (ros-msgs-destroy-message ?msg)
     )
   )
-  (printout yellow "hi" crlf)
 )
 
 (defrule pending-add-objects-process-response
