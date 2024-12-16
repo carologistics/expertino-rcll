@@ -80,6 +80,23 @@
        (at end (not (at ?wp ?from)))
      )
    )
+   (:durative-action transport-to-slide
+     :parameters (?wp - workpiece ?from - place ?to - slide)
+     :duration (= ?duration 5)
+     :condition (and
+       (at start (at ?wp ?from))
+       (at start (step ?wp dispose))
+       (at start (step-place dispose ?to))
+       (at start (usable ?wp))
+     )
+     :effect (and
+       (at start (not (usable ?wp)))
+       (at end (at ?wp ?to))
+       (at end (free ?from))
+       (at end (usable ?wp))
+       (at end (not (at ?wp ?from)))
+     )
+   )
 
    ;; Process a workpiece for its current task
    (:durative-action cs-mount-cap
@@ -227,7 +244,6 @@
        (at start (not (usable ?m)))
        (at start (not (usable ?pay)))
        (at end (not (at ?pay ?slide)))
-       (at end (free ?slide))
        (at end (usable ?m))
        (at end (increase (pay-count ?m) 1))
      )
