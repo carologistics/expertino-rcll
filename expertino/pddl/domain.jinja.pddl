@@ -240,7 +240,7 @@
        (at start (usable ?m))
        (at start (<= (pay-count ?m) 2))
        (at start (step ?wp ?task))
-       (at start (>= (pay-count ?m) (price ?task)))
+       (at start (<= (pay-count ?m) (price ?task)))
      )
      :effect (and
        (at start (not (usable ?m)))
