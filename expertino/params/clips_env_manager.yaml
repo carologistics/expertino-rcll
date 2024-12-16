@@ -43,8 +43,13 @@ clips_manager:
         "clips/expertino/start-tasks/init-pddl.clp",
         # Actual Reasoning
         "clips/expertino/init.clp",
+        "clips/expertino/pddl/set-goals.clp",
+        "clips/expertino/pddl/clear-goals.clp",
+        "clips/expertino/pddl/objects.clp",
+        "clips/expertino/pddl/fluents.clp",
         "clips/expertino/pddl/instances.clp",
         "clips/expertino/pddl/get-fluents.clp",
+        "clips/expertino/pddl/numeric-fluents.clp",
         "clips/expertino/pddl/plan.clp",
         "clips/expertino/refbox-comm-init.clp",
         "clips/expertino/refbox-recv.clp",

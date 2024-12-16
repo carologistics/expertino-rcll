@@ -123,24 +123,106 @@
   (slot meta (type SYMBOL))
 )
 
-(deftemplate pddl-fluent
+(deftemplate action-feedback
+  (slot action-id (type SYMBOL))
   (slot name (type SYMBOL))
-  (multislot params (type SYMBOL))
+  (multislot params (type SYMBOL) (default (create$)))
+)
+
+(deftemplate pddl-manager
+  (slot node (type STRING) (default "/pddl_manager"))
+)
+(deftemplate pddl-goal-fluent
   (slot instance (type SYMBOL))
+  (slot name (type SYMBOL))
+  (multislot params (type SYMBOL) (default (create$)))
+)
+
+(deftemplate pddl-goal-numeric-fluent
+  (slot instance (type SYMBOL))
+  (slot name (type SYMBOL))
+  (multislot params (type SYMBOL) (default (create$)))
+  (slot value (type FLOAT))
+)
+
+(deftemplate pddl-set-goals
+  (slot instance (type SYMBOL))
+  (slot state (type SYMBOL) (allowed-values PENDING DONE ERROR) (default PENDING))
+  (slot error (type STRING))
+)
+
+(deftemplate pddl-clear-goals
+  (slot instance (type SYMBOL))
+  (slot state (type SYMBOL) (allowed-values PENDING DONE ERROR) (default PENDING))
+  (slot error (type STRING))
+)
+
+(deftemplate pddl-get-fluents
+  (slot instance (type SYMBOL))
+  (slot state (type SYMBOL) (allowed-values PENDING DONE ERROR) (default PENDING))
+  (slot error (type STRING))
+)
+
+(deftemplate pddl-get-numeric-fluents
+  (slot instance (type SYMBOL))
+  (slot state (type SYMBOL) (allowed-values PENDING DONE ERROR) (default PENDING))
+  (slot error (type STRING))
+)
+
+(deftemplate pddl-instance
+  (slot name (type SYMBOL))
+  (slot domain (type STRING))
+  (slot problem (type STRING))
+  (slot directory (type STRING))
+  (slot state (type SYMBOL) (allowed-values PENDING LOADED ERROR) (default PENDING))
+  (slot error (type STRING))
+)
+
+(deftemplate pending-pddl-object
+  (slot name (type SYMBOL))
+  (slot type (type SYMBOL))
+  (slot instance (type SYMBOL))
+  (slot request-id (type INTEGER))
+  (slot delete (type SYMBOL) (allowed-values FALSE TRUE) (default FALSE))
+  (slot state (type SYMBOL) (allowed-values PENDING WAITING ERROR ON-HOLD) (default PENDING))
+)
+
+(deftemplate pending-pddl-fluent
+  (slot instance (type SYMBOL))
+  (slot name (type SYMBOL))
+  (multislot params (type SYMBOL) (default (create$)))
+  (slot request-id (type INTEGER))
+  (slot delete (type SYMBOL) (allowed-values FALSE TRUE) (default FALSE))
+  (slot state (type SYMBOL) (allowed-values PENDING WAITING ERROR ON-HOLD) (default PENDING))
+)
+
+(deftemplate pending-pddl-numeric-fluent
+  (slot instance (type SYMBOL))
+  (slot name (type SYMBOL))
+  (multislot params (type SYMBOL) (default (create$)))
+  (slot value (type FLOAT))
+  (slot request-id (type INTEGER))
+  (slot state (type SYMBOL) (allowed-values PENDING WAITING ERROR ON-HOLD) (default PENDING))
+)
+
+(deftemplate pddl-fluent
+  (slot instance (type SYMBOL))
+  (slot name (type SYMBOL))
+  (multislot params (type SYMBOL) (default (create$)))
 )
 
 (deftemplate pddl-numeric-fluent
-  (slot name (type SYMBOL))
-  (multislot params (type SYMBOL))
-  (slot value (type FLOAT))
   (slot instance (type SYMBOL))
+  (slot name (type SYMBOL))
+  (multislot params (type SYMBOL) (default (create$)))
+  (slot value (type FLOAT))
 )
 
 (deftemplate pddl-action
-  (slot id (type SYMBOL)) ; this should be a globally unique ID
   (slot instance (type SYMBOL))
+  (slot id (type SYMBOL)) ; this should be a globally unique ID
   (slot name (type SYMBOL))
-  (multislot params (type SYMBOL))
+  (multislot params (type SYMBOL) (default (create$)))
   (slot state (type SYMBOL)) ; initial, check-precond, precond-sat, exec-wait, exec, exec-done, effects-applied, failed final
 )
 
