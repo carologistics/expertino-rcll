@@ -13,11 +13,18 @@ from rclpy.node import Node
 from rclpy.action import ActionServer
 from expertino_msgs.srv import (
     AddFluent,
+    AddFluents,
+    RemoveFluents,
+    AddObjects,
+    RemoveObjects,
+    SetFunctions,
     AddPddlInstance,
     CheckActionPrecondition,
     GetActionEffects,
     GetFluents,
     GetFunctions,
+    SetGoals,
+    ClearGoals,
 )
 from expertino_msgs.msg import Fluent as FluentMsg, FluentEffect, FunctionEffect, Function, TimedPlanAction, Action as ActionMsg
 from expertino_msgs.action import PlanTemporal
@@ -73,11 +80,18 @@ class PddlManagerLifecycleNode(LifecycleNode):
         super().__init__("pddl_problem_manager")
         self.my_executor = cf.ProcessPoolExecutor(max_workers=4)
         self.add_fluent_srv = None
+        self.add_fluents_srv = None
+        self.rm_fluents_srv = None
+        self.add_objects_srv = None
+        self.rm_objects_srv = None
+        self.set_functions_srv = None
         self.add_pddl_instance_srv = None
         self.check_action_precondition_srv = None
         self.get_action_effects_srv = None
         self.get_fluents_srv = None
         self.get_functions_srv = None
+        self.set_goals_srv = None
+        self.clear_goals_srv = None
         self.plan_action_server = None
         self.reader = PDDLReader()
         self.problems = {}
@@ -115,6 +129,12 @@ class PddlManagerLifecycleNode(LifecycleNode):
             self.handle_add_fluent,
             callback_group=self.srv_cb_group,
         )
+        self.add_fluents_srv = self.create_service(
+            AddFluents,
+            f"{self.get_name()}/add_fluents",
+            self.handle_add_fluents,
+            callback_group=self.srv_cb_group,
+        )
         self.add_pddl_instance_srv = self.create_service(
             AddPddlInstance,
             f"{self.get_name()}/add_pddl_instance",
@@ -139,10 +159,52 @@ class PddlManagerLifecycleNode(LifecycleNode):
             self.handle_get_fluents,
             callback_group=self.srv_cb_group,
         )
+        self.add_fluents_srv = self.create_service(
+            AddFluents,
+            f"{self.get_name()}/add_fluents",
+            self.handle_add_fluents,
+            callback_group=self.srv_cb_group,
+        )
+        self.rm_fluents_srv = self.create_service(
+            RemoveFluents,
+            f"{self.get_name()}/rm_fluents",
+            self.handle_rm_fluents,
+            callback_group=self.srv_cb_group,
+        )
+        self.add_objects_srv = self.create_service(
+            AddObjects,
+            f"{self.get_name()}/add_objects",
+            self.handle_add_objects,
+            callback_group=self.srv_cb_group,
+        )
+        self.rm_objects_srv = self.create_service(
+            RemoveObjects,
+            f"{self.get_name()}/rm_objects",
+            self.handle_rm_objects,
+            callback_group=self.srv_cb_group,
+        )
+        self.set_functions_srv = self.create_service(
+            SetFunctions,
+            f"{self.get_name()}/set_functions",
+            self.handle_set_functions,
+            callback_group=self.srv_cb_group,
+        )
         self.get_functions_srv = self.create_service(
             GetFunctions,
             f"{self.get_name()}/get_functions",
             self.handle_get_functions,
+            callback_group=self.srv_cb_group,
+        )
+        self.set_goals_srv = self.create_service(
+            SetGoals,
+            f"{self.get_name()}/set_goals",
+            self.handle_set_goals,
+            callback_group=self.srv_cb_group,
+        )
+        self.clear_goals_srv = self.create_service(
+            ClearGoals,
+            f"{self.get_name()}/clear_goals",
+            self.handle_clear_goals,
             callback_group=self.srv_cb_group,
         )
         self.plan_action_server = ActionServer(
@@ -177,15 +239,28 @@ class PddlManagerLifecycleNode(LifecycleNode):
         self.get_logger().info("Shutting down node...")
         return TransitionCallbackReturn.SUCCESS
 
-    def handle_add_fluent(self, request, response):
-        fluent = request.fluent
+    def try_set_object(self, obj, value):
+        self.get_logger().debug(
+            f"Received Object: name={obj.name}, type={obj.type}"
+        )
+        if obj.pddl_instance not in self.problems.keys():
+            return False, "Unknown pddl instance"
+        instance = self.problems[obj.pddl_instance]
+        try:
+            if(value):
+              instance.add_object(obj.name, instance.user_type(obj.type))
+            else:
+              raise Exception("Deletion of objects is not supported yet")
+            return True, ""
+        except Exception as e:
+            return False, f"error while { "adding" if value else "removing" } object: {e}"
+
+    def try_set_fluent(self, fluent, value):
         self.get_logger().debug(
             f"Received Fluent: name={fluent.name}, args={fluent.args}"
         )
         if fluent.pddl_instance not in self.problems.keys():
-            response.success = False
-            response.error = "Unknown pddl instance"
-            return response
+            return False, "Unknown pddl instance"
         instance = self.problems[fluent.pddl_instance]
         args = []
         try:
@@ -194,14 +269,136 @@ class PddlManagerLifecycleNode(LifecycleNode):
             grounded_fluent = self.fnode_manager.FluentExp(
                 instance.fluent(fluent.name), args
             )
-            instance.set_initial_value(grounded_fluent, True)
-            response.success = True
+            instance.set_initial_value(grounded_fluent, value)
+            return True, ""
+        except Exception as e:
+            return False, f"error while { "adding" if value else "removing" } fluent: {e}"
+
+    def try_set_function(self, function):
+        self.get_logger().debug(
+            f"Received Function: name={function.name}, args={function.args}, value={function.value}"
+        )
+        return self.try_set_fluent(function, function.value)
+
+    def try_set_function_goal(self, function):
+        return self.try_set_fluent_goal(function, function.value)
+
+
+    def try_set_fluent_goal(self, fluent, value):
+        if fluent.pddl_instance not in self.problems.keys():
+            return False, "Unknown pddl instance"
+        instance = self.problems[fluent.pddl_instance]
+        args = []
+        try:
+            for arg in fluent.args:
+                args.append(instance.object(arg))
+            grounded_fluent = self.fnode_manager.FluentExp(
+                instance.fluent(fluent.name), args
+            )
+            instance.add_goal(grounded_fluent)
+            return True, ""
+        except Exception as e:
+            return False, f"error while { "adding" if value else "removing" } fluent: {e}"
+
+    def handle_add_fluent(self, request, response):
+        fluent = request.fluent
+        response.success, response.error = self.try_set_fluent(fluent, True)
+        return response
+
+    def handle_add_fluents(self, request, response):
+        success = True
+        error = ""
+        for fluent in request.fluents:
+            curr_success, curr_error = self.try_set_fluent(fluent, True)
+            success = success and curr_success
+            error = f"{error} {curr_error}"
+        response.success = success
+        response.error = error
+        return response
+
+    def handle_set_functions(self, request, response):
+        success = True
+        error = ""
+        for function in request.functions:
+            curr_success, curr_error = self.try_set_function(function)
+            success = success and curr_success
+            error = f"{error} {curr_error}"
+        response.success = success
+        response.error = error
+        return response
+
+    def handle_rm_fluents(self, request, response):
+        success = True
+        error = ""
+        for fluent in request.fluents:
+            curr_success, curr_error = self.try_set_fluent(fluent, False)
+            success = success and curr_success
+            error = f"{error} {curr_error}"
+        response.success = success
+        response.error = error
+        return response
+
+    def handle_add_objects(self, request, response):
+        success = True
+        error = ""
+        for object in request.objects:
+            curr_success, curr_error = self.try_set_object(object, True)
+            success = success and curr_success
+            error = f"{error} {curr_error}"
+        response.success = success
+        response.error = error
+        return response
+
+    def handle_rm_objects(self, request, response):
+        success = True
+        error = ""
+        for object in request.objects:
+            curr_success, curr_error = self.try_set_object(object, False)
+            success = success and curr_success
+            error = f"{error} {curr_error}"
+        response.success = success
+        response.error = error
+        return response
+
+    def handle_clear_goals(self, request, response):
+        response.success = True
+        error = ""
+        if not request.pddl_instance in self.problems:
+            response.success = False
+            response.error = "Unknown pddl instance"
+            return response
+        instance = self.problems[request.pddl_instance]
+        try:
+            instance.clear_goals()
             return response
         except Exception as e:
             response.success = False
-            response.error = f"error while adding fluent: {e}"
-            self.get_logger().error(response.error)
+            response.error = f"error while clearing goals: {e}"
+            self.get_logger().error(f"{response.error}")
             return response
+
+    def handle_set_goals(self, request, response):
+        success = True
+        error = ""
+        for fluent in request.fluents:
+            if not success:
+                break
+            curr_success, curr_error = self.try_set_fluent_goal(fluent, True)
+            success = success and curr_success
+            error = f"{error} {curr_error}"
+
+        for function in request.functions:
+            if not success:
+                break
+            curr_success, curr_error = self.try_set_function_goal(function)
+            success = success and curr_success
+            error = f"{error} {curr_error}"
+        response.success = success
+        response.error = error
+        if not response.success:
+            self.get_logger().error(f"{response.error}")
+        return response
+
 
     def handle_add_pddl_instance(self, request, response):
         directory = request.directory
