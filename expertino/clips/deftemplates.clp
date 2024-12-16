@@ -130,15 +130,29 @@
 )
 
 (deftemplate pddl-manager
+" Store information on the external pddl manager.
+"
   (slot node (type STRING) (default "/pddl_manager"))
 )
+
 (deftemplate pddl-goal-fluent
+" Facts to represent goal conditions for planning.
+  Each fact of this template represent one positive boolean fluent in a
+  goal condition.
+  Negative goal conditions are currently not supported.
+"
   (slot instance (type SYMBOL))
   (slot name (type SYMBOL))
   (multislot params (type SYMBOL) (default (create$)))
 )
 
 (deftemplate pddl-goal-numeric-fluent
+" Facts to represent goal conditions for planning.
+  Each fact of this template represent one numeric fluent in a goal condition
+  with exactly the value specified in here.
+  Note that this is a rather limited representation for numeric fluent
+  conditions and can therefore only represent a subset of valid conditions.
+"
   (slot instance (type SYMBOL))
   (slot name (type SYMBOL))
   (multislot params (type SYMBOL) (default (create$)))
@@ -146,30 +160,95 @@
 )
 
 (deftemplate pddl-set-goals
+" Interface for set-goals.clp
+  Assert a fact of this type in order to actually register the respective goal
+  conditions represented by pddl-goal-(numeric-)fluent facts with the external
+  pddl manager.
+  @slot instance: pddl instance to which the respective goal conditions are
+        added.
+  Slots set automatically:
+  @slot state:
+   - PENDING: The goal is not updated with the pddl manager yet.
+   - DONE: The goal is updated with the pddl manager.
+   - ERROR: The goal is not (or only partially) updated.
+            Note that this leaves the set goal in an undefined state,
+            hence it is advised to clear the goal before proceeding.
+  @slot error: provide information on encountered errors.
+"
   (slot instance (type SYMBOL))
   (slot state (type SYMBOL) (allowed-values PENDING DONE ERROR) (default PENDING))
   (slot error (type STRING))
 )
 
 (deftemplate pddl-clear-goals
+" Interface for clear-goals.clp
+  Assert a fact of this type in order to clear all goal conditions of a given
+  pddl instance with the external pddl manager.
+  @slot instance: pddl instance which should clear it's goal conditions.
+  Slots set automatically:
+  @slot state:
+   - PENDING: The goal is not cleared in the pddl manager yet.
+   - DONE: The goal is cleared with the pddl manager.
+   - ERROR: The goal is not cleared due to some error.
+  @slot error: provide information on encountered errors.
+"
   (slot instance (type SYMBOL))
   (slot state (type SYMBOL) (allowed-values PENDING DONE ERROR) (default PENDING))
   (slot error (type STRING))
 )
 
 (deftemplate pddl-get-fluents
+" Interface for get-fluents.clp
+  Assert a fact of this type in order to fetch all positive boolean fluents
+  of a given pddl instance with the external pddl manager.
+  This results in the automatic assertion of all positive boolean fluents
+  (pddl-fluent template facts) currently present in the given pddl instance.
+  @slot instance: pddl instance from which the fluents are fetched.
+  Slots set automatically:
+  @slot state:
+   - PENDING: The fluents were not fetched yet.
+   - DONE: The fluents were successfully retrieved
+   - ERROR: The fluents were not fetched due to an error.
+  @slot error: provide information on encountered errors.
+"
   (slot instance (type SYMBOL))
   (slot state (type SYMBOL) (allowed-values PENDING DONE ERROR) (default PENDING))
   (slot error (type STRING))
 )
 
 (deftemplate pddl-get-numeric-fluents
+" Interface for get-fluents.clp
+  Assert a fact of this type in order to fetch all numeric fluents
+  of a given pddl instance with the external pddl manager.
+  This results in the automatic assertion of all numeric fluents
+  (pddl-numeric-fluent template facts) currently present in the given pddl
+  instance.
+  @slot instance: pddl instance from which the fluents are fetched.
+  Slots set automatically:
+  @slot state:
+   - PENDING: The fluents were not fetched yet.
+   - DONE: The fluents were successfully retrieved
+   - ERROR: The fluents were not fetched due to an error.
+  @slot error: provide information on encountered errors.
+"
   (slot instance (type SYMBOL))
   (slot state (type SYMBOL) (allowed-values PENDING DONE ERROR) (default PENDING))
   (slot error (type STRING))
 )
 
 (deftemplate pddl-instance
+" Interface for instances.clp
+  Assert a fact of this type to initialize a pddl instance with the external pddl manager.
+  @slot name: unique name to refer to when using this instance
+  @slot domain: name of a domain.pddl file to be loaded.
+  @slot problem: optional name of the problem.pddl, leave empty if no problem should be loaded initially.
+  Slots set automatically:
+  @slot state:
+   - PENDING: The instance was not registered yet.
+   - LOADED: The instance is loaded and ready for usage.
+   - ERROR: The fluents were not fetched due to an error.
+  @slot error
+"
   (slot name (type SYMBOL))
   (slot domain (type STRING))
   (slot problem (type STRING))
@@ -179,24 +258,76 @@
 )
 
 (deftemplate pending-pddl-object
+" Interface for objects.clp
+  Assert a fact of this type in order to indicate that an object needs to be
+  added to/removed from a pddl instance.
+  @slot instance: pddl instance to add the object to.
+  @slot name: name of the object.
+  @slot type: type of the object.
+  @slot delete: if true, remove the object, else add it.
+  Slots set automatically:
+  @slot state:
+   - PENDING: The object was not added yet.
+   - WAITING: The object is about to be added and is waiting for confirmation.
+   - ERROR: The object might not have been fetched due to an error.
+   - ON-HOLD: Unused state that can be set in order to defer the object update
+     to a later time (by switching it manually to PENDING).
+  @slot error: provide information on encountered errors.
+"
+  (slot instance (type SYMBOL))
   (slot name (type SYMBOL))
   (slot type (type SYMBOL))
-  (slot instance (type SYMBOL))
-  (slot request-id (type INTEGER))
   (slot delete (type SYMBOL) (allowed-values FALSE TRUE) (default FALSE))
+  (slot request-id (type INTEGER))
   (slot state (type SYMBOL) (allowed-values PENDING WAITING ERROR ON-HOLD) (default PENDING))
 )
 
 (deftemplate pending-pddl-fluent
+" Interface for fluents.clp
+  Assert a fact of this type in order to indicate that a fluent needs to be
+  added to/removed from a pddl instance.
+  Acts as a transient layer to pddl-fluent facts to make sure the CLIPS
+  representation stays consistant with the externally managed pddl instance.
+  @slot instance: pddl instance to add the fluent to.
+  @slot name: name of the fluent.
+  @slot params: parameters of the fluent.
+  @slot delete: if true, remove the fluent, else add it.
+  Slots set automatically:
+  @slot request-id: id of the associated ros service request
+  @slot state:
+   - PENDING: The fluent was not added yet.
+   - WAITING: The fluent is about to be added and is waiting for confirmation.
+   - ERROR: The fluent might not have been fetched due to an error.
+   - ON-HOLD: Unused state that can be set in order to defer the fluent update
+     to a later time (by switching it manually to PENDING).
+"
   (slot instance (type SYMBOL))
   (slot name (type SYMBOL))
   (multislot params (type SYMBOL) (default (create$)))
-  (slot request-id (type INTEGER))
   (slot delete (type SYMBOL) (allowed-values FALSE TRUE) (default FALSE))
+  (slot request-id (type INTEGER))
   (slot state (type SYMBOL) (allowed-values PENDING WAITING ERROR ON-HOLD) (default PENDING))
 )
 
 (deftemplate pending-pddl-numeric-fluent
+" Interface for numeric-fluents.clp
+  Assert a fact of this type in order to indicate that a numeric fluent needs
+  to be added to/removed from a pddl instance.
+  Acts as a transient layer to pddl-numeric-fluent facts to make sure the CLIPS
+  representation stays consistant with the externally managed pddl instance.
+  @slot instance: pddl instance to add the fluent to.
+  @slot name: name of the fluent.
+  @slot params: parameters of the fluent.
+  @slot value: value of the fluent.
+  Slots set automatically:
+  @slot request-id: id of the associated ros service request
+  @slot state:
+   - PENDING: The fluent was not added yet.
+   - WAITING: The fluent is about to be added and is waiting for confirmation.
+   - ERROR: The fluent might not have been fetched due to an error.
+   - ON-HOLD: Unused state that can be set in order to defer the fluent update
+     to a later time (by switching it manually to PENDING).
+"
   (slot instance (type SYMBOL))
   (slot name (type SYMBOL))
   (multislot params (type SYMBOL) (default (create$)))
@@ -206,12 +337,31 @@
 )
 
 (deftemplate pddl-fluent
+" Represents a (boolean) fluent in a pddl instance.
+  Do not retract/assert/modify facts of this type directly, rather use
+  request-pddl-fluent facts to indicate the desired change.
+  This ensures that the external pddl manager stays in sync with the CLIPS
+  model.
+  @slot instance: pddl instance to add the fluent to.
+  @slot name: name of the fluent.
+  @slot params: parameters of the fluent.
+"
   (slot instance (type SYMBOL))
   (slot name (type SYMBOL))
   (multislot params (type SYMBOL) (default (create$)))
 )
 
 (deftemplate pddl-numeric-fluent
+" Represents a numeric fluent in a pddl instance.
+  Do not retract/assert/modify facts of this type directly, rather use
+  request-pddl-numeric-fluent facts to indicate the desired change.
+  This ensures that the external pddl manager stays in sync with the CLIPS
+  model.
+  @slot instance: pddl instance to add the fluent to.
+  @slot name: name of the fluent.
+  @slot params: parameters of the fluent.
+  @slot value: value of the fluent.
+"
   (slot instance (type SYMBOL))
   (slot name (type SYMBOL))
   (multislot params (type SYMBOL) (default (create$)))
@@ -219,6 +369,12 @@
 )
 
 (deftemplate pddl-action
+" Represents a grounded pddl action in a pddl instance.
+  @slot instance: pddl instance to add the fluent to.
+  @slot name: name of the fluent.
+  @slot params: parameters of the fluent.
+  @slot state: TBD
+"
   (slot instance (type SYMBOL))
   (slot id (type SYMBOL)) ; this should be a globally unique ID
   (slot name (type SYMBOL))
