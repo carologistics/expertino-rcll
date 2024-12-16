@@ -129,12 +129,6 @@ class PddlManagerLifecycleNode(LifecycleNode):
             self.handle_add_fluent,
             callback_group=self.srv_cb_group,
         )
-        self.add_fluents_srv = self.create_service(
-            AddFluents,
-            f"{self.get_name()}/add_fluents",
-            self.handle_add_fluents,
-            callback_group=self.srv_cb_group,
-        )
         self.add_pddl_instance_srv = self.create_service(
             AddPddlInstance,
             f"{self.get_name()}/add_pddl_instance",
