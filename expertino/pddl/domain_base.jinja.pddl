@@ -1,3 +1,17 @@
+; Copyright (c) 2024 Carologistics
+;
+; Licensed under the Apache License, Version 2.0 (the "License");
+; you may not use this file except in compliance with the License.
+; You may obtain a copy of the License at
+;
+;     http://www.apache.org/licenses/LICENSE-2.0
+;
+; Unless required by applicable law or agreed to in writing, software
+; distributed under the License is distributed on an "AS IS" BASIS,
+; WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+; See the License for the specific language governing permissions and
+; limitations under the License.
+
 (define (domain workpiece_flow)
   ; standalone parser of nextflap crashes when you both have an
   ; instance of an object and a sub-object of the same type!
@@ -13,7 +27,7 @@
     base-station cap-station ring-station storage-station delivery-station - machine
     slide bs-place cs-place rs-place ss-place ds-place - place
   )
-  (:constants 
+  (:constants
     bs - base-station
     cs1 cs2 - cap-station
     rs1 rs2 - ring-station
@@ -33,21 +47,21 @@
   (:predicates
      ;; Locations of workpieces
      (at ?wp - workpiece ?p - place) ; Workpiece is at a machine side
- 
+
      ;; Workpiece tasks
      (step ?wp - workpiece ?r - task) ; Current active task
      (next-step ?wp - workpiece ?task1 - task ?task2 - task) ; Requirement order
- 
+
      ;; Machine capabilities
      (step-place ?task - task ?p - place) ; Machine can process a task
- 
+
      ;; Side availability
      (free ?p - place)
      (spawnable ?wp - workpiece)
      (usable ?i - interactable)
      (in ?m - machine ?p - place)
      (out ?m - machine ?p - place)
- 
+
      (rs-slide ?m - ring-station ?s - slide)
 
      (buffered ?m - cap-station ?c - cap)
@@ -66,4 +80,3 @@
 
 {% endblock %}
 )
-

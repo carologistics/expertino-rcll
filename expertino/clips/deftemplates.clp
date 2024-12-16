@@ -1,6 +1,16 @@
-; Copyright (C) 2024 Team Carologistics
+; Copyright (c) 2024 Carologistics
 ;
-; Licensed under GPLv2+ license, cf. LICENSE file in project root directory.
+; Licensed under the Apache License, Version 2.0 (the "License");
+; you may not use this file except in compliance with the License.
+; You may obtain a copy of the License at
+;
+;     http://www.apache.org/licenses/LICENSE-2.0
+;
+; Unless required by applicable law or agreed to in writing, software
+; distributed under the License is distributed on an "AS IS" BASIS,
+; WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+; See the License for the specific language governing permissions and
+; limitations under the License.
 
 (deftemplate game-state
   (slot state (type SYMBOL) (allowed-values INIT WAIT-START RUNNING PAUSED))
@@ -105,3 +115,32 @@
   (slot plan-id (type SYMBOL) (default UNSET))
   (slot action-id (type INTEGER))
 )
+
+
+(deftemplate service-request-meta
+  (slot service (type STRING))
+  (slot request-id (type INTEGER))
+  (slot meta (type SYMBOL))
+)
+
+(deftemplate pddl-fluent
+  (slot name (type SYMBOL))
+  (multislot params (type SYMBOL))
+  (slot instance (type SYMBOL))
+)
+
+(deftemplate pddl-numeric-fluent
+  (slot name (type SYMBOL))
+  (multislot params (type SYMBOL))
+  (slot value (type FLOAT))
+  (slot instance (type SYMBOL))
+)
+
+(deftemplate pddl-action
+  (slot id (type SYMBOL)) ; this should be a globally unique ID
+  (slot instance (type SYMBOL))
+  (slot name (type SYMBOL))
+  (multislot params (type SYMBOL))
+  (slot state (type SYMBOL)) ; initial, check-precond, precond-sat, exec-wait, exec, exec-done, effects-applied, failed final
+)
+

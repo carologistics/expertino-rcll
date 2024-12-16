@@ -1,4 +1,18 @@
-{% extends "domain.jinja.pddl" %}
+; Copyright (c) 2024 Carologistics
+;
+; Licensed under the Apache License, Version 2.0 (the "License");
+; you may not use this file except in compliance with the License.
+; You may obtain a copy of the License at
+;
+;     http://www.apache.org/licenses/LICENSE-2.0
+;
+; Unless required by applicable law or agreed to in writing, software
+; distributed under the License is distributed on an "AS IS" BASIS,
+; WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+; See the License for the specific language governing permissions and
+; limitations under the License.
+
+{% extends "domain_base.jinja.pddl" %}
 {% block actions %}
    ;; Dispense a workpiece to the initial location
    (:durative-action bs-dispense
@@ -44,7 +58,7 @@
        (at end (not (free ?p)))
      )
    )
- 
+
    ;; Transport a workpiece from one machine side to another
    (:durative-action transport
      :parameters (?wp - workpiece ?from - place ?to - place ?r - task)
@@ -66,7 +80,7 @@
        (at end (not (at ?wp ?from)))
      )
    )
- 
+
    ;; Process a workpiece for its current task
    (:durative-action cs-mount-cap
      :parameters (?wp - product ?m - cap-station ?in - place ?out - place ?task - cap ?next - task)
@@ -195,7 +209,7 @@
        (at end (not (at ?wp ?in)))
      )
    )
- 
+
    (:durative-action rs-pay
      :parameters (?wp - product ?task - ring ?pay - payment ?m - ring-station ?slide - slide)
      :duration (= ?duration 0.5)
