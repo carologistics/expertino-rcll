@@ -16,10 +16,11 @@
   (:domain workpiece-flow)
 
    (:objects
-     wp1 wp2 - product
      pay1 pay2 pay3 pay4 pay5 pay6 pay7 pay8 pay9 pay10 pay11 pay12 - payment
      grey1 grey2 grey3 - carrier
      black1 black2 black3 - carrier
+{% block objects %}
+{% endblock %}
    )
 
    (:init
@@ -52,9 +53,6 @@
      (free ss-output)
      (free ds-input)
 
-
-     (spawnable wp1)
-     (spawnable wp2)
      (spawnable pay1)
 
      (next-payment pay1 pay2)
@@ -125,22 +123,6 @@
     (next-shelf black1 black2)
     (next-shelf black2 black3)
 
-    (step wp1 base-red)
-    (next-step wp1 base-red ring-blue1)
-    (next-step wp1 ring-blue1 ring-yellow2)
-    (next-step wp1 ring-yellow2 ring-blue3)
-    (next-step wp1 ring-blue3 cap-grey)
-    (next-step wp1 cap-grey deliver)
-    (next-step wp1 deliver done)
-
-    (step wp2 base-black)
-    (next-step wp2 base-black ring-green1)
-    (next-step wp2 ring-green1 ring-yellow2)
-    (next-step wp2 ring-yellow2 ring-orange3)
-    (next-step wp2 ring-orange3 cap-black)
-    (next-step wp2 cap-black deliver)
-    (next-step wp2 deliver done)
-
     (step-place dispose rs1-slide)
     (step-place dispose rs2-slide)
 
@@ -174,19 +156,14 @@
     (usable rs2)
     (usable ss)
     (usable ds)
+{% block init %}
+{% endblock %}
   )
 
   (:goal
     (and
-      (step wp1 done)
-      ;(at grey3 rs1-slide)
-      ;(buffered cs1 cap-grey)
-      ;(buffered cs2 cap-black)
-      ;(= (pay-count rs1) 1)
-      ;(= (pay-count rs2) 0)
-      ;(at wp2 rs1-input)
-      ;(at pay2 rs1-slide)
-      (step wp2 done)
+{% block goals %}
+{% endblock %}
     )
   )
 )
