@@ -1,4 +1,4 @@
-(deftemplate planner-call
+(deftemplate pddl-planner-call
   (slot context (type SYMBOL))
   (slot uuid (type STRING))
   (slot status (type SYMBOL) (allowed-values PENDING UNKNOWN ACCEPTED EXECUTING CANCELING SUCCEEDED CANCELED ABORTED) (default PENDING))
@@ -18,23 +18,9 @@
   (return UNKNOWN)
 )
 
-(defrule plan-main-problem
-  (confval (path "/pddl/manager_node") (value ?node))
-  (confval (path "/pddl/problem_instance") (value ?instance))
-  (expertino-msgs-plan-temporal-client (server ?server&:(eq ?server (str-cat ?node "/temp_plan"))))
-  (not (planner-call (status PENDING)))
-  (not (test-plan-triggered))
-  =>
-  (bind ?goal (expertino-msgs-plan-temporal-goal-create))
-  (assert (planner-call (context test-plan) (goal ?goal)))
-  (expertino-msgs-plan-temporal-goal-set-field ?goal "pddl_instance" ?instance)
-  (expertino-msgs-plan-temporal-send-goal ?goal ?server)
-  (assert (test-plan-triggered))
-)
-
-(defrule plan-update-status
+(defrule plan-start-status-checks
   ?gr-f <- (expertino-msgs-plan-temporal-goal-response (server ?server) (client-goal-handle-ptr ?cgh-ptr))
-  ?pc-f <- (planner-call (status PENDING))
+  ?pc-f <- (pddl-planner-call (status PENDING))
   =>
   (bind ?status (expertino-msgs-plan-temporal-client-goal-handle-get-status ?cgh-ptr))
   (bind ?uuid (expertino-msgs-plan-temporal-client-goal-handle-get-goal-id ?cgh-ptr))
@@ -45,26 +31,33 @@
   (printout green "got goal response " (client-status-to-sym ?status) crlf)
 )
 
-(defrule plan-finish-plan
-  ?pc <- (planner-call (status ~PENDING) (client-goal-handle ?cgh-ptr))
+(defrule plan-update-plan-status
+  ?pc <- (pddl-planner-call (status ?status&: (member$ ?status (create$ UNKNOWN ACCEPTED EXECUTING CANCELING))) (client-goal-handle ?cgh-ptr))
   (time ?) ; poll the update
   =>
-  (bind ?status (expertino-msgs-plan-temporal-client-goal-handle-get-status ?cgh-ptr))
-  (modify ?pc (status (client-status-to-sym ?status)))
+  (bind ?new-status (expertino-msgs-plan-temporal-client-goal-handle-get-status ?cgh-ptr))
+  (bind ?new-status (client-status-to-sym ?new-status))
+  (if (neq ?status ?new-status) then
+    (modify ?pc (status ?new-status))
+  )
 )
 
 (defrule plan-get-result
-  ?pc-f <- (planner-call (client-goal-handle ?cgh-ptr) (goal ?goal-ptr) (uuid ?goal-id))
+  ?pc-f <- (pddl-planner-call (client-goal-handle ?cgh-ptr) (goal ?goal-ptr) (uuid ?goal-id))
   ?wr-f <- (expertino-msgs-plan-temporal-wrapped-result (server "/pddl_manager/temp_plan") (goal-id ?goal-id) (code SUCCEEDED) (result-ptr ?res-ptr))
   =>
   (bind ?plan-found (expertino-msgs-plan-temporal-result-get-field ?res-ptr "success"))
   (if ?plan-found then
     (bind ?plan (expertino-msgs-plan-temporal-result-get-field ?res-ptr "actions"))
 	(foreach ?action ?plan
-	(bind ?instance (expertino-msgs-timed-plan-action-get-field ?action "pddl_instance"))
-	(bind ?name (expertino-msgs-timed-plan-action-get-field ?action "name"))
+	(bind ?instance (sym-cat (expertino-msgs-timed-plan-action-get-field ?action "pddl_instance")))
+	(bind ?name (sym-cat (expertino-msgs-timed-plan-action-get-field ?action "name")))
 	(bind ?args (expertino-msgs-timed-plan-action-get-field ?action "args"))
-	(assert (pddl-action (id (gensym*)) (instance ?instance) (name ?name) (params ?args) (state INITIAL)))
+	(bind ?arg-syms (create$))
+	(foreach ?arg ?args
+	  (bind ?arg-syms (create$ ?arg-syms (sym-cat ?arg)))
+	)
+	(assert (pddl-action (id (gensym*)) (instance ?instance) (name ?name) (params ?arg-syms) (state INITIAL)))
 	)
   )
 	(expertino-msgs-plan-temporal-result-destroy ?res-ptr)
