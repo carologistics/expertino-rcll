@@ -14,7 +14,7 @@
 
 (defrule refbox-recv-GameState
   ?pb-msg <- (protobuf-msg (type "llsf_msgs.GameState") (ptr ?p))
-  ?gt <- (game-time ?old-game-time)
+;  ?gt <- (game-time ?old-game-time)
   ?gs <- (game-state
     (points ?points)
     (points-other ?points-other)
@@ -27,11 +27,11 @@
   (bind ?new-team-other ?team-other)
   (bind ?new-points ?points)
   (bind ?new-points-other ?points-other)
-  (retract ?gt)
+;  (retract ?gt)
   (bind ?time (pb-field-value ?p "game_time"))
   (bind ?sec (pb-field-value ?time "sec"))
   (bind ?nsec (pb-field-value ?time "nsec"))
-  (assert (game-time (+ ?sec (/  ?nsec 1000000))))
+;  (assert (game-time (+ ?sec (/  ?nsec 1000000))))
   (if (and (pb-has-field ?p "team_cyan")
            (eq (pb-field-value ?p "team_cyan") ?team))
     then 

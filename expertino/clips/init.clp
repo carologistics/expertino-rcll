@@ -14,18 +14,17 @@
   (assert (domain-loaded))
 )
 
-; (defrule init-load-initial-facts
-; " Load all initial domain facts on startup of the game "
-;   (domain-loaded)
-;   =>
-;   (printout info "Initializing worldmodel" crlf)
-;   (bind ?team-color MAGENTA)
-;   (foreach ?robot (create$ ROBOT1 ROBOT2 ROBOT3)
-;     (assert
-;       (domain-fact (name at) (param-values ?robot START INPUT))
-;       (domain-object (name ?robot) (type robot))
-;     )
-;   )
+ (defrule init-load-initial-facts
+ " Load all initial facts on startup of the game "
+   (domain-loaded)
+   (confval (path "/game/parameters/rcll/team_name") (value ?team-name))
+   =>
+   (printout info "Initializing game-state and robot facts" crlf)
+   (foreach ?robot (create$ ROBOT1 ROBOT2 ROBOT3)
+     (assert
+       (robot (name ?robot) (number ?robot-index) (state ACTIVE)) 
+     )
+   )
 ;   (assert
 ;     (domain-object (name INPUT) (type mps-side))
 ;     (domain-object (name OUTPUT) (type mps-side))
@@ -35,7 +34,7 @@
 ;     (domain-object (name M-BS) (type mps))
 ;     (domain-object (name C-BS) (type mps))
 ;   )
-;   (assert (game-state (team "Carologistics")))
+   (assert (game-state (team ?team-name)))
 ;   (assert (game-time 0.))
-;   (assert (domain-facts-loaded))
-; )
+   (assert (domain-facts-loaded))
+ )

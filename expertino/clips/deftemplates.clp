@@ -89,34 +89,6 @@
   (slot name (type SYMBOL) (default ?NONE))
 )
 
-
-(deftemplate rcll-agent-task
-  (slot task-id (type INTEGER))
-  (slot robot (type SYMBOL))
-  (slot robot-id (type INTEGER) (allowed-values  1 2 3) (default 1))
-  (slot task-type (type SYMBOL)
-    (allowed-values UNSET Move Retrieve Deliver BufferStation ExploreWaypoint)
-    (default UNSET))
-  (slot machine (type SYMBOL)
-   (allowed-values UNSET
-    C-BS C-CS1 C-CS2 C-RS1 C-RS2 C-DS C-SS
-    M-BS M-CS1 M-CS2 M-RS1 M-RS2 M-DS M-SS
-   )
-   (default UNSET))
-  (slot order (type SYMBOL) (default UNSET))
-  (slot side (type SYMBOL)
-    (allowed-values UNSET INPUT OUTPUT LEFT MIDDLE RIGHT SLIDE)
-    (default UNSET))
-  (slot waypoint (type SYMBOL) (default UNSET))
-  (slot workpiece (type SYMBOL) (default UNSET))
-  (multislot workpiece-colors (type SYMBOL) (default (create$)))
-  (slot outcome (type SYMBOL) (allowed-values UNKNOWN FAILED CANCELLED SUCCEEDED))
-  (slot goal-id (type SYMBOL) (default UNSET))
-  (slot plan-id (type SYMBOL) (default UNSET))
-  (slot action-id (type INTEGER))
-)
-
-
 (deftemplate service-request-meta
   (slot service (type STRING))
   (slot request-id (type INTEGER))
@@ -396,7 +368,6 @@
   (slot planned-duration (type FLOAT))
 )
 
-
 (deftemplate pddl-action-apply-effect
 " Apply the effect of a grounded pddl action.
   @slot instance: pddl instance belonging to the action.
@@ -455,4 +426,46 @@
   Can be extended later in case different kind of planning filters should be used or if planning is used in varying contexts.
 "
   (multislot action-names (type SYMBOL) (default (create$ )))
+)
+
+(deftemplate executor
+  (slot id (type SYMBOL))
+  (slot worker (type SYMBOL))
+  (slot interface (type SYMBOL))
+  (slot pddl-action-id (type SYMBOL))
+  (slot state (type SYMBOL) (allowed-values INIT ASSIGNED REQUESTED ACCEPTED ABORTED CANCELLED SUCCEEDED))
+  (multislot param-names (type SYMBOL))
+  (multislot param-values (type SYMBOL))
+)
+
+(deftemplate rcll-agent-task
+  (slot task-id (type INTEGER))
+  (slot task-name (type SYMBOL))
+  (slot robot (type SYMBOL))
+  (slot task-type (type SYMBOL)
+    (allowed-values UNSET Move Retrieve Deliver BufferStation ExploreWaypoint)
+    (default UNSET))
+  (slot machine (type SYMBOL)
+   (allowed-values UNSET
+    C-BS C-CS1 C-CS2 C-RS1 C-RS2 C-DS C-SS
+    M-BS M-CS1 M-CS2 M-RS1 M-RS2 M-DS M-SS
+   )
+   (default UNSET))
+  (slot order (type SYMBOL) (default UNSET))
+  (slot side (type SYMBOL)
+    (allowed-values UNSET INPUT OUTPUT LEFT MIDDLE RIGHT SLIDE)
+    (default UNSET))
+  (slot waypoint (type SYMBOL) (default UNSET))
+  (slot workpiece (type SYMBOL) (default UNSET))
+  (multislot workpiece-colors (type SYMBOL) (default (create$)))
+  (slot outcome (type SYMBOL) (allowed-values UNKNOWN FAILED CANCELLED SUCCEEDED))
+  (slot executor-id (type SYMBOL))
+)
+
+(deftemplate agent-task-list
+  (slot id (type SYMBOL))
+  (slot pddl-action-id (type SYMBOL))
+  (slot executor-id (type SYMBOL))
+  (multislot tasks (type SYMBOL) (default (create$)))
+  (slot current-task-id (type INTEGER))
 )
