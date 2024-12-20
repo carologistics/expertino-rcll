@@ -115,8 +115,12 @@
 )
 
 (defrule pddl-fluents-all-requests-done
+  (pddl-manager (node ?node))
   ?pi-f <- (pddl-instance (name ?instance) (busy-with FLUENTS))
-  (not (service-request-meta (meta ?instance)))
+  (ros-msgs-client (service ?add-s&:(eq ?add-s (str-cat ?node "/add_fluents"))) (type ?add-type))
+  (ros-msgs-client (service ?rm-s&:(eq ?rm-s (str-cat ?node "/rm_fluents"))) (type ?rm-type))
+  (not (service-request-meta (service ?add-s) (meta ?instance)))
+  (not (service-request-meta (service ?rm-s) (meta ?instance)))
   =>
   (modify ?pi-f (busy-with FALSE))
 )

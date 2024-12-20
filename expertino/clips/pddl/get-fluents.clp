@@ -1,7 +1,7 @@
 (defrule pddl-request-get-fluents
   (pddl-get-fluents (instance ?instance) (state PENDING))
   (pddl-manager (node ?node))
-  (pddl-instance (name ?instance) (state LOADED))
+  ?pi-f <- (pddl-instance (name ?instance) (state LOADED) (busy-with FALSE))
   (ros-msgs-client (service ?s&:(eq ?s (str-cat ?node "/get_fluents"))) (type ?type))
   (not (service-request-meta (service ?s)))
   (time ?any-time) ; used to continuously attempt to request the service until success
@@ -10,6 +10,7 @@
   (ros-msgs-set-field ?new-req "pddl_instance" ?instance)
   (bind ?id (ros-msgs-async-send-request ?new-req ?s))
   (if ?id then
+    (modify ?pi-f (busy-with GET-FLUENTS))
     (assert (service-request-meta (service ?s) (request-id ?id) (meta ?instance)))
    else
     (printout error "Sending of request failed, is the service " ?s " running?" crlf)
@@ -21,11 +22,12 @@
 " Get response, read it and delete."
   ?get-facts-f <- (pddl-get-fluents (instance ?instance) (state PENDING))
   (pddl-manager (node ?node))
-  (pddl-instance (name ?instance) (state LOADED))
+  ?pi-f <- (pddl-instance (name ?instance) (busy-with GET-FLUENTS))
   (ros-msgs-client (service ?s&:(eq ?s (str-cat ?node "/get_fluents"))) (type ?type))
   ?msg-f <- (ros-msgs-response (service ?s) (msg-ptr ?ptr) (request-id ?id))
   ?req-meta <- (service-request-meta (service ?s) (request-id ?id) (meta ?instance))
 =>
+  (modify ?pi-f (busy-with FALSE))
   (bind ?success (ros-msgs-get-field ?ptr "success"))
   (bind ?error (ros-msgs-get-field ?ptr "error"))
   (if ?success then
@@ -52,7 +54,7 @@
 
 (defrule pddl-request-get-functions
   (pddl-get-numeric-fluents (instance ?instance) (state PENDING))
-  (pddl-instance (name ?instance) (state LOADED))
+  ?pi-f <- (pddl-instance (name ?instance) (state LOADED) (busy-with FALSE))
   (pddl-manager (node ?node))
   (ros-msgs-client (service ?s&:(eq ?s (str-cat ?node "/get_functions"))) (type ?type))
   (not (service-request-meta (service ?s)))
@@ -61,6 +63,7 @@
   (ros-msgs-set-field ?new-req "pddl_instance" "rcll")
   (bind ?id (ros-msgs-async-send-request ?new-req ?s))
   (if ?id then
+    (modify ?pi-f (busy-with GET-NUMERIC-FLUENTS))
     (assert (service-request-meta (service ?s) (request-id ?id) (meta ?instance)))
    else
     (printout error "Sending of request failed, is the service " ?s " running?" crlf)
@@ -72,11 +75,12 @@
 " Get response, read it and delete."
   ?get-facts-f <- (pddl-get-numeric-fluents (instance ?instance) (state PENDING))
   (pddl-manager (node ?node))
-  (pddl-instance (name ?instance) (state LOADED))
+  ?pi-f <- (pddl-instance (name ?instance) (busy-with GET-NUMERIC-FLUENTS))
   (ros-msgs-client (service ?s&:(eq ?s (str-cat ?node "/get_functions"))) (type ?type))
   ?msg-f <- (ros-msgs-response (service ?s) (msg-ptr ?ptr) (request-id ?id))
   ?req-meta <- (service-request-meta (service ?) (request-id ?id) (meta ?instance))
 =>
+  (modify ?pi-f (busy-with FALSE))
   (bind ?success (ros-msgs-get-field ?ptr "success"))
   (bind ?error (ros-msgs-get-field ?ptr "error"))
   (if ?success then

@@ -115,7 +115,11 @@
 
 (defrule pddl-objects-all-requests-done
   ?pi-f <- (pddl-instance (name ?instance) (busy-with OBJECTS))
-  (not (service-request-meta (meta ?instance)))
+  (pddl-manager (node ?node))
+  (ros-msgs-client (service ?add-s&:(eq ?add-s (str-cat ?node "/add_objects"))) (type ?add-type))
+  (ros-msgs-client (service ?rm-s&:(eq ?rm-s (str-cat ?node "/rm_objects"))) (type ?rm-type))
+  (not (service-request-meta (service ?add-s) (meta ?instance)))
+  (not (service-request-meta (service ?rm-s) (meta ?instance)))
   =>
   (modify ?pi-f (busy-with FALSE))
 )
