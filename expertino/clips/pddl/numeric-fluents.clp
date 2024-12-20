@@ -1,4 +1,5 @@
 (defrule pending-function-send-request
+  (declare (salience ?*PRIORITY-PDDL-FLUENTS*))
   (pending-pddl-numeric-fluent (instance ?instance) (state PENDING))
   (not (pending-pddl-object (instance ?instance)))
   ?pi-f <- (pddl-instance (name ?instance) (state LOADED) (busy-with FALSE))
@@ -36,7 +37,6 @@
 (defrule pending-set-functions-process-response
 " Process a response to the /set_functions service by removing the respective pddl-numeric-fluent facts and clean up the associated pending facts afterwards.
 "
-  (declare (salience ?*PRIORITY-PDDL-FLUENTS*))
   (pddl-manager (node ?node))
   ?pi-f <- (pddl-instance (name ?instance) (busy-with FLUENTS))
   (ros-msgs-client (service ?s&:(eq ?s (str-cat ?node "/add_fluents"))))
