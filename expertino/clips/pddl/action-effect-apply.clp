@@ -9,7 +9,8 @@
 (defrule action-get-action-effect-request
   (declare (salience ?*PRIORITY-PDDL-APPLY-EFFECT*))
   (pddl-manager (node ?node))
-  ?apply-effect-f <- (pddl-action-apply-effect (instance ?instance) (name ?name) (params $?params) (state PENDING))
+  ?apply-effect-f <- (pddl-action-apply-effect (instance ?instance) (name ?name)
+    (params $?params) (state PENDING))
   ?pi-f <- (pddl-instance (name ?instance) (state LOADED) (busy-with FALSE))
   (ros-msgs-client (service ?s&:(eq ?s (str-cat ?node "/get_action_effects"))) (type ?type))
   (not (service-request-meta (service ?s) (meta ?instance)))
@@ -36,7 +37,8 @@
   (declare (salience ?*PRIORITY-PDDL-APPLY-EFFECT*))
   (pddl-manager (node ?node))
   ?pi-f <- (pddl-instance (name ?instance) (busy-with FALSE))
-  ?apply-effect-f <- (pddl-action-apply-effect (instance ?instance) (name ?name) (params $?params) (state START-EFFECT-APPLIED))
+  ?apply-effect-f <- (pddl-action-apply-effect (instance ?instance) (name ?name)
+    (params $?params) (state START-EFFECT-APPLIED))
   =>
   (modify ?pi-f (busy-with ACTION-EFFECTS))
 )
@@ -44,7 +46,9 @@
 (defrule action-get-action-effect
   (pddl-manager (node ?node))
   ?pi-f <- (pddl-instance (name ?instance) (busy-with ACTION-EFFECTS))
-  ?apply-effect-f <- (pddl-action-apply-effect (instance ?instance) (name ?name) (params $?params) (state ?state&:(member$ ?state (create$ WAITING START-EFFECT-APPLIED))) (effect-type ?eff-type))
+  ?apply-effect-f <- (pddl-action-apply-effect (instance ?instance) (name ?name)
+    (params $?params) (effect-type ?eff-type)
+    (state ?state&:(member$ ?state (create$ WAITING START-EFFECT-APPLIED))))
   (ros-msgs-client (service ?s&:(eq ?s (str-cat ?node "/get_action_effects"))) (type ?type))
   ?msg-f <- (ros-msgs-response (service ?s) (msg-ptr ?ptr) (request-id ?id))
   ?req-meta <- (service-request-meta (service ?s) (request-id ?id) (meta ?action-id))
@@ -79,13 +83,15 @@
         )
         (bind ?value (ros-msgs-get-field ?fun "value"))
         (if (not (do-for-fact ((?pf pddl-numeric-fluent)) (and (eq ?name ?pf:name) (eq ?pf:params ?arg-syms))
-          (assert (pending-pddl-numeric-fluent (name ?name) (params ?arg-syms) (value (pddl-apply-op ?op ?value ?pf:value)) (state PENDING) (instance ?instance)))
+          (assert (pending-pddl-numeric-fluent (name ?name) (params ?arg-syms)
+            (value (pddl-apply-op ?op ?value ?pf:value)) (state PENDING) (instance ?instance)))
         )) then
-	      (printout error "pddl-numeric-fluent from action effect unknown, init to 0" crlf)
-	      (assert (pddl-numeric-fluent (instance ?instance) (name ?name) (params ?arg-syms) (value 0.0)))
-          (assert (pending-pddl-numeric-fluent (name ?name) (params ?arg-syms) (value (pddl-apply-op ?op 0.0 ?value)) (state PENDING) (instance ?instance)))
-	    ; TODO: pending numeric effects need the operator
-	    ; TODO: they also dont support values dependent onf other functions
+          (printout error "pddl-numeric-fluent from action effect unknown, init to 0" crlf)
+          (assert (pddl-numeric-fluent (instance ?instance) (name ?name) (params ?arg-syms) (value 0.0)))
+          (assert (pending-pddl-numeric-fluent (name ?name) (params ?arg-syms)
+            (value (pddl-apply-op ?op 0.0 ?value)) (state PENDING) (instance ?instance)))
+        ; TODO: pending numeric effects need the operator
+        ; TODO: they also dont support values dependent on other functions
         )
       )
       (ros-msgs-destroy-message ?function-msg)
@@ -104,7 +110,8 @@
         )
         (bind ?time-point (sym-cat (ros-msgs-get-field ?fluent "time_point")))
         (bind ?value (ros-msgs-get-field ?fluent "value"))
-        (assert (pending-pddl-fluent (name ?name) (params ?arg-syms) (delete (not ?value)) (state PENDING) (instance ?instance)))
+        (assert (pending-pddl-fluent (name ?name) (params ?arg-syms)
+          (delete (not ?value)) (state PENDING) (instance ?instance)))
       ); endif target-time-point matches effect
       (ros-msgs-destroy-message ?fluent-msg)
     ) 
