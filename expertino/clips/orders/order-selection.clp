@@ -73,3 +73,8 @@
   (assert (planned-for-main))
 )
 
+(defrule action-apply-effect-test
+  (pddl-action (instance ?instance) (name carrier-to-input) (params grey1 grey2 cap-grey cs1 cs1-input))
+  =>
+  (assert (pddl-action-apply-effect (instance ?instance) (name carrier-to-input) (params grey1 grey2 cap-grey cs1 cs1-input) (effect-type ALL)))
+)

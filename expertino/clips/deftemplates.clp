@@ -255,7 +255,7 @@
   (slot problem (type STRING))
   (slot directory (type STRING))
   (slot state (type SYMBOL) (allowed-values PENDING LOADED ERROR) (default PENDING))
-  (slot busy-with (type SYMBOL) (allowed-values FALSE OBJECTS FLUENTS ACTION-EFFECTS CLEAR-GOALS SET-GOALS CHECK-CONDITIONS GET-FLUENTS) (default FALSE))
+  (slot busy-with (type SYMBOL) (allowed-values FALSE OBJECTS FLUENTS ACTION-EFFECTS CLEAR-GOALS SET-GOALS CHECK-CONDITIONS GET-FLUENTS GET-NUMERIC-FLUENTS) (default FALSE))
   (slot error (type STRING))
 )
 
@@ -372,9 +372,9 @@
 
 (deftemplate pddl-action
 " Represents a grounded pddl action in a pddl instance.
-  @slot instance: pddl instance to add the fluent to.
-  @slot name: name of the fluent.
-  @slot params: parameters of the fluent.
+  @slot instance: pddl instance belonging to the action.
+  @slot name: name of the action.
+  @slot params: parameters of the  action.
   @slot state: TBD
 "
   (slot instance (type SYMBOL))
@@ -382,5 +382,21 @@
   (slot name (type SYMBOL))
   (multislot params (type SYMBOL) (default (create$)))
   (slot state (type SYMBOL)) ; initial, check-precond, precond-sat, exec-wait, exec, exec-done, effects-applied, failed final
+)
+
+
+(deftemplate pddl-action-apply-effect
+" Apply the effect of a grounded pddl action.
+  @slot instance: pddl instance belonging to the action.
+  TODO: should this reference a pddl-action or copy the values like now?
+  @slot name: name of the action.
+  @slot params: parameters of the action.
+  @slot state: TBD
+"
+  (slot instance (type SYMBOL))
+  (slot name (type SYMBOL))
+  (multislot params (type SYMBOL) (default (create$)))
+  (slot effect-type (type SYMBOL) (allowed-values ALL START END) (default ALL))
+  (slot state (type SYMBOL) (allowed-values PENDING WAITING START-EFFECT-APPLIED ERROR) (default PENDING))
 )
 
