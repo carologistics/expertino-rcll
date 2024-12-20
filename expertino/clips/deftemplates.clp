@@ -247,13 +247,15 @@
    - PENDING: The instance was not registered yet.
    - LOADED: The instance is loaded and ready for usage.
    - ERROR: The fluents were not fetched due to an error.
-  @slot error
+  @busy-with: Indicates the current operation
+  @slot error: provide information on encountered errors.
 "
   (slot name (type SYMBOL))
   (slot domain (type STRING))
   (slot problem (type STRING))
   (slot directory (type STRING))
   (slot state (type SYMBOL) (allowed-values PENDING LOADED ERROR) (default PENDING))
+  (slot busy-with (type SYMBOL) (allowed-values FALSE OBJECTS FLUENTS ACTION-EFFECTS CLEAR-GOALS SET-GOALS CHECK-CONDITIONS GET-FLUENTS) (default FALSE))
   (slot error (type STRING))
 )
 

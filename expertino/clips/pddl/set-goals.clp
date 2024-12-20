@@ -1,9 +1,8 @@
 (defrule pddl-request-set-goals
+  (declare (salience ?*PRIORITY-PDDL-SET-GOALS*))
   (pddl-set-goals (instance ?instance) (state PENDING))
   (pddl-manager (node ?node))
-  (not (pending-pddl-object (instance ?instance) (state PENDING|WAITING)))
-  (not (pddl-clear-goals (instance ?instance) (state PENDING)))
-  (pddl-instance (name ?instance) (state LOADED))
+  ?pi-f <- (pddl-instance (name ?instance) (state LOADED) (busy-with FALSE))
   (ros-msgs-client (service ?s&:(eq ?s (str-cat ?node "/set_goals"))) (type ?type))
   (not (service-request-meta (service ?s)))
   (time ?any-time) ; used to continuously attempt to request the service until success
@@ -31,6 +30,7 @@
   (ros-msgs-set-field ?new-req "functions" ?numeric-fluent-goal-msgs)
   (bind ?id (ros-msgs-async-send-request ?new-req ?s))
   (if ?id then
+    (modify ?pi-f (busy-with SET-GOALS))
     (assert (service-request-meta (service ?s) (request-id ?id) (meta ?instance)))
    else
     (printout error "Sending of request failed, is the service " ?s " running?" crlf)
@@ -48,11 +48,12 @@
 " Get response, read it and delete."
   ?set-goals-f <- (pddl-set-goals (instance ?instance) (state PENDING))
   (pddl-manager (node ?node))
-  (pddl-instance (name ?instance) (state LOADED))
+  ?pi-f <- (pddl-instance (name ?instance) (state LOADED) (busy-with SET-GOALS))
   (ros-msgs-client (service ?s&:(eq ?s (str-cat ?node "/set_goals"))) (type ?type))
   ?msg-f <- (ros-msgs-response (service ?s) (msg-ptr ?ptr) (request-id ?id))
   ?req-meta <- (service-request-meta (service ?s) (request-id ?id) (meta ?instance))
 =>
+  (modify ?pi-f (busy-with FALSE))
   (bind ?success (ros-msgs-get-field ?ptr "success"))
   (bind ?error (ros-msgs-get-field ?ptr "error"))
   (if ?success then

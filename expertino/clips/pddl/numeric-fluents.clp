@@ -1,7 +1,7 @@
 (defrule pending-function-send-request
   (pending-pddl-numeric-fluent (instance ?instance) (state PENDING))
   (not (pending-pddl-object (instance ?instance)))
-  (pddl-instance (name ?instance) (state LOADED))
+  ?pi-f <- (pddl-instance (name ?instance) (state LOADED) (busy-with FALSE))
   (pddl-manager (node ?node))
   (ros-msgs-client (service ?s&:(eq ?s (str-cat ?node "/set_functions"))) (type ?type))
   (not (service-request-meta (service ?s) (meta ?instance)))
@@ -21,6 +21,7 @@
     (ros-msgs-set-field ?new-req "functions" ?function-msgs)
     (bind ?id (ros-msgs-async-send-request ?new-req ?s))
     (if ?id then
+      (modify ?pi-f (busy-with FLUENTS))
       (assert (service-request-meta (service ?s) (request-id ?id) (meta (sym-cat ?instance))))
      else
       (printout error "Sending of request failed, is the service " ?s " running?" crlf)
@@ -35,11 +36,14 @@
 (defrule pending-set-functions-process-response
 " Process a response to the /set_functions service by removing the respective pddl-numeric-fluent facts and clean up the associated pending facts afterwards.
 "
+  (declare (salience ?*PRIORITY-PDDL-FLUENTS*))
   (pddl-manager (node ?node))
+  ?pi-f <- (pddl-instance (name ?instance) (busy-with FLUENTS))
   (ros-msgs-client (service ?s&:(eq ?s (str-cat ?node "/add_fluents"))))
   ?req-f <- (service-request-meta (service ?s) (meta ?instance) (request-id ?id))
   ?msg-f <- (ros-msgs-response (service ?s) (msg-ptr ?ptr) (request-id ?id))
   =>
+  (modify ?pi-f (busy-with FALSE))
   (bind ?success (ros-msgs-get-field ?ptr "success"))
   (bind ?error (ros-msgs-get-field ?ptr "error"))
   (if ?success then

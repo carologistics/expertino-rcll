@@ -1,4 +1,5 @@
 (defrule pddl-request-load-instance
+  (declare (salience ?*PRIORITY-PDDL-INSTANCES*))
   (pddl-instance (state PENDING) (name ?instance) (domain ?domain) (problem ?problem) (directory ?dir))
   (pddl-manager (node ?node))
   (ros-msgs-client (service ?s&:(eq ?s (str-cat ?node "/add_pddl_instance"))) (type ?type))

@@ -1,12 +1,14 @@
 (defrule pending-objects-send-request
+  (declare (salience ?*PRIORITY-PDDL-OBJECTS*))
   (pending-pddl-object (instance ?instance) (state PENDING))
-  (pddl-instance (name ?instance) (state LOADED))
+  ?pi-f <- (pddl-instance (name ?instance) (state LOADED) (busy-with FALSE))
   (pddl-manager (node ?node))
   (ros-msgs-client (service ?add-s&:(eq ?add-s (str-cat ?node "/add_objects"))) (type ?add-type))
   (ros-msgs-client (service ?rm-s&:(eq ?rm-s (str-cat ?node "/rm_objects"))) (type ?rm-type))
   (not (service-request-meta (service ?add-s) (meta ?instance)))
   (not (service-request-meta (service ?rm-s) (meta ?instance)))
   =>
+  (bind ?request-sent FALSE)
   (bind ?object-add-msgs (create$))
   (bind ?object-rm-msgs (create$))
   (delayed-do-for-all-facts ((?ppo pending-pddl-object)) (and (eq ?ppo:state PENDING) (eq ?ppo:instance ?instance))
@@ -26,6 +28,7 @@
     (ros-msgs-set-field ?new-req "objects" ?object-add-msgs)
     (bind ?add-id (ros-msgs-async-send-request ?new-req ?add-s))
     (if ?add-id then
+      (bind ?request-sent TRUE)
       (assert (service-request-meta (service ?add-s) (request-id ?add-id) (meta ?instance)))
      else
       (printout error "Sending of request failed, is the service " ?add-s " running?" crlf)
@@ -40,6 +43,7 @@
     (ros-msgs-set-field ?new-req "objects" ?object-rm-msgs)
     (bind ?rm-id (ros-msgs-async-send-request ?new-req ?rm-s))
     (if ?rm-id then
+      (bind ?request-sent TRUE)
       (assert (service-request-meta (service ?rm-s) (request-id ?rm-id) (meta ?instance)))
      else
       (printout error "Sending of request failed, is the service " ?rm-s " running?" crlf)
@@ -48,6 +52,9 @@
     (foreach ?msg ?object-add-msgs
       (ros-msgs-destroy-message ?msg)
     )
+  )
+  (if ?request-sent then
+    (modify ?pi-f (busy-with OBJECTS))
   )
 )
 
@@ -104,4 +111,11 @@
   (ros-msgs-destroy-message ?ptr)
   (retract ?msg-f)
   (retract ?req-f)
+)
+
+(defrule pddl-objects-all-requests-done
+  ?pi-f <- (pddl-instance (name ?instance) (busy-with OBJECTS))
+  (not (service-request-meta (meta ?instance)))
+  =>
+  (modify ?pi-f (busy-with FALSE))
 )
