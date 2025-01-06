@@ -370,6 +370,13 @@
   (slot value (type FLOAT))
 )
 
+(deftemplate pddl-plan
+  (slot id (type SYMBOL))
+  (slot instance (type SYMBOL))
+  (slot duration (type FLOAT))
+  (slot state (type SYMBOL) (allowed-values PENDING EXECUTING) (default PENDING))
+)
+
 (deftemplate pddl-action
 " Represents a grounded pddl action in a pddl instance.
   @slot instance: pddl instance belonging to the action.
@@ -379,9 +386,13 @@
 "
   (slot instance (type SYMBOL))
   (slot id (type SYMBOL)) ; this should be a globally unique ID
+  (slot plan (type SYMBOL))
   (slot name (type SYMBOL))
   (multislot params (type SYMBOL) (default (create$)))
   (slot state (type SYMBOL)) ; initial, check-precond, precond-sat, exec-wait, exec, exec-done, effects-applied, failed final
+  (slot plan-order-class (type INTEGER))
+  (slot planned-start-time (type FLOAT))
+  (slot planned-duration (type FLOAT))
 )
 
 
