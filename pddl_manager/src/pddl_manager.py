@@ -654,6 +654,12 @@ class PddlManagerLifecycleNode(LifecycleNode):
       response.actions = []
       if result:
         response.success = True
+        self.get_logger().info("Successfully planned")
+
+        delta_threshold = 0.1
+        last_time = 0.0
+        equiv_class_idx = 0
+        # iterate over all actions in the plan to compute regions and generate response
         for time, act, duration in result.timed_actions:
           plan_action = TimedPlanAction()
           plan_action.pddl_instance = request.pddl_instance
@@ -661,6 +667,7 @@ class PddlManagerLifecycleNode(LifecycleNode):
             plan_action.name=f"{writer.get_item_named(f"{act.action.name}").name}"
           else:
             plan_action.name = f"{act.action.name}"
+
           plan_action.args = []
           for arg in act.actual_parameters:
             if f"{arg}" in writer.nto_renamings.keys():
@@ -669,12 +676,15 @@ class PddlManagerLifecycleNode(LifecycleNode):
               plan_action.args.append(f"{arg}")
           plan_action.start_time = float(time)
           plan_action.duration = float(duration)
+          if float(time) - last_time > delta_threshold:
+            equiv_class_idx += 1
+            last_time = float(time)
+          plan_action.equiv_class = equiv_class_idx
           response.actions.append(plan_action)
       else:
         response.success = False
       goal_handle.succeed()
       return response
-
 
 def run_planner_process(env, dom, prob):
   env = get_environment()
