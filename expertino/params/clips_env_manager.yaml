@@ -58,6 +58,8 @@ clips_manager:
         "clips/expertino/sim-interface.clp",
         "clips/expertino/orders/order-selection.clp",
         "clips/expertino/action-sim-bindings.clp",
+        "clips/expertino/action/action-agenda.clp",
+        "clips/expertino/action/action-precond-check.clp",
         # Finalize
         "clips/expertino/shutdown/finalize-ros.clp",
         ]
