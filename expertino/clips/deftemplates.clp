@@ -401,15 +401,13 @@
 " Apply the effect of a grounded pddl action.
   @slot instance: pddl instance belonging to the action.
   TODO: should this reference a pddl-action or copy the values like now?
-  @slot name: name of the action.
-  @slot params: parameters of the action.
+  @slot action: id of the action.
   @slot state: TBD
 "
   (slot instance (type SYMBOL))
-  (slot name (type SYMBOL))
-  (multislot params (type SYMBOL) (default (create$)))
+  (slot action (type SYMBOL))
   (slot effect-type (type SYMBOL) (allowed-values ALL START END) (default ALL))
-  (slot state (type SYMBOL) (allowed-values PENDING WAITING START-EFFECT-APPLIED ERROR) (default PENDING))
+  (slot state (type SYMBOL) (allowed-values PENDING WAITING START-EFFECT-APPLIED DONE ERROR) (default PENDING))
 )
 
 (deftemplate pddl-action-precondition

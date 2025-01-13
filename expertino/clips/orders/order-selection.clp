@@ -70,12 +70,24 @@
   (bind ?goal (expertino-msgs-plan-temporal-goal-create))
   (assert (pddl-planner-call (context test-plan) (goal ?goal)))
   (expertino-msgs-plan-temporal-goal-set-field ?goal "pddl_instance" ?instance)
+  (expertino-msgs-plan-temporal-goal-set-field ?goal "action_names" ?an)
   (expertino-msgs-plan-temporal-send-goal ?goal ?server)
   (assert (planned-for-main))
 )
 
-(defrule action-apply-effect-test
-  (pddl-action (instance ?instance) (name carrier-to-input) (params grey1 grey2 cap-grey cs1 cs1-input))
+(defrule action-apply-effect-test-main-action
+  (pddl-action (instance rcll) (id ?action-id) (name bs-dispense) (params o2-gen1 bs ?bs-side base-black ring-blue1))
   =>
-  (assert (pddl-action-apply-effect (instance ?instance) (name carrier-to-input) (params grey1 grey2 cap-grey cs1 cs1-input) (effect-type ALL)))
+  (assert (pddl-action-apply-effect (instance rcll) (action ?action-id) (effect-type ALL)))
+)
+
+(defrule action-apply-effect-test-sub-action
+  (pddl-action (instance rcll) (id ?dispense-id) (name bs-dispense))
+  ?apply-effect <- (pddl-action-apply-effect (action ?dispense-id) (instance rcll) (state DONE))
+  (pddl-action (instance rcll) (id ?transport) (name transport) (params o2-gen1 ?bs-side rs2-input ring-blue1))
+  =>
+  (retract ?apply-effect)
+  (bind ?id (gensym*))
+  (assert (pddl-action (instance rcll) (id ?id) (name transport-step-1-drive-to) (params o2-gen1 ?bs-side rs2-input ring-blue1)))
+  (assert (pddl-action-apply-effect (instance rcll) (action ?id) (effect-type START)))
 )
