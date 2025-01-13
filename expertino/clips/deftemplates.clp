@@ -370,18 +370,30 @@
   (slot value (type FLOAT))
 )
 
+(deftemplate pddl-plan
+  (slot id (type SYMBOL))
+  (slot instance (type SYMBOL))
+  (slot duration (type FLOAT))
+  (slot state (type SYMBOL) (allowed-values PENDING EXECUTING) (default PENDING))
+)
+
 (deftemplate pddl-action
 " Represents a grounded pddl action in a pddl instance.
   @slot instance: pddl instance belonging to the action.
   @slot name: name of the action.
   @slot params: parameters of the  action.
-  @slot state: TBD
+  @slot plan-order-class: partial order class of the action in theplan
+  @slot: planned-start-time: start time of the action in the plan
+  @slot: planned-duration: assumed duration of the action according to plan
 "
   (slot instance (type SYMBOL))
   (slot id (type SYMBOL)) ; this should be a globally unique ID
+  (slot plan (type SYMBOL))
   (slot name (type SYMBOL))
   (multislot params (type SYMBOL) (default (create$)))
-  (slot state (type SYMBOL)) ; initial, check-precond, precond-sat, exec-wait, exec, exec-done, effects-applied, failed final
+  (slot plan-order-class (type INTEGER))
+  (slot planned-start-time (type FLOAT))
+  (slot planned-duration (type FLOAT))
 )
 
 
@@ -400,3 +412,25 @@
   (slot state (type SYMBOL) (allowed-values PENDING WAITING START-EFFECT-APPLIED ERROR) (default PENDING))
 )
 
+(deftemplate pddl-action-precondition
+  (slot instance (type SYMBOL))
+  (slot plan (type SYMBOL))
+  (slot id (type SYMBOL))
+  (slot context (type SYMBOL))
+  (slot state (type SYMBOL) (allowed-values PENDING CHECK-PRECONDITION PRECONDITION-SAT PRECONDITION-UNSAT) (default PENDING))
+  (multislot unsatisfied-preconditions (type STRING) (default (create$)))
+)
+
+(deftemplate agenda
+  (slot plan (type SYMBOL))
+  (slot class-selection (type INTEGER) (default 0))
+  (slot class-relaxation (type INTEGER) (default 1))
+  (slot state (type SYMBOL) (allowed-values ACTIVE INACTIVE) (default INACTIVE))
+)
+
+(deftemplate agenda-action-item
+  (slot plan (type SYMBOL))
+  (slot action (type SYMBOL))
+  (slot execution-state (type SYMBOL) (allowed-values PENDING SELECTED EXECUTING COMPLETED ERROR EFFECTS-APPLIED) (default PENDING))
+  (slot priority (type INTEGER) (default 0))
+)

@@ -47,19 +47,26 @@
   =>
   (bind ?plan-found (expertino-msgs-plan-temporal-result-get-field ?res-ptr "success"))
   (printout green "planning done" crlf)
+  (bind ?plan-id (gensym*))
+  (bind ?instance nil)
   (if ?plan-found then
     (bind ?plan (expertino-msgs-plan-temporal-result-get-field ?res-ptr "actions"))
-	(foreach ?action ?plan
-	(bind ?instance (sym-cat (expertino-msgs-timed-plan-action-get-field ?action "pddl_instance")))
-	(bind ?name (sym-cat (expertino-msgs-timed-plan-action-get-field ?action "name")))
-	(bind ?args (expertino-msgs-timed-plan-action-get-field ?action "args"))
-	(bind ?arg-syms (create$))
-	(foreach ?arg ?args
-	  (bind ?arg-syms (create$ ?arg-syms (sym-cat ?arg)))
-	)
-	(assert (pddl-action (id (gensym*)) (instance ?instance) (name ?name) (params ?arg-syms) (state INITIAL)))
-	)
+    (foreach ?action ?plan
+      (bind ?instance (sym-cat (expertino-msgs-timed-plan-action-get-field ?action "pddl_instance")))
+      (bind ?name (sym-cat (expertino-msgs-timed-plan-action-get-field ?action "name")))
+      (bind ?args (expertino-msgs-timed-plan-action-get-field ?action "args"))
+      (bind ?arg-syms (create$))
+      (foreach ?arg ?args
+        (bind ?arg-syms (create$ ?arg-syms (sym-cat ?arg)))
+      )
+      (bind ?equiv_class (expertino-msgs-timed-plan-action-get-field ?action "equiv_class"))
+      (bind ?ps-time (expertino-msgs-timed-plan-action-get-field ?action "start_time"))
+      (bind ?p-duration (expertino-msgs-timed-plan-action-get-field ?action "duration"))
+      (assert (pddl-action (id (gensym*)) (plan ?plan-id) (instance ?instance) (name ?name) (params ?args) (plan-order-class ?equiv_class) (planned-start-time ?ps-time) (planned-duration ?p-duration)))
+    )
   )
+
+  (assert (pddl-plan (id ?plan-id)))
 	(expertino-msgs-plan-temporal-result-destroy ?res-ptr)
 	(expertino-msgs-plan-temporal-goal-destroy ?goal-ptr)
 	(expertino-msgs-plan-temporal-client-goal-handle-destroy ?cgh-ptr)
