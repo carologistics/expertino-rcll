@@ -21,6 +21,7 @@ from expertino_msgs.srv import (
     AddPddlInstance,
     CheckActionPrecondition,
     GetActionEffects,
+    GetActionNames,
     GetFluents,
     GetFunctions,
     SetGoals,
@@ -88,6 +89,7 @@ class PddlManagerLifecycleNode(LifecycleNode):
         self.add_pddl_instance_srv = None
         self.check_action_precondition_srv = None
         self.get_action_effects_srv = None
+        self.get_action_names_srv = None
         self.get_fluents_srv = None
         self.get_functions_srv = None
         self.set_goals_srv = None
@@ -145,6 +147,12 @@ class PddlManagerLifecycleNode(LifecycleNode):
             GetActionEffects,
             f"{self.get_name()}/get_action_effects",
             self.handle_get_action_effects,
+            callback_group=self.srv_cb_group,
+        )
+        self.get_action_names_srv = self.create_service(
+            GetActionNames,
+            f"{self.get_name()}/get_action_names",
+            self.handle_get_action_names,
             callback_group=self.srv_cb_group,
         )
         self.get_fluents_srv = self.create_service(
@@ -549,7 +557,12 @@ class PddlManagerLifecycleNode(LifecycleNode):
             response.success = False
             response.error = "Unknown pddl instance"
             return response
+
         instance = self.problems[action.pddl_instance]
+        an = instance.actions
+        action_names_new = []
+        for action_name in an:
+            action_names_new.append(action_name.name)
         args = []
         try:
             # Ground action
@@ -636,6 +649,26 @@ class PddlManagerLifecycleNode(LifecycleNode):
             response.success = False
             return response
 
+    def handle_get_action_names(self, request, response):
+        if request.pddl_instance not in self.problems.keys():
+            response.success = False
+            response.error = "Unknown pddl instance"
+            return response
+        instance = self.problems[request.pddl_instance]
+        try:
+            actions = instance.actions
+            action_names = []
+            for action in actions:
+                action_names.append(action.name)
+            response.success = True
+            response.action_names = action_names
+            return response
+        except Exception as e:
+            response.error = f"error while getting action names: {e}"
+            self.get_logger().error(response.error)
+            response.success = False
+            return response
+
     def plan_callback(self, goal_handle):
       self.get_logger().info("Start planning...")
       response = PlanTemporal.Result()
@@ -645,7 +678,14 @@ class PddlManagerLifecycleNode(LifecycleNode):
           response.success = False
           return response
 
-      problem = self.problems[request.pddl_instance]
+      problem = self.problems[request.pddl_instance].clone()
+      action_filter = request.action_names
+      if action_filter:
+        actions = problem.actions
+        problem.clear_actions()
+        for act in actions:
+          if act.name in  action_filter:
+            problem.add_action(act)
       writer = PDDLWriter(problem)
       dom = writer.get_domain()
       prob = writer.get_problem()

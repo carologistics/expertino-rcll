@@ -17,6 +17,7 @@
 ; Parts:
 ;  - init-clients: start all service clients
 ;  - init-problem: setup an initial pddl domain
+;  - init-planning-actions: retrieve the list of actions to prepare the main planning filter
 ;  - init-fluents: retrieve fluents and numeric fluents from pddl domain and store them
 ;  - init-plan-server: create a client for the planner server
 ;
@@ -24,7 +25,7 @@
 (deffacts pddl-task
   (start-task (name pddl)
     (wait-for)
-    (parts init-cfg init-clients init-problem init-fluents init-planner)
+    (parts init-cfg init-clients init-problem init-planning-actions init-fluents init-planner)
   )
 )
 
@@ -55,6 +56,7 @@
     add_pddl_instance AddPddlInstance
     check_action_precondition CheckActionPrecondition
     get_action_effects GetActionEffects
+    get_action_names GetActionNames
     get_fluents GetFluents
     get_functions GetFunctions
     set_goals SetGoals
@@ -92,6 +94,36 @@
   ?st <- (start-task (name pddl) (state ACTIVE) (parts init-problem $?rest-parts))
   =>
   (modify ?st (parts $?rest-parts))
+)
+
+(defrule pddl-request-load-planning-action-domain
+  (pddl-manager (node ?node))
+  (confval (path "/pddl/pddl_dir") (value ?dir))
+  (confval (path "/pddl/planning_domain_file") (value ?domain))
+  (confval (path "/pddl/planning_instance") (value ?instance))
+  (start-task (name pddl) (state ACTIVE) (parts init-planning-actions $?rest-parts))
+  =>
+  (assert (pddl-instance (name (sym-cat ?instance)) (domain (str-cat ?domain)) (problem "") (directory ?dir) (state PENDING)))
+)
+
+(defrule pddl-init-problem-request-planning-action-domain
+  (confval (path "/pddl/planning_instance") (value ?instance-str))
+  (pddl-instance (state LOADED) (name ?instance&:(eq ?instance (sym-cat ?instance-str))))
+  (not (pddl-action-names (instance ?instance)))
+  (start-task (name pddl) (state ACTIVE) (parts init-planning-actions $?rest-parts))
+  =>
+  (assert (pddl-action-names (instance ?instance)))
+)
+
+(defrule pddl-init-problem-finish-planning-action-domain
+  (confval (path "/pddl/planning_instance") (value ?instance-str))
+  (pddl-instance (state LOADED) (name ?instance&:(eq ?instance (sym-cat ?instance-str))))
+  ?pan-f <- (pddl-action-names (instance ?instance) (state DONE) (action-names $?an))
+  ?st <- (start-task (name pddl) (state ACTIVE) (parts init-planning-actions $?rest-parts))
+  =>
+  (assert (planning-filter (action-names ?an)))
+  (retract ?pan-f)
+  (modify ?st (parts ?rest-parts))
 )
 
 (defrule pddl-init-load-facts

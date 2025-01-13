@@ -62,6 +62,7 @@
   ?set-f <- (pddl-set-goals (instance ?instance) (state DONE))
   (pddl-manager (node ?node))
   (pddl-instance (name ?instance) (busy-with FALSE) (state LOADED))
+  (planning-filter (action-names $?an))
   (expertino-msgs-plan-temporal-client (server ?server&:(eq ?server (str-cat ?node "/temp_plan"))))
   (not (planned-for-main))
   =>
