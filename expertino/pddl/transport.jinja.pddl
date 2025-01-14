@@ -1,4 +1,4 @@
-   ;; Transport a workpiece from one machine side to another
+   ;; Sub-action example for the transport planning action.
    (:durative-action transport-step-1-drive-to
      :parameters (?wp - workpiece ?from - place ?to - place ?r - task)
      :duration (= ?duration 5)
