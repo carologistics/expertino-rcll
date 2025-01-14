@@ -62,7 +62,7 @@
       (bind ?equiv_class (expertino-msgs-timed-plan-action-get-field ?action "equiv_class"))
       (bind ?ps-time (expertino-msgs-timed-plan-action-get-field ?action "start_time"))
       (bind ?p-duration (expertino-msgs-timed-plan-action-get-field ?action "duration"))
-      (assert (pddl-action (id (gensym*)) (plan ?plan-id) (instance ?instance) (name ?name) (params ?args) (plan-order-class ?equiv_class) (planned-start-time ?ps-time) (planned-duration ?p-duration)))
+      (assert (pddl-action (id (gensym*)) (plan ?plan-id) (instance ?instance) (name ?name) (params ?arg-syms) (plan-order-class ?equiv_class) (planned-start-time ?ps-time) (planned-duration ?p-duration)))
     )
   )
 

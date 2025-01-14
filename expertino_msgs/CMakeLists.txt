@@ -18,6 +18,7 @@ set(MSGS
 set(SERVICES
     "srv/CheckActionPrecondition.srv"
     "srv/GetActionEffects.srv"
+    "srv/GetActionNames.srv"
     "srv/AddPddlInstance.srv"
     "srv/AddFluent.srv"
     "srv/AddObjects.srv"

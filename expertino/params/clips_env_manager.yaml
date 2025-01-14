@@ -49,6 +49,7 @@ clips_manager:
         "clips/expertino/pddl/objects.clp",
         "clips/expertino/pddl/fluents.clp",
         "clips/expertino/pddl/instances.clp",
+        "clips/expertino/pddl/get-action-names.clp",
         "clips/expertino/pddl/get-fluents.clp",
         "clips/expertino/pddl/numeric-fluents.clp",
         "clips/expertino/pddl/plan.clp",

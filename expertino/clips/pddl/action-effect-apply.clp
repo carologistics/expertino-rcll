@@ -9,8 +9,8 @@
 (defrule action-get-action-effect-request
   (declare (salience ?*PRIORITY-PDDL-APPLY-EFFECT*))
   (pddl-manager (node ?node))
-  ?apply-effect-f <- (pddl-action-apply-effect (instance ?instance) (name ?name)
-    (params $?params) (state PENDING))
+  (pddl-action (id ?action-id) (name ?name) (params $?params))
+  ?apply-effect-f <- (pddl-action-apply-effect (instance ?instance) (action ?action-id) (state PENDING))
   ?pi-f <- (pddl-instance (name ?instance) (state LOADED) (busy-with FALSE))
   (ros-msgs-client (service ?s&:(eq ?s (str-cat ?node "/get_action_effects"))) (type ?type))
   (not (service-request-meta (service ?s) (meta ?instance)))
@@ -37,8 +37,8 @@
   (declare (salience ?*PRIORITY-PDDL-APPLY-EFFECT*))
   (pddl-manager (node ?node))
   ?pi-f <- (pddl-instance (name ?instance) (busy-with FALSE))
-  ?apply-effect-f <- (pddl-action-apply-effect (instance ?instance) (name ?name)
-    (params $?params) (state START-EFFECT-APPLIED))
+  ?apply-effect-f <- (pddl-action-apply-effect (instance ?instance)
+    (state START-EFFECT-APPLIED))
   =>
   (modify ?pi-f (busy-with ACTION-EFFECTS))
 )
@@ -46,8 +46,7 @@
 (defrule action-get-action-effect
   (pddl-manager (node ?node))
   ?pi-f <- (pddl-instance (name ?instance) (busy-with ACTION-EFFECTS))
-  ?apply-effect-f <- (pddl-action-apply-effect (instance ?instance) (name ?name)
-    (params $?params) (effect-type ?eff-type)
+  ?apply-effect-f <- (pddl-action-apply-effect (instance ?instance) (effect-type ?eff-type)
     (state ?state&:(member$ ?state (create$ WAITING START-EFFECT-APPLIED))))
   (ros-msgs-client (service ?s&:(eq ?s (str-cat ?node "/get_action_effects"))) (type ?type))
   ?msg-f <- (ros-msgs-response (service ?s) (msg-ptr ?ptr) (request-id ?id))

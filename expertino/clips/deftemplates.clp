@@ -255,7 +255,7 @@
   (slot problem (type STRING))
   (slot directory (type STRING))
   (slot state (type SYMBOL) (allowed-values PENDING LOADED ERROR) (default PENDING))
-  (slot busy-with (type SYMBOL) (allowed-values FALSE OBJECTS FLUENTS ACTION-EFFECTS CLEAR-GOALS SET-GOALS CHECK-CONDITIONS GET-FLUENTS GET-NUMERIC-FLUENTS) (default FALSE))
+  (slot busy-with (type SYMBOL) (allowed-values FALSE OBJECTS FLUENTS ACTION-EFFECTS CLEAR-GOALS SET-GOALS CHECK-CONDITIONS GET-FLUENTS GET-NUMERIC-FLUENTS GET-ACTION-NAMES) (default FALSE))
   (slot error (type STRING))
 )
 
@@ -401,15 +401,13 @@
 " Apply the effect of a grounded pddl action.
   @slot instance: pddl instance belonging to the action.
   TODO: should this reference a pddl-action or copy the values like now?
-  @slot name: name of the action.
-  @slot params: parameters of the action.
+  @slot action: id of the action.
   @slot state: TBD
 "
   (slot instance (type SYMBOL))
-  (slot name (type SYMBOL))
-  (multislot params (type SYMBOL) (default (create$)))
+  (slot action (type SYMBOL))
   (slot effect-type (type SYMBOL) (allowed-values ALL START END) (default ALL))
-  (slot state (type SYMBOL) (allowed-values PENDING WAITING START-EFFECT-APPLIED ERROR) (default PENDING))
+  (slot state (type SYMBOL) (allowed-values PENDING WAITING START-EFFECT-APPLIED DONE ERROR) (default PENDING))
 )
 
 (deftemplate pddl-action-precondition
@@ -433,4 +431,28 @@
   (slot action (type SYMBOL))
   (slot execution-state (type SYMBOL) (allowed-values PENDING SELECTED EXECUTING COMPLETED ERROR EFFECTS-APPLIED) (default PENDING))
   (slot priority (type INTEGER) (default 0))
+)
+
+(deftemplate pddl-action-names
+" Retrieve the list of action names.
+  @slot instance: pddl instance to retrieve the action names for.
+  Slots set automatically:
+  @multislot action-names: retrieved list of action names
+  @slot state:
+   - PENDING: The action names were not retrieved yet.
+   - ERROR: The names were not fetched due to an error.
+   - DONE: The action-names slot now is filled properly.
+  @slot error: provide information on encountered errors.
+"
+  (slot instance (type SYMBOL))
+  (multislot action-names (type SYMBOL) (default (create$)))
+  (slot state (type SYMBOL) (allowed-values PENDING DONE ERROR) (default PENDING))
+  (slot error (type STRING))
+)
+
+(deftemplate planning-filter
+" This currently mainly is a transient layer betweeen the general pddl interface and our domain-specific usage.
+  Can be extended later in case different kind of planning filters should be used or if planning is used in varying contexts.
+"
+  (multislot action-names (type SYMBOL) (default (create$ )))
 )
