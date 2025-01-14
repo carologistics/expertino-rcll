@@ -20,12 +20,6 @@ find_package(cx_ros_comm_gen REQUIRED)
 cx_generate_msg_bindings("expertino_msgs" "TimedPlanAction")
 cx_generate_action_bindings("expertino_msgs" "PlanTemporal")
 
-execute_process(
-  COMMAND
-    ${CMAKE_COMMAND} -E create_symlink
-    ${rcll_protobuf_msgs_DIR}/rcll-protobuf-msgs
-    ${CMAKE_INSTALL_PREFIX}/share/${PROJECT_NAME}/rcll-protobuf-msgs)
-
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
   ament_lint_auto_find_test_dependencies()
