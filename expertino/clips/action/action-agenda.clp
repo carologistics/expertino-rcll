@@ -36,7 +36,7 @@
   (pddl-action (id ?action-id) (plan ?plan-id) (plan-order-class ?ordering-class))
   (not (agenda-action-item (plan ?plan-id) (action ?action-id)))
   =>
-  (assert (agenda-action-item (action ?action-id) (plan ?plan-id)))
+  (assert (agenda-action-item (action ?action-id) (plan ?plan-id) (priority 0 1)))
   (printout red "Added action " ?action-id "(ordering " ?ordering-class ") to agenda" crlf)
 )
 
@@ -46,7 +46,7 @@
   ?precon <- (pddl-action-precondition (plan ?plan-id) (id ?action-id) (state PRECONDITION-SAT) (context AGENDA-LOOKAHEAD))
   (not (agenda-action-item (plan ?plan-id) (action ?action-id)))
   =>
-  (assert (agenda-action-item (action ?action-id) (plan ?plan-id)))
+  (assert (agenda-action-item (action ?action-id) (plan ?plan-id) (priority 0 0)))
   (retract ?precon)
   (printout red "Added action " ?action-id "(" ?plan-order-class ") to agenda (relaxed condition, precondition satisfied)" crlf)
 )

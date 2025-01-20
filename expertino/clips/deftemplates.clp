@@ -401,7 +401,7 @@
   (slot plan (type SYMBOL))
   (slot action (type SYMBOL))
   (slot execution-state (type SYMBOL) (allowed-values PENDING SELECTED EXECUTING COMPLETED ERROR EFFECTS-APPLIED) (default PENDING))
-  (slot priority (type INTEGER) (default 0))
+  (multislot slot priority (type INTEGER) (default (create$ 0)))
 )
 
 (deftemplate pddl-action-names
