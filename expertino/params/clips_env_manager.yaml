@@ -63,6 +63,7 @@ clips_manager:
         "clips/expertino/action/action-precond-check.clp",
         "clips/expertino/sim-agent-task.clp",
         "clips/expertino/executor.clp",
+        "clips/expertino/action/action-selection.clp",
         # Finalize
         "clips/expertino/shutdown/finalize-ros.clp",
         ]
