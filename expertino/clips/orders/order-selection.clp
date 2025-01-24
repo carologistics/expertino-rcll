@@ -1,12 +1,3 @@
-(deffacts test-order
-  (order (id 1) (name O1) (complexity C3) (base-color BASE_RED) (ring-colors (create$)) (cap-color CAP_GREY))
-  (order (id 2) (name O2) (complexity C3) (base-color BASE_BLACK) (ring-colors (create$ RING_BLUE RING_YELLOW)) (cap-color CAP_BLACK))
-  (ring-spec (color RING_BLUE) (cost 2))
-  (ring-spec (color RING_YELLOW) (cost 0))
-  (ring-spec (color RING_GREEN) (cost 1))
-  (ring-spec (color RING_ORANGE) (cost 1))
-)
-
 (deffunction wp-part-to-pddl (?refbox-name $?number)
   (bind ?converted-name (str-replace (lowcase ?refbox-name) "_" "-"))
   (if (neq ?number (create$)) then
@@ -19,6 +10,7 @@
 (defrule add-order-to-problem
   (startup-completed)
   ?o-f <- (order (name ?name) (workpiece nil) (base-color ?base-col) (ring-colors $?ring-cols) (cap-color ?cap-col))
+  (not (added-one-order))
   (confval (path "/pddl/problem_instance") (value ?instance-str))
   =>
   (bind ?instance (sym-cat ?instance-str))
@@ -44,12 +36,12 @@
   (assert (pddl-goal-fluent (instance ?instance) (name step) (params ?wp done)))
   ; also, clear all old goals
   (assert (pddl-clear-goals (instance ?instance)))
+  (assert (added-one-order))
 )
 
 (defrule set-goal-for-orders
   (startup-completed)
   (pddl-goal-fluent (instance ?instance) (name step) (params ?wp1 $?))
-  (pddl-goal-fluent (instance ?instance) (name step) (params ?wp2&:(neq ?wp1 ?wp2) $?))
   ?clear-f <- (pddl-clear-goals (instance ?instance) (state DONE))
   =>
   ; notify to add the goal to the domain

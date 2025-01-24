@@ -14,16 +14,16 @@
         )
     )
     =>
-    (modify ?action (state SELECTED))
+    (modify ?action (execution-state SELECTED))
 )
 
 (defrule action-agenda-item-update-selection
     ?action <- (agenda-action-item (action ?action-id) (plan ?plan-id) (priority $?priority) (execution-state SELECTED))
-    ?other-action (agenda-action-item (action ?other-action-id) (plan ?plan-id) (priority $?other-priority) (execution-state PENDING))
+    ?other-action <- (agenda-action-item (action ?other-action-id) (plan ?plan-id) (priority $?other-priority) (execution-state PENDING))
     (test (> (+ (expand$ ?priority)) (+ (expand$ ?other-priority))))
     =>
-    (modify ?action (state PENDING))
-    (modify ?other-action (state SELECTED))
+    (modify ?action (execution-state PENDING))
+    (modify ?other-action (execution-state SELECTED))
 )
 
 
