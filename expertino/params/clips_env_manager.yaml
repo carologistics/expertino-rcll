@@ -64,6 +64,7 @@ clips_manager:
         "clips/expertino/sim-agent-task.clp",
         "clips/expertino/executor.clp",
         "clips/expertino/action/action-selection.clp",
+        "clips/expertino/workers/workers.clp",
         # Finalize
         "clips/expertino/shutdown/finalize-ros.clp",
         ]

@@ -481,3 +481,10 @@
   (slot current-task-id (type INTEGER))
   (multislot params (type SYMBOL))
 )
+
+(deftemplate worker
+  (slot id (type SYMBOL))
+  (slot name (type SYMBOL))
+  (slot type (type SYMBOL) (allowed-values ROBOT CENTRAL))
+  (slot state (type SYMBOL) (allowed-values IDLE BUSY))
+)
