@@ -73,3 +73,17 @@
   (retract ?msg-f)
   (retract ?req-meta)
 )
+
+(defrule agenda-action-sat
+  (pddl-action-precondition (plan ?plan-id) (id ?action-id) (state PRECONDITION-SAT) (context ?context))
+  (pddl-action (id ?action-id) (name ?action-name) (params $?action-params))
+  =>
+  (printout yellow "Action " ?action-name "[" ?action-id "]" ?action-params " has satisfied preconditions for context " ?context crlf)
+)
+
+(defrule agenda-action-unsat
+  (pddl-action-precondition (plan ?plan-id) (id ?action-id) (state PRECONDITION-UNSAT) (context ?context) (unsatisfied-preconditions $?unsats))
+  (pddl-action (id ?action-id) (name ?action-name) (params $?action-params))
+  =>
+  (printout yellow "Action " ?action-name "[" ?action-id "]" ?action-params " has unsatisfied preconditions: " ?unsats " for context " ?context crlf)
+)

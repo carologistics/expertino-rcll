@@ -10,6 +10,7 @@
   ?plan <- (pddl-plan (id ?plan-id))
   =>
   (assert (agenda (plan ?plan-id) (state ACTIVE)))
+  (printout green "Initialiasing action agenda from plan " ?plan-id crlf)
 )
 
 (defrule agenda-step-ahead
@@ -29,6 +30,7 @@
   (pddl-action (id ?action-id) (plan ?plan-id) (plan-order-class ?action-order-class&:(> ?action-order-class ?ordering-class)))
   =>
   (modify ?ag (class-selection (+ ?ordering-class 1)))
+  (printout green "Agenda moved ahead to class " (+ ?ordering-class 1) crlf)
 )
 
 (defrule agenda-add-action
@@ -37,7 +39,7 @@
   (not (agenda-action-item (plan ?plan-id) (action ?action-id)))
   =>
   (assert (agenda-action-item (action ?action-id) (plan ?plan-id) (priority 0 1)))
-  (printout red "Added action " ?action-id "(ordering " ?ordering-class ") to agenda" crlf)
+  (printout yellow "Added action " ?action-id "(ordering " ?ordering-class ") to agenda" crlf)
 )
 
 (defrule agenda-add-action-relaxed
@@ -48,7 +50,7 @@
   =>
   (assert (agenda-action-item (action ?action-id) (plan ?plan-id) (priority 0 0)))
   (retract ?precon)
-  (printout red "Added action " ?action-id "(" ?plan-order-class ") to agenda (relaxed condition, precondition satisfied)" crlf)
+  (printout yellow "Added action " ?action-id "(" ?plan-order-class ") to agenda (relaxed condition, precondition satisfied)" crlf)
 )
 
 (defrule agenda-add-action-relaxed-check
@@ -58,7 +60,7 @@
     (not (agenda-action-item (plan ?plan-id) (action ?action-id)))
     =>
     (assert (pddl-action-precondition (plan ?plan-id) (id ?action-id) (state PENDING) (context AGENDA-LOOKAHEAD)))
-    (printout red "Checking action " ?action-id "(ordering " ?plan-order-class ") for preconditions, relaxed agenda candidate" crlf)
+    (printout yellow "Checking action " ?action-id "(ordering " ?plan-order-class ") for preconditions, relaxed agenda candidate" crlf)
 )
 
 (defrule agenda-add-action-relaxed-reset
@@ -84,18 +86,4 @@
   (agenda-action-item (plan ?plan-id) (action ?completed-action-id&:(neq ?completed-action-id ?action-id)) (execution-state EFFECTS-APPLIED))
   =>
   (retract ?precon)
-)
-
-(defrule agenda-action-print-sat
-  ;(agenda-action-item (plan ?plan-id) (action ?action-id) (execution-state PENDING))
-  (pddl-action-precondition (plan ?plan-id) (id ?action-id) (state PRECONDITION-SAT) (context ?context))
-  =>
-  (printout green "Action " ?action-id " has satisfied preconditions for context " ?context crlf)
-)
-
-(defrule agenda-action-print-unsat
-  ;(agenda-action-item (plan ?plan-id) (action ?action-id) (execution-state PENDING))
-  (pddl-action-precondition (plan ?plan-id) (id ?action-id) (state PRECONDITION-UNSAT) (context ?context) (unsatisfied-preconditions $?unsats))
-  =>
-  (printout yellow "Action " ?action-id " has unsatisfied preconditions: " ?unsats " for context " ?context crlf)
 )
