@@ -5,16 +5,21 @@
 
 
 (defrule agenda-action-sat-check-start
-  (agenda-action-item (plan ?plan-id) (action ?action-id) (execution-state INITIAL))
+  (agenda-action-item (plan ?plan-id) (action ?action-id) (execution-state INITIAL) (worker-type ?worker-type))
   (not (pddl-action-precondition (plan ?plan-id) (id ?action-id) (context AGENDA-SELECTION)))
+  (worker (id ?worker) (state IDLE) (type ?worker-type))
+  (pddl-plan (id ?plan-id) (instance ?instance))
+  (pddl-instance-update (instance ?instance) (last-updated ?last-update-time))
   =>
-  (assert (pddl-action-precondition (plan ?plan-id) (id ?action-id) (state PENDING) (context AGENDA-SELECTION)))
+  (assert (pddl-action-precondition (plan ?plan-id) (instance ?instance) (id ?action-id) (state PENDING) (context AGENDA-SELECTION) (instance-update ?last-update-time)))
 )
 
 (defrule agenda-action-sat-check-reset
-  ?action <- (agenda-action-item (plan ?plan-id) (action ?action-id) (execution-state PENDING|UNSAT))
-  ?precon <- (pddl-action-precondition (plan ?plan-id) (id ?action-id) (state PRECONDITION-UNSAT|PRECONDITION-SAT|PENDING) (context AGENDA-SELECTION))
-  (agenda-action-item (plan ?plan-id) (action ?completed-action-id&:(neq ?completed-action-id ?action-id)) (execution-state EFFECTS-APPLIED))
+  ?action <- (agenda-action-item (plan ?plan-id) (action ?action-id) (execution-state PENDING|UNSAT) (worker-type ?worker-type))
+  ?precon <- (pddl-action-precondition (plan ?plan-id) (id ?action-id) (state PRECONDITION-UNSAT|PRECONDITION-SAT|PENDING) (context AGENDA-SELECTION) (instance-update ?update-time))
+  (worker (id ?worker) (state IDLE) (type ?worker-type))
+  (pddl-plan (id ?plan-id) (instance ?instance))
+  (pddl-instance-update (instance ?instance) (last-updated ?last-update-time&:(> ?last-update-time ?update-time)))
   =>
   (retract ?precon)
   (modify ?action (execution-state INITIAL))
