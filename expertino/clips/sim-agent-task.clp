@@ -4,7 +4,7 @@
   (confval (path "/rcll-simulator/enabled") (value TRUE))
   (protobuf-peer (name ?robot) (peer-id ?peer-id))
   (not (agent-task-list (executor-id ?ex-id)))
-  ?pa <- (pddl-action (id ?pa-id) (name transport|transport-to-slide) (params ?wp ?from ?to $?))
+  ?pa <- (pddl-action (id ?action-id) (name transport|transport-to-slide) (params ?wp ?from ?to $?))
   (game-state (team-color ?team-color))
   =>
   (bind ?from-mps (pddl-place-to-refbox-mps ?from ?team-color))
@@ -23,13 +23,13 @@
   (confval (path "/rcll-simulator/enabled") (value TRUE))
   (protobuf-peer (name ?robot) (peer-id ?peer-id))
   (not (agent-task-list (executor-id ?ex-id)))
-  ?pa <- (pddl-action (id ?pa-id) (name carrier-to-input) 
+  ?pa <- (pddl-action (id ?action-id) (name carrier-to-input) 
            (params ?wp ?next-carr ?step ?mps ?to-place))
   (game-state (team-color ?team-color))
   ;TODO check for cap carrier on CS shelf
   =>
   (bind ?from-mps (pddl-place-to-refbox-mps ?mps ?team-color))
-  (bind ?from-side (pddl-place-to-mps-side LEFT))
+  (bind ?from-side SHELF)
   (bind ?to-side (pddl-place-to-mps-side ?to-place))
   (assert (agent-task-list (id (sym-cat TASK-LIST-(gensym*))) (executor-id ?ex-id) (pddl-action-id ?action-id)
               (tasks Move-src Retrieve Move-dest Deliver) 
@@ -46,10 +46,16 @@
   =>
   (bind ?mps (nth$ 2 ?params))
   (bind ?mps-side (nth$ 3 ?params))
-  (assert (rcll-agent-task (task-id ?seq) (task-name ?task) (robot ?robot) (task-type Retrieve)     
-   ;TODO add workpiece information
-   (machine ?mps) (side ?mps-side) (executor-id ?ex-id)                                                              
-  ))
+  (if (eq ?mps-side SHELF)
+   then
+     (assert (rcll-agent-task (task-id ?seq) (task-name ?task) (robot ?robot) (task-type Retrieve)     
+       ;TODO add workpiece information
+                (machine ?mps) (executor-id ?ex-id)))
+   else
+     (assert (rcll-agent-task (task-id ?seq) (task-name ?task) (robot ?robot) (task-type Retrieve)     
+       ;TODO add workpiece information
+                (machine ?mps) (side ?mps-side) (executor-id ?ex-id)))
+  )
   (modify ?at-list (current-task-id ?seq))
 )    
 
