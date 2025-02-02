@@ -9,8 +9,8 @@
 
 (defrule add-order-to-problem
   (startup-completed)
-  ?o-f <- (order (name ?name) (workpiece nil) (base-color ?base-col) (ring-colors $?ring-cols) (cap-color ?cap-col))
-  (not (added-one-order))
+  ?o-f <- (order (name ?name) (workpiece nil) (base-color ?base-col) (ring-colors $?ring-cols) (cap-color ?cap-col) (state OPEN))
+  (not (added-one-order)) ;remove this eventually
   (confval (path "/pddl/problem_instance") (value ?instance-str))
   =>
   (bind ?instance (sym-cat ?instance-str))
@@ -32,6 +32,7 @@
   (assert (pending-pddl-fluent (instance ?instance) (name next-step) (params ?wp ?curr-step ?next-step)))
   (assert (pending-pddl-fluent (instance ?instance) (name next-step) (params ?wp ?next-step deliver)))
   (assert (pending-pddl-fluent (instance ?instance) (name next-step) (params ?wp deliver done)))
+  (modify ?o-f (state ACTIVE))
   ; set the wp as a goal
   (assert (pddl-goal-fluent (instance ?instance) (name step) (params ?wp done)))
   ; also, clear all old goals
