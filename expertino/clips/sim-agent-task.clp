@@ -1,6 +1,6 @@
 (defrule agent-task-list-create-transport
   ?ex <- (executor (id ?ex-id) (state INIT) (worker ?robot) (pddl-action-id ?action-id))
-  (robot (name ?robot))
+  (worker (id ?robot) (type ROBOT))
   (confval (path "/rcll-simulator/enabled") (value TRUE))
   (protobuf-peer (name ?robot) (peer-id ?peer-id))
   (not (agent-task-list (executor-id ?ex-id)))
@@ -19,7 +19,7 @@
 
 (defrule agent-task-list-create-carrier-to-input
   ?ex <- (executor (id ?ex-id) (state INIT) (worker ?robot) (pddl-action-id ?action-id))
-  (robot (name ?robot))
+  (worker (id ?robot) (type ROBOT))
   (confval (path "/rcll-simulator/enabled") (value TRUE))
   (protobuf-peer (name ?robot) (peer-id ?peer-id))
   (not (agent-task-list (executor-id ?ex-id)))

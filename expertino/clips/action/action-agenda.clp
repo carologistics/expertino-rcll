@@ -35,20 +35,26 @@
 
 (defrule agenda-add-action
   (agenda (plan ?plan-id) (class-selection ?ordering-class) (class-relaxation ?relaxation))
-  (pddl-action (id ?action-id) (plan ?plan-id) (plan-order-class ?ordering-class))
+  (pddl-action (id ?action-id) (name ?action-name) (plan ?plan-id) (plan-order-class ?ordering-class))
   (not (agenda-action-item (plan ?plan-id) (action ?action-id)))
+  (confval (path "/pddl/actions/robot") (list-value $?robot-actions))
+  (confval (path "/pddl/actions/refbox") (list-value $?refbox-actions))
   =>
-  (assert (agenda-action-item (action ?action-id) (plan ?plan-id) (priority 0 1)))
+  (bind ?worker-type (if (member$ (str-cat ?action-name) ?robot-actions) then ROBOT else REFBOX))
+  (assert (agenda-action-item (action ?action-id) (plan ?plan-id) (priority 0 1) (worker-type ?worker-type)))
   (printout yellow "Added action " ?action-id "(ordering " ?ordering-class ") to agenda" crlf)
 )
 
 (defrule agenda-add-action-relaxed
   (agenda (plan ?plan-id) (class-selection ?ordering-class-selected) (class-relaxation ?relaxation))
-  (pddl-action (id ?action-id) (plan ?plan-id) (plan-order-class ?plan-order-class&:(>= ?ordering-class-selected  (- ?plan-order-class ?relaxation))))
+  (pddl-action (id ?action-id) (name ?action-name) (plan ?plan-id) (plan-order-class ?plan-order-class&:(>= ?ordering-class-selected  (- ?plan-order-class ?relaxation))))
   ?precon <- (pddl-action-precondition (plan ?plan-id) (id ?action-id) (state PRECONDITION-SAT) (context AGENDA-LOOKAHEAD))
   (not (agenda-action-item (plan ?plan-id) (action ?action-id)))
+  (confval (path "/pddl/actions/robot") (list-value $?robot-actions))
+  (confval (path "/pddl/actions/refbox") (list-value $?refbox-actions))
   =>
-  (assert (agenda-action-item (action ?action-id) (plan ?plan-id) (priority 0 0)))
+  (bind ?worker-type (if (member$ (str-cat ?action-name) ?robot-actions) then ROBOT else REFBOX))
+  (assert (agenda-action-item (action ?action-id) (plan ?plan-id) (priority 0 0) (worker-type ?worker-type)))
   (retract ?precon)
   (printout yellow "Added action " ?action-id "(" ?plan-order-class ") to agenda (relaxed condition, precondition satisfied)" crlf)
 )

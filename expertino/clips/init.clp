@@ -23,7 +23,7 @@
    (foreach ?robot (create$ ROBOT1 ROBOT2 ROBOT3)
      (assert (worker (id ?robot) (state IDLE) (type ROBOT)))
    )
-   (assert (worker (id CENTRAL1) (state IDLE) (type CENTRAL)))
+   (assert (worker (id REFBOX) (state IDLE) (type REFBOX)))
 ;   (assert
 ;     (domain-object (name INPUT) (type mps-side))
 ;     (domain-object (name OUTPUT) (type mps-side))

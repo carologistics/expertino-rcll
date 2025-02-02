@@ -44,13 +44,6 @@
   (slot cost (type INTEGER))
 )
 
-(deftemplate robot
-  (slot name (type SYMBOL))
-  (slot number (type INTEGER))
-  (slot state (type SYMBOL) (allowed-values ACTIVE MAINTENANCE))
-  (slot is-busy (type SYMBOL) (allowed-values TRUE FALSE) (default FALSE))
-)
-
 (deftemplate order
   (slot id (type INTEGER))
   (slot name (type SYMBOL))
@@ -68,6 +61,8 @@
   (slot delivery-begin (type INTEGER))
   (slot delivery-end (type INTEGER))
   (slot competitive (type SYMBOL))
+
+  (slot state (type SYMBOL) (default OPEN) (allowed-values OPEN ACTIVE COMPLETED CANCELLED))
 )
 
 (deftemplate protobuf-peer
@@ -402,6 +397,8 @@
   (slot action (type SYMBOL))
   (slot execution-state (type SYMBOL) (allowed-values INITIAL UNSAT PENDING SELECTED EXECUTING COMPLETED ERROR EFFECTS-APPLIED) (default INITIAL))
   (multislot priority (type INTEGER) (default (create$ 0)))
+  (slot worker-type (type SYMBOL) (allowed-values ROBOT REFBOX))
+  (slot worker (type SYMBOL) (default UNSET))
 )
 
 (deftemplate pddl-action-names
@@ -485,6 +482,12 @@
 (deftemplate worker
   (slot id (type SYMBOL))
   (slot name (type SYMBOL))
-  (slot type (type SYMBOL) (allowed-values ROBOT CENTRAL))
-  (slot state (type SYMBOL) (allowed-values IDLE BUSY))
+  (slot type (type SYMBOL) (allowed-values ROBOT REFBOX))
+  (slot state (type SYMBOL) (allowed-values IDLE BUSY RECOVERY))
+  (slot refbox-state (type SYMBOL) (allowed-values ACTIVE MAINTENANCE))
+)
+
+(deftemplate worker-idle-timer
+  (slot worker (type SYMBOL))
+  (slot start-time (type FLOAT) (default 0.0))
 )
