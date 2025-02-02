@@ -400,7 +400,7 @@
 (deftemplate agenda-action-item
   (slot plan (type SYMBOL))
   (slot action (type SYMBOL))
-  (slot execution-state (type SYMBOL) (allowed-values PENDING SELECTED EXECUTING COMPLETED ERROR EFFECTS-APPLIED) (default PENDING))
+  (slot execution-state (type SYMBOL) (allowed-values INITIAL UNSAT PENDING SELECTED EXECUTING COMPLETED ERROR EFFECTS-APPLIED) (default INITIAL))
   (multislot priority (type INTEGER) (default (create$ 0)))
 )
 
