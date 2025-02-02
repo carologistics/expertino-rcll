@@ -72,18 +72,3 @@
   =>
   (retract ?precon)
 )
-
-(defrule agenda-action-check-start
-  (agenda-action-item (plan ?plan-id) (action ?action-id) (execution-state PENDING))
-  (not (pddl-action-precondition (plan ?plan-id) (id ?action-id) (context AGENDA-SELECTION)))
-  =>
-  (assert (pddl-action-precondition (plan ?plan-id) (id ?action-id) (state PENDING) (context AGENDA-SELECTION)))
-)
-
-(defrule agenda-action-check-reset
-  (agenda-action-item (plan ?plan-id) (action ?action-id) (execution-state PENDING))
-  ?precon <- (pddl-action-precondition (plan ?plan-id) (id ?action-id) (state PRECONDITION-UNSAT|PRECONDITION-SAT|PENDING) (context AGENDA-SELECTION))
-  (agenda-action-item (plan ?plan-id) (action ?completed-action-id&:(neq ?completed-action-id ?action-id)) (execution-state EFFECTS-APPLIED))
-  =>
-  (retract ?precon)
-)
