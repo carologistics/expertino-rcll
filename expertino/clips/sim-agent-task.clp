@@ -46,16 +46,9 @@
   =>
   (bind ?mps (nth$ 2 ?params))
   (bind ?mps-side (nth$ 3 ?params))
-  (if (eq ?mps-side SHELF)
-   then
-     (assert (rcll-agent-task (task-id ?seq) (task-name ?task) (robot ?robot) (task-type Retrieve)     
-       ;TODO add workpiece information
-                (machine ?mps) (executor-id ?ex-id)))
-   else
-     (assert (rcll-agent-task (task-id ?seq) (task-name ?task) (robot ?robot) (task-type Retrieve)     
+  (assert (rcll-agent-task (task-id ?seq) (task-name ?task) (robot ?robot) (task-type Retrieve)     
        ;TODO add workpiece information
                 (machine ?mps) (side ?mps-side) (executor-id ?ex-id)))
-  )
   (modify ?at-list (current-task-id ?seq))
 )    
 
