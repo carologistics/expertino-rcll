@@ -29,6 +29,7 @@ from expertino_msgs.srv import (
 )
 from expertino_msgs.msg import Fluent as FluentMsg, FluentEffect, FunctionEffect, Function, TimedPlanAction, Action as ActionMsg
 from expertino_msgs.action import PlanTemporal
+from std_msgs.msg import String
 
 from unified_planning.engines import PlanGenerationResultStatus
 from unified_planning.shortcuts import (
@@ -120,6 +121,7 @@ class PddlManagerLifecycleNode(LifecycleNode):
             is_left_open=False,
             is_right_open=False,
         )
+        self.instance_update_pub = None
         self.get_logger().info("Lifecycle node created.")
 
     def on_configure(self, state: State) -> TransitionCallbackReturn:
@@ -216,6 +218,11 @@ class PddlManagerLifecycleNode(LifecycleNode):
             self.plan_callback,
             callback_group=self.action_cb_group,
         )
+        self.instance_update_pub = self.create_publisher(
+            String,
+            f"{self.get_name()}/instance_update",
+            10
+        )
         self.get_logger().info("Service created successfully.")
         return TransitionCallbackReturn.SUCCESS
 
@@ -305,6 +312,9 @@ class PddlManagerLifecycleNode(LifecycleNode):
     def handle_add_fluent(self, request, response):
         fluent = request.fluent
         response.success, response.error = self.try_set_fluent(fluent, True)
+        msg = String()
+        msg.data = request.fluent.pddl_instance
+        self.instance_update_pub.publish(msg)
         return response
 
     def handle_add_fluents(self, request, response):
@@ -316,6 +326,10 @@ class PddlManagerLifecycleNode(LifecycleNode):
             error = f"{error} {curr_error}"
         response.success = success
         response.error = error
+
+        msg = String()
+        msg.data = request.fluents[0].pddl_instance
+        self.instance_update_pub.publish(msg)
         return response
 
     def handle_set_functions(self, request, response):
@@ -327,6 +341,10 @@ class PddlManagerLifecycleNode(LifecycleNode):
             error = f"{error} {curr_error}"
         response.success = success
         response.error = error
+
+        msg = String()
+        msg.data = request.functions[0].pddl_instance
+        self.instance_update_pub.publish(msg)
         return response
 
     def handle_rm_fluents(self, request, response):
@@ -338,6 +356,11 @@ class PddlManagerLifecycleNode(LifecycleNode):
             error = f"{error} {curr_error}"
         response.success = success
         response.error = error
+
+        msg = String()
+        msg.data = request.fluents[0].pddl_instance
+        self.instance_update_pub.publish(msg)
+
         return response
 
     def handle_add_objects(self, request, response):
@@ -349,6 +372,10 @@ class PddlManagerLifecycleNode(LifecycleNode):
             error = f"{error} {curr_error}"
         response.success = success
         response.error = error
+
+        msg = String()
+        msg.data = request.objects[0].pddl_instance
+        self.instance_update_pub.publish(msg)
         return response
 
     def handle_rm_objects(self, request, response):
@@ -360,6 +387,10 @@ class PddlManagerLifecycleNode(LifecycleNode):
             error = f"{error} {curr_error}"
         response.success = success
         response.error = error
+
+        msg = String()
+        msg.data = request.objects[0].pddl_instance
+        self.instance_update_pub.publish(msg)
         return response
 
     def handle_clear_goals(self, request, response):
