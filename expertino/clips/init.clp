@@ -35,6 +35,6 @@
 ;     (domain-object (name C-BS) (type mps))
 ;   )
    (assert (game-state (team ?team-name)))
-;   (assert (game-time 0.))
+   (assert (game-time 0.))
    (assert (domain-facts-loaded))
  )

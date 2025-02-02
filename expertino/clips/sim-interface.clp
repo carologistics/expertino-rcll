@@ -33,7 +33,7 @@
   )
 )
 
- (defrule agent-task-send-command
+(defrule agent-task-send-command
  " Create an AgentTask protobuf message and send it to the simulator peer.
  "
    (current-rcll-agent-task-id (robot ?robot) (task-id ?task-seq))

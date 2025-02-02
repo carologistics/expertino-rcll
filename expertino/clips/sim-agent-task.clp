@@ -1,9 +1,10 @@
 (defrule agent-task-list-create-transport
-  ?ex <- (executor (id ?ex-id) (state ASSIGNED) (worker ?robot&ROBOT1|ROBOT2|ROBOT3) (pddl-action-id ?action-id))
+  ?ex <- (executor (id ?ex-id) (state INIT) (worker ?robot) (pddl-action-id ?action-id))
+  (robot (name ?robot))
   (confval (path "/rcll-simulator/enabled") (value TRUE))
   (protobuf-peer (name ?robot) (peer-id ?peer-id))
   (not (agent-task-list (executor-id ?ex-id)))
-  ?pa <- (pddl-action (id ?pa-id) (name transport) (params ?wp ?from ?to ?step))
+  ?pa <- (pddl-action (id ?pa-id) (name transport|transport-to-slide) (params ?wp ?from ?to $?))
   (game-state (team-color ?team-color))
   =>
   (bind ?from-mps (pddl-place-to-refbox-mps ?from ?team-color))
@@ -11,33 +12,14 @@
   (bind ?to-mps (pddl-place-to-refbox-mps ?to ?team-color))
   (bind ?to-side (pddl-place-to-mps-side ?to))
   (assert (agent-task-list (id (sym-cat TASK-LIST-(gensym*))) (executor-id ?ex-id) (pddl-action-id ?action-id)
-                           (tasks Move-src Retrieve Move-dest Deliver))) 
-  (modify ?ex (state REQUESTED)
-              (param-names wp from-mps from-side to-mps to-side step)
-              (param-values ?wp ?from-mps ?from-side ?to-mps ?to-side ?step))
-)
-
-(defrule agent-task-list-create-transport-to-slide
-  ?ex <- (executor (id ?ex-id) (state ASSIGNED) (worker ?robot&ROBOT1|ROBOT2|ROBOT3) (pddl-action-id ?action-id))
-  (confval (path "/rcll-simulator/enabled") (value TRUE))
-  (protobuf-peer (name ?robot) (peer-id ?peer-id))
-  (not (agent-task-list (executor-id ?ex-id)))
-  ?pa <- (pddl-action (id ?pa-id) (name transport-to-slide) (params ?wp ?from ?to))
-  (game-state (team-color ?team-color))
-  =>
-  (bind ?from-mps (pddl-place-to-refbox-mps ?from ?team-color))
-  (bind ?from-side (pddl-place-to-mps-side ?from))
-  (bind ?to-mps (pddl-place-to-refbox-mps ?to ?team-color))
-  (bind ?to-side (pddl-place-to-mps-side ?to))
-  (assert (agent-task-list (id (sym-cat TASK-LIST-(gensym*))) (executor-id ?ex-id) (pddl-action-id ?action-id)
-                           (tasks Move-src Retrieve Move-dest Deliver))) 
-  (modify ?ex (state REQUESTED)
-              (param-names wp from-mps from-side to-mps to-side)
-              (param-values ?wp ?from-mps ?from-side ?to-mps ?to-side))
+               (tasks Move-src Retrieve Move-dest Deliver) 
+               (params ?wp ?from-mps ?from-side ?to-mps ?to-side)))
+  (modify ?ex (state REQUESTED))
 )
 
 (defrule agent-task-list-create-carrier-to-input
-  ?ex <- (executor (id ?ex-id) (state ASSIGNED) (worker ?robot&ROBOT1|ROBOT2|ROBOT3) (pddl-action-id ?action-id))
+  ?ex <- (executor (id ?ex-id) (state INIT) (worker ?robot) (pddl-action-id ?action-id))
+  (robot (name ?robot))
   (confval (path "/rcll-simulator/enabled") (value TRUE))
   (protobuf-peer (name ?robot) (peer-id ?peer-id))
   (not (agent-task-list (executor-id ?ex-id)))
@@ -50,21 +32,20 @@
   (bind ?from-side (pddl-place-to-mps-side LEFT))
   (bind ?to-side (pddl-place-to-mps-side ?to-place))
   (assert (agent-task-list (id (sym-cat TASK-LIST-(gensym*))) (executor-id ?ex-id) (pddl-action-id ?action-id)
-                           (tasks Move-src Retrieve Move-dest Deliver))) 
-  (modify ?ex (state REQUESTED)
-              (param-names wp from-mps from-side to-mps to-side)
-              (param-values ?wp ?from-mps ?from-side ?from-mps ?to-side))
+              (tasks Move-src Retrieve Move-dest Deliver) 
+              (params ?wp ?from-mps ?from-side ?from-mps ?to-side)))
+  (modify ?ex (state REQUESTED))
 )
 
 (defrule agent-task-create-retrieve
-  ?at-list <- (agent-task-list (executor-id ?ex-id) (tasks ?task&Retrieve $?rest)) 
-  ?ex <- (executor (id ?ex-id) (worker ?robot) (param-names $?param-names)
-             (param-values $?param-values))
+  ?at-list <- (agent-task-list (executor-id ?ex-id) (tasks ?task&Retrieve $?rest) 
+                          (params $?params))
+  ?ex <- (executor (id ?ex-id) (worker ?robot))
   (current-rcll-agent-task-id (robot ?robot) (task-id ?seq)) 
-  (not (rcll-agent-task (robot ?robot) (task-id ?seq) (task-name ?task)))
+  (not (rcll-agent-task (robot ?robot) (task-id ?seq)))
   =>
-  (bind ?mps (get-param-by-name from-mps ?param-names ?param-values))
-  (bind ?mps-side (get-param-by-name from-side ?param-names ?param-values))
+  (bind ?mps (nth$ 2 ?params))
+  (bind ?mps-side (nth$ 3 ?params))
   (assert (rcll-agent-task (task-id ?seq) (task-name ?task) (robot ?robot) (task-type Retrieve)     
    ;TODO add workpiece information
    (machine ?mps) (side ?mps-side) (executor-id ?ex-id)                                                              
@@ -73,14 +54,14 @@
 )    
 
 (defrule agent-task-create-deliver
-  ?at-list <- (agent-task-list (id ?id) (executor-id ?ex-id) (tasks ?task&Deliver $?rest))
-  ?ex <- (executor (id ?ex-id) (worker ?robot) (param-names $?param-names)
-             (param-values $?param-values))
+  ?at-list <- (agent-task-list (id ?id) (executor-id ?ex-id) (tasks ?task&Deliver $?rest)
+                          (params $?params))
+  ?ex <- (executor (id ?ex-id) (worker ?robot))
   (current-rcll-agent-task-id (robot ?robot) (task-id ?seq)) 
-  (not (rcll-agent-task (robot ?robot) (task-id ?seq) (task-name ?task)))
+  (not (rcll-agent-task (robot ?robot) (task-id ?seq)))
   =>
-  (bind ?mps (get-param-by-name to-mps ?param-names ?param-values))
-  (bind ?mps-side (get-param-by-name to-side ?param-names ?param-values))
+  (bind ?mps (nth$ 4 ?params))
+  (bind ?mps-side (nth$ 5 ?params))
   (assert (rcll-agent-task (task-id ?seq) (task-name ?task) (robot ?robot) (task-type Deliver)     
    ;TODO add workpiece information
    (machine ?mps) (side ?mps-side) (executor-id ?ex-id)                                                              
@@ -89,21 +70,20 @@
 )    
 
 (defrule agent-task-create-move
-  ?at-list <- (agent-task-list (id ?id) (executor-id ?ex-id) (tasks ?task&Move-src|Move-dest $?rest)) 
-  ?ex <- (executor (id ?ex-id) (worker ?robot)
-             (param-names $?param-names)
-             (param-values $?param-values))
+  ?at-list <- (agent-task-list (id ?id) (executor-id ?ex-id) (tasks ?task&Move-src|Move-dest $?rest)
+                          (params $?params))
+  ?ex <- (executor (id ?ex-id) (worker ?robot))
   (current-rcll-agent-task-id (robot ?robot) (task-id ?seq)) 
-  (not (rcll-agent-task (robot ?robot) (task-id ?seq) (task-name ?task)))
+  (not (rcll-agent-task (robot ?robot) (task-id ?seq)))
   =>
   ;TODO test for current location to be not equal to desired location
   (if (eq ?task Move-src)
    then 
-     (bind ?mps (get-param-by-name from-mps ?param-names ?param-values))
-     (bind ?mps-side (get-param-by-name from-side ?param-names ?param-values))
+     (bind ?mps (nth$ 2 ?params))
+     (bind ?mps-side (nth$ 3 ?params))
    else 
-     (bind ?mps (get-param-by-name to-mps ?param-names ?param-values))
-     (bind ?mps-side (get-param-by-name to-side ?param-names ?param-values))
+     (bind ?mps (nth$ 4 ?params))
+     (bind ?mps-side (nth$ 5 ?params))
   )
   (assert (rcll-agent-task (task-id ?seq) (task-name ?task) (robot ?robot) (task-type Move)
    (machine ?mps) (side ?mps-side) (executor-id ?ex-id)
@@ -112,7 +92,8 @@
 )    
 
 (defrule agent-task-list-delete-active
-  ?at-list <- (agent-task-list (tasks ?cur-task $?rest) (current-task-id ?seq))
+  ?at-list <- (agent-task-list (executor-id ?id) (tasks ?cur-task $?rest) (current-task-id ?seq))
+  (executor (id ?id) (state ACCEPTED))
   ?at <- (rcll-agent-task (task-id ?seq) (task-name ?cur-task) (outcome ~UNKNOWN) (robot ?robot))
   ?cur-task-seq <- (current-rcll-agent-task-id (task-id ?seq) (robot ?robot))
   =>
@@ -125,7 +106,7 @@
   ?ex <- (executor (id ?ex-id) (state ACCEPTED))
   (rcll-agent-task (task-id ?seq) (outcome ?outcome&~UNKNOWN))
   =>
-  (if (eq ?outcome SUCCESSFUL)
+  (if (eq ?outcome SUCCEEDED)
    then
      (modify ?ex (state SUCCEEDED))
    else
