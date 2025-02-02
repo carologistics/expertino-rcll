@@ -102,6 +102,11 @@
   (slot node (type STRING) (default "/pddl_manager"))
 )
 
+(deftemplate pddl-instance-update
+  (slot instance (type SYMBOL))
+  (slot last-updated (type FLOAT))
+)
+
 (deftemplate pddl-goal-fluent
 " Facts to represent goal conditions for planning.
   Each fact of this template represent one positive boolean fluent in a
@@ -381,6 +386,7 @@
   (slot plan (type SYMBOL))
   (slot id (type SYMBOL))
   (slot context (type SYMBOL))
+  (slot instance-update (type FLOAT))
   (slot state (type SYMBOL) (allowed-values PENDING CHECK-PRECONDITION PRECONDITION-SAT PRECONDITION-UNSAT) (default PENDING))
   (multislot unsatisfied-preconditions (type STRING) (default (create$)))
 )
