@@ -9,11 +9,12 @@
 (defrule action-get-action-effect-request
   (declare (salience ?*PRIORITY-PDDL-APPLY-EFFECT*))
   (pddl-manager (node ?node))
-  (pddl-action (id ?action-id) (name ?name) (params $?params))
-  ?apply-effect-f <- (pddl-action-apply-effect (instance ?instance) (action ?action-id) (state PENDING))
+  (pddl-action (id ?action-id) (name ?name) (params $?params) (instance ?instance))
+  ?apply-effect-f <- (pddl-action-apply-effect (action ?action-id) (state PENDING))
+  (not (pddl-action-apply-effect (state START-EFFECT-APPLIED)))
   ?pi-f <- (pddl-instance (name ?instance) (state LOADED) (busy-with FALSE))
   (ros-msgs-client (service ?s&:(eq ?s (str-cat ?node "/get_action_effects"))) (type ?type))
-  (not (service-request-meta (service ?s) (meta ?instance)))
+  (not (service-request-meta (service ?s) (meta ?action-id)))
   =>
   (bind ?new-req (ros-msgs-create-request ?type))
   (bind ?action-msg (ros-msgs-create-message "expertino_msgs/msg/Action"))
@@ -23,7 +24,7 @@
   (ros-msgs-set-field ?new-req "action" ?action-msg)
   (bind ?id (ros-msgs-async-send-request ?new-req ?s))
   (if ?id then
-    (assert (service-request-meta (service ?s) (request-id ?id) (meta ?instance)))
+    (assert (service-request-meta (service ?s) (request-id ?id) (meta ?action-id)))
     (modify ?apply-effect-f (state WAITING))
     (modify ?pi-f (busy-with ACTION-EFFECTS))
    else
@@ -37,8 +38,8 @@
   (declare (salience ?*PRIORITY-PDDL-APPLY-EFFECT*))
   (pddl-manager (node ?node))
   ?pi-f <- (pddl-instance (name ?instance) (busy-with FALSE))
-  ?apply-effect-f <- (pddl-action-apply-effect (instance ?instance)
-    (state START-EFFECT-APPLIED))
+  ?apply-effect-f <- (pddl-action-apply-effect (action ?id) (effect-type ALL) (state START-EFFECT-APPLIED))
+  (pddl-action (id ?id) (instance ?instance))
   =>
   (modify ?pi-f (busy-with ACTION-EFFECTS))
 )
@@ -46,7 +47,8 @@
 (defrule action-get-action-effect
   (pddl-manager (node ?node))
   ?pi-f <- (pddl-instance (name ?instance) (busy-with ACTION-EFFECTS))
-  ?apply-effect-f <- (pddl-action-apply-effect (instance ?instance) (effect-type ?eff-type)
+  (pddl-action (id ?action-id) (instance ?instance))
+  ?apply-effect-f <- (pddl-action-apply-effect (effect-type ?eff-type) (action ?action-id)
     (state ?state&:(member$ ?state (create$ WAITING START-EFFECT-APPLIED))))
   (ros-msgs-client (service ?s&:(eq ?s (str-cat ?node "/get_action_effects"))) (type ?type))
   ?msg-f <- (ros-msgs-response (service ?s) (msg-ptr ?ptr) (request-id ?id))
@@ -57,7 +59,11 @@
   (bind ?next-state DONE)
   (if (and (member$ ?eff-type (create$ ALL START)) (eq ?state WAITING)) then
     (bind ?target-time-point START)
-    (bind ?next-state START-EFFECT-APPLIED)
+    (if (eq ?eff-type ALL) then
+      (bind ?next-state START-EFFECT-APPLIED)
+     else
+      (bind ?nex-state DONE)
+    )
    else
     (if (member$ ?eff-type (create$ ALL END)) then
       (bind ?target-time-point END)
@@ -115,7 +121,7 @@
       (ros-msgs-destroy-message ?fluent-msg)
     ) 
    else
-    (printout error "Failed to retrieve precondition \"" ?action-id "\":" ?error crlf)
+    (printout error "Failed to retrieve effect for action \"" ?action-id "\":" ?error crlf)
   )
   (if (eq ?next-state DONE) then
     (ros-msgs-destroy-message ?ptr)

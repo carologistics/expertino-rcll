@@ -7,14 +7,37 @@
   )
 )
 
+(defrule add-ring-specs-to-problem
+  (startup-completed)
+  (not (added-ring-specs))
+  (confval (path "/pddl/problem_instance") (value ?instance-str))
+  (ring-spec (color RING_GREEN))
+  (ring-spec (color RING_YELLOW))
+  (ring-spec (color RING_BLUE))
+  (ring-spec (color RING_ORANGE))
+  =>
+  (bind ?instance (sym-cat ?instance-str))
+  (delayed-do-for-all-facts ((?ring-spec ring-spec)) TRUE
+    (bind ?value (float ?ring-spec:cost))
+    (foreach ?i (create$ 1 2 3)
+      (assert (pending-pddl-numeric-fluent (instance ?instance) (name price)
+                 (params (ring-color-to-pddl ?ring-spec:color ?i))
+                 (value ?value)))
+    )
+  )
+  (assert (added-ring-specs))
+)
+
 (defrule add-order-to-problem
   (startup-completed)
-  ?o-f <- (order (name ?name) (workpiece nil) (base-color ?base-col) (ring-colors $?ring-cols) (cap-color ?cap-col) (state OPEN))
+  (added-ring-specs)
+  ?o-f <- (order (name ?name) (id ?order-id) (workpiece nil) (base-color ?base-col) (ring-colors $?ring-cols) (cap-color ?cap-col) (state OPEN))
   (not (added-one-order)) ;remove this eventually
   (confval (path "/pddl/problem_instance") (value ?instance-str))
   =>
   (bind ?instance (sym-cat ?instance-str))
   (bind ?wp (sym-cat (lowcase ?name) "-" (gensym*)))
+  (assert (workpiece-for-order (wp ?wp) (order ?order-id)))
   (assert (pending-pddl-object (instance ?instance) (name ?wp) (type product)))
   (assert (pending-pddl-fluent (instance ?instance) (name spawnable) (params ?wp)))
   (bind ?curr-step (wp-part-to-pddl ?base-col))
@@ -67,34 +90,34 @@
   (assert (planned-for-main))
 )
 
-(defrule action-apply-effect-test-main-action
-" Showcase how to apply an action effect 'directly' (as in, the actual action
-  of the plan is used).
-  It applies all at-start and at-end effects of it are applied.
-  Hence, WP o2-gen1 ends up being at a BS side in the worldmodel once this is
-  processed.
-"
-  (pddl-action (instance rcll) (id ?action-id) (name bs-dispense) (params ?wp bs ?bs-side base-black ring-blue1))
-  =>
-  (assert (pddl-action-apply-effect (instance rcll) (action ?action-id) (effect-type ALL)))
-)
-
-(defrule action-apply-effect-test-sub-action
-" Continuation of the example for applying effects, showcasing how to handle
-  sub-actions and partial effect application.
-  Once the action-apply-effect-test-main-action activation caused the
-  bs-dispense action effects to be applied, this rule takes the subsequent
-  transport action and applies some partial effects.
-  In particular, it applies the at-start effects of the 'transport-step-1-drive-to'
-  action by first creating a suitable grounded pddl-action for it and then
-  requesting the application of the effects.
-"
-  (pddl-action (instance rcll) (id ?dispense-id) (name bs-dispense))
-  ?apply-effect <- (pddl-action-apply-effect (action ?dispense-id) (instance rcll) (state DONE))
-  (pddl-action (instance rcll) (id ?transport) (name transport) (params ?wp ?bs-side rs2-input ring-blue1))
-  =>
-  (retract ?apply-effect)
-  (bind ?id (gensym*))
-  (assert (pddl-action (instance rcll) (id ?id) (name transport-step-1-drive-to) (params ?wp ?bs-side rs2-input ring-blue1)))
-  (assert (pddl-action-apply-effect (instance rcll) (action ?id) (effect-type START)))
-)
+;(defrule action-apply-effect-test-main-action
+;" Showcase how to apply an action effect 'directly' (as in, the actual action
+;  of the plan is used).
+;  It applies all at-start and at-end effects of it are applied.
+;  Hence, WP o2-gen1 ends up being at a BS side in the worldmodel once this is
+;  processed.
+;"
+;  (pddl-action (instance rcll) (id ?action-id) (name bs-dispense) (params ?wp bs ?bs-side base-black ring-blue1))
+;  =>
+;  (assert (pddl-action-apply-effect (action ?action-id) (effect-type ALL)))
+;)
+;
+;(defrule action-apply-effect-test-sub-action
+;" Continuation of the example for applying effects, showcasing how to handle
+;  sub-actions and partial effect application.
+;  Once the action-apply-effect-test-main-action activation caused the
+;  bs-dispense action effects to be applied, this rule takes the subsequent
+;  transport action and applies some partial effects.
+;  In particular, it applies the at-start effects of the 'transport-step-1-drive-to'
+;  action by first creating a suitable grounded pddl-action for it and then
+;  requesting the application of the effects.
+;"
+;  (pddl-action (instance rcll) (id ?dispense-id) (name bs-dispense))
+;  ?apply-effect <- (pddl-action-apply-effect (action ?dispense-id) (state DONE))
+;  (pddl-action (instance rcll) (id ?transport) (name transport) (params ?wp ?bs-side rs2-input ring-blue1))
+;  =>
+;  (retract ?apply-effect)
+;  (bind ?id (gensym*))
+;  (assert (pddl-action (instance rcll) (id ?id) (name transport-step-1-drive-to) (params ?wp ?bs-side rs2-input ring-blue1)))
+;  (assert (pddl-action-apply-effect (action ?id) (effect-type START)))
+;)

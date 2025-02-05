@@ -28,6 +28,7 @@
     (status (client-status-to-sym ?status))
     (client-goal-handle ?cgh-ptr)
   )
+  (retract ?gr-f)
 )
 
 (defrule plan-update-plan-status
@@ -62,16 +63,23 @@
       (bind ?equiv_class (expertino-msgs-timed-plan-action-get-field ?action "equiv_class"))
       (bind ?ps-time (expertino-msgs-timed-plan-action-get-field ?action "start_time"))
       (bind ?p-duration (expertino-msgs-timed-plan-action-get-field ?action "duration"))
-      (assert (pddl-action (id (gensym*)) (plan ?plan-id) (instance ?instance) (name ?name) (params ?arg-syms) (plan-order-class ?equiv_class) (planned-start-time ?ps-time) (planned-duration ?p-duration)))
+      (assert (pddl-action (id (gensym*)) (plan ?plan-id) (instance ?instance) (name ?name) (params ?arg-syms)
+                   (plan-order-class ?equiv_class) (planned-start-time ?ps-time) (planned-duration ?p-duration)))
+      (assert (pddl-plan (id ?plan-id) (instance ?instance)))
     )
+   else
+    (printout red "plan not found!" crlf)
   )
-
-  (assert (pddl-plan (id ?plan-id) (instance ?instance)))
-	(expertino-msgs-plan-temporal-result-destroy ?res-ptr)
-	(expertino-msgs-plan-temporal-goal-destroy ?goal-ptr)
-	(expertino-msgs-plan-temporal-client-goal-handle-destroy ?cgh-ptr)
-   (retract ?pc-f)
-   (retract ?wr-f)
+  ;de-freeze the agenda if frozen
+  (do-for-all-facts ((?agenda agenda))
+    (eq ?agenda:state INACTIVE)
+    (modify ?agenda (state ACTIVE))
+  )
+  (expertino-msgs-plan-temporal-result-destroy ?res-ptr)
+  (expertino-msgs-plan-temporal-goal-destroy ?goal-ptr)
+  (expertino-msgs-plan-temporal-client-goal-handle-destroy ?cgh-ptr)
+  (retract ?pc-f)
+  (retract ?wr-f)
 )
 
 

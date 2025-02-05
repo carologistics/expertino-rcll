@@ -22,7 +22,7 @@
     (ros-msgs-set-field ?new-req "functions" ?function-msgs)
     (bind ?id (ros-msgs-async-send-request ?new-req ?s))
     (if ?id then
-      (modify ?pi-f (busy-with FLUENTS))
+      (modify ?pi-f (busy-with NUMERIC-FLUENTS))
       (assert (service-request-meta (service ?s) (request-id ?id) (meta (sym-cat ?instance))))
      else
       (printout error "Sending of request failed, is the service " ?s " running?" crlf)
@@ -38,8 +38,8 @@
 " Process a response to the /set_functions service by removing the respective pddl-numeric-fluent facts and clean up the associated pending facts afterwards.
 "
   (pddl-manager (node ?node))
-  ?pi-f <- (pddl-instance (name ?instance) (busy-with FLUENTS))
-  (ros-msgs-client (service ?s&:(eq ?s (str-cat ?node "/add_fluents"))))
+  ?pi-f <- (pddl-instance (name ?instance) (busy-with NUMERIC-FLUENTS))
+  (ros-msgs-client (service ?s&:(eq ?s (str-cat ?node "/set_functions"))))
   ?req-f <- (service-request-meta (service ?s) (meta ?instance) (request-id ?id))
   ?msg-f <- (ros-msgs-response (service ?s) (msg-ptr ?ptr) (request-id ?id))
   =>
@@ -48,15 +48,15 @@
   (bind ?error (ros-msgs-get-field ?ptr "error"))
   (if ?success then
     (printout debug "Successfully set functions" crlf)
-    (delayed-do-for-all-facts ((?ppf pending-pddl-numeric-fluent)) (and (eq ?ppf:state PENDING) (eq ?ppf:instance ?instance))
+    (delayed-do-for-all-facts ((?ppf pending-pddl-numeric-fluent)) (and (eq ?ppf:state WAITING) (eq ?ppf:instance ?instance))
       (if (not (do-for-fact ((?fluent pddl-numeric-fluent)) (and (eq ?fluent:name ?ppf:name) (eq ?fluent:params ?ppf:params))
         (modify ?fluent (value ?ppf:value)))) then
-        (assert (pddl-numeric-fluent (name ?ppf:name) (instance ?instance) (params ?ppf:values) (value ?ppf:value)))
+        (assert (pddl-numeric-fluent (name ?ppf:name) (instance ?instance) (params ?ppf:params) (value ?ppf:value)))
       )
       (retract ?ppf)
     )
    else
-    (printout error "Failed to remove fluents \"" ?instance "\":" ?error crlf)
+    (printout error "Failed to set numeric fluents \"" ?instance "\":" ?error crlf)
     ; TODO: how to deal with failed removing of fluents
     (delayed-do-for-all-facts ((?ppf pending-pddl-fluent)) (and ?ppf:request-sent (eq ?ppf:instance ?instance) ?ppf:delete)
       (modify ?ppf (error ?error) (state ERROR))

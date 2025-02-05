@@ -105,7 +105,7 @@
    else
     (printout error "Failed to remove fluents \"" ?instance "\":" ?error crlf)
     ; TODO: how to deal with failed removing of fluents
-    (delayed-do-for-all-facts ((?ppf pending-pddl-fluent)) (and ?ppf:request-sent (eq ?ppf:instance ?instance) ?ppf:delete)
+    (delayed-do-for-all-facts ((?ppf pending-pddl-fluent)) (and (eq ?ppf:state WAITING) (eq ?ppf:instance ?instance) ?ppf:delete)
       (modify ?ppf (state ERROR) (error ?error))
     )
   )

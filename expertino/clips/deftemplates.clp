@@ -228,7 +228,7 @@
   (slot problem (type STRING))
   (slot directory (type STRING))
   (slot state (type SYMBOL) (allowed-values PENDING LOADED ERROR) (default PENDING))
-  (slot busy-with (type SYMBOL) (allowed-values FALSE OBJECTS FLUENTS ACTION-EFFECTS CLEAR-GOALS SET-GOALS CHECK-CONDITIONS GET-FLUENTS GET-NUMERIC-FLUENTS GET-ACTION-NAMES SET-ACTION-FILTER SET-OBJECT-FILTER SET-FLUENT-FILTER CREATE-GOAL-INSTANCE) (default FALSE))
+  (slot busy-with (type SYMBOL) (allowed-values FALSE OBJECTS FLUENTS NUMERIC-FLUENTS ACTION-EFFECTS CLEAR-GOALS SET-GOALS CHECK-CONDITIONS GET-FLUENTS GET-NUMERIC-FLUENTS GET-ACTION-NAMES SET-ACTION-FILTER SET-OBJECT-FILTER SET-FLUENT-FILTER CREATE-GOAL-INSTANCE) (default FALSE))
   (slot error (type STRING))
 )
 
@@ -372,12 +372,9 @@
 
 (deftemplate pddl-action-apply-effect
 " Apply the effect of a grounded pddl action.
-  @slot instance: pddl instance belonging to the action.
-  TODO: should this reference a pddl-action or copy the values like now?
   @slot action: id of the action.
   @slot state: TBD
 "
-  (slot instance (type SYMBOL))
   (slot action (type SYMBOL))
   (slot effect-type (type SYMBOL) (allowed-values ALL START END) (default ALL))
   (slot state (type SYMBOL) (allowed-values PENDING WAITING START-EFFECT-APPLIED DONE ERROR) (default PENDING))
@@ -405,7 +402,7 @@
   (slot action (type SYMBOL))
   (slot execution-state (type SYMBOL) (allowed-values INITIAL UNSAT PENDING SELECTED EXECUTING COMPLETED ERROR EFFECTS-APPLIED) (default INITIAL))
   (multislot priority (type INTEGER) (default (create$ 0)))
-  (slot worker-type (type SYMBOL) (allowed-values ROBOT REFBOX))
+  (slot worker-type (type SYMBOL) (allowed-values ROBOT REFBOX AGENT))
   (slot worker (type SYMBOL) (default UNSET))
 )
 
@@ -493,7 +490,7 @@
 (deftemplate worker
   (slot id (type SYMBOL))
   (slot name (type SYMBOL))
-  (slot type (type SYMBOL) (allowed-values ROBOT REFBOX))
+  (slot type (type SYMBOL) (allowed-values ROBOT REFBOX AGENT))
   (slot state (type SYMBOL) (allowed-values IDLE BUSY RECOVERY))
   (slot refbox-state (type SYMBOL) (allowed-values ACTIVE MAINTENANCE))
 )
@@ -501,4 +498,9 @@
 (deftemplate worker-idle-timer
   (slot worker (type SYMBOL))
   (slot start-time (type FLOAT) (default 0.0))
+)
+
+(deftemplate workpiece-for-order
+  (slot wp (type SYMBOL))
+  (slot order (type SYMBOL))
 )

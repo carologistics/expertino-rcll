@@ -214,6 +214,24 @@
   )
 )
 
+(deffunction ring-color-to-pddl (?ring ?num)
+  (if (str-index "BLUE" ?ring)
+   then
+    (return (sym-cat ring-blue ?num))
+   else (if (str-index "GREEN" ?ring)
+         then
+          (return (sym-cat ring-green ?num))
+         else (if (str-index "ORANGE" ?ring)
+               then
+    (           return (sym-cat ring-orange ?num))
+               else (if (str-index "YELLOW" ?ring)
+                     then
+                      (return (sym-cat ring-yellow ?num))
+                      )))
+  )
+)
+
+
 (deffunction pddl-task-to-cap-color (?task)
   (return (sym-cat CAP _ (upcase (sub-string (+ (str-index "-" ?task) 1) (str-length ?task) ?task))))
 )

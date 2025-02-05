@@ -39,8 +39,8 @@
       (bind ?arg-syms (create$))
       (foreach ?arg ?args
         (bind ?arg-syms (create$ ?arg-syms (sym-cat ?arg)))
-        (assert (pddl-fluent (name ?name) (params ?arg-syms) (instance ?instance)))
       )
+      (assert (pddl-fluent (name ?name) (params ?arg-syms) (instance ?instance)))
     )
     (modify ?get-facts-f (state DONE))
    else
