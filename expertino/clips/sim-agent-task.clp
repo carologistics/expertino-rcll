@@ -92,22 +92,49 @@
 
 (defrule agent-task-list-delete-active
   ?at-list <- (agent-task-list (executor-id ?id) (tasks ?cur-task $?rest) (current-task-id ?seq))
-  (executor (id ?id) (state ACCEPTED))
+  (executor (id ?id) (state ACCEPTED) (pddl-action-id ?action-id))
   ?at <- (rcll-agent-task (task-id ?seq) (task-name ?cur-task) (outcome ~UNKNOWN) (robot ?robot))
   ?cur-task-seq <- (current-rcll-agent-task-id (task-id ?seq) (robot ?robot))
+  (pddl-action (id ?action-id) (name ?action) (instance ?instance) (params $?params))
   =>
   (modify ?at-list (tasks $?rest))
   (modify ?cur-task-seq (task-id (+ 1 ?seq)))
+  (if (or (eq ?action transport) (eq ?action transport-to-slide))
+   then
+     (bind ?sub-action nil)
+     (switch ?cur-task
+       (case Move-src then
+         (bind ?sub-action (sym-cat ?action -step-1-drive-to))
+       )
+       (case Retrieve then
+         (bind ?sub-action (sym-cat ?action -step-2-pick-up))
+       )
+       (case Deliver then 
+         (bind ?sub-action (sym-cat ?action -step-4-place-down))
+       )
+     )
+     (if (neq ?sub-action nil)
+      then
+        (bind ?sub-action-id (gensym*)) 
+        (assert (pddl-action (id ?sub-action-id) (name ?sub-action) (instance ?instance) (params ?params)))
+        (assert (pddl-action-apply-effect (action ?sub-action-id) (effect-type ALL)))
+     )
+  ) 
 )
 
 (defrule agent-task-list-mark-done
   ?at-list <- (agent-task-list (tasks) (executor-id ?ex-id) (current-task-id ?seq))
-  ?ex <- (executor (id ?ex-id) (state ACCEPTED))
+  ?ex <- (executor (id ?ex-id) (state ACCEPTED) (pddl-action-id ?action-id))
   (rcll-agent-task (task-id ?seq) (outcome ?outcome&~UNKNOWN))
+  (pddl-action (id ?action-id) (name ?action-name) (params $?params))
   =>
   (if (eq ?outcome SUCCEEDED)
    then
      (modify ?ex (state SUCCEEDED))
+     (if (eq ?action-name carrier-to-input)
+      then
+        (assert (pddl-action-apply-effect (action ?action-id) (effect-type ALL))) 
+     )
    else
      (modify ?ex (state ABORTED))
   )

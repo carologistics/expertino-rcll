@@ -26,7 +26,7 @@
 (defrule action-precond-check-response
   ?act-f <- (pddl-action (id ?action-id) (state CHECK-PRECONDITION))
   (pddl-manager (node ?node))
-  ?pi-f <- (pddl-instance (name ?instance) (busy-with ACTION-EFFECTS))
+  ?pi-f <- (pddl-instance (name ?instance) (busy-with CHECK-CONDITIONS))
   (ros-msgs-client (service ?s&:(eq ?s (str-cat ?node "/check_action_precondition"))) (type ?type))
   ?msg-f <- (ros-msgs-response (service ?s) (msg-ptr ?ptr) (request-id ?id))
   ?req-meta <- (service-request-meta (service ?s) (request-id ?id) (meta ?action-id))
@@ -56,7 +56,7 @@
 
 (defrule action-precond-response-no-action
   (pddl-manager (node ?node))
-  ?pi-f <- (pddl-instance (name ?instance) (busy-with ACTION-EFFECTS))
+  ?pi-f <- (pddl-instance (name ?instance) (busy-with CHECK-CONDITIONS))
   (ros-msgs-client (service ?s&:(eq ?s (str-cat ?node "/check_action_precondition"))) (type ?type))
   ?msg-f <- (ros-msgs-response (service ?s) (msg-ptr ?ptr) (request-id ?id))
   ?req-meta <- (service-request-meta (service ?s) (request-id ?id) (meta ?action-id))

@@ -370,12 +370,9 @@
 
 (deftemplate pddl-action-apply-effect
 " Apply the effect of a grounded pddl action.
-  @slot instance: pddl instance belonging to the action.
-  TODO: should this reference a pddl-action or copy the values like now?
   @slot action: id of the action.
   @slot state: TBD
 "
-  (slot instance (type SYMBOL))
   (slot action (type SYMBOL))
   (slot effect-type (type SYMBOL) (allowed-values ALL START END) (default ALL))
   (slot state (type SYMBOL) (allowed-values PENDING WAITING START-EFFECT-APPLIED DONE ERROR) (default PENDING))
