@@ -14,7 +14,7 @@
 
 {% extends "domain_base.jinja.pddl" %}
 
-{% set templates = ['domain_planning_actions.jinja.pddl', 'transport.jinja.pddl'] %}
+{% set templates = ['domain_planning_actions.jinja.pddl', 'transport.jinja.pddl', 'transport-to-slide.jinja.pddl'] %}
 
 {% block actions %}
 {% for template in templates %}

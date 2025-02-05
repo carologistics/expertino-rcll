@@ -77,7 +77,7 @@
 "
   (pddl-action (instance rcll) (id ?action-id) (name bs-dispense) (params ?wp bs ?bs-side base-black ring-blue1))
   =>
-  (assert (pddl-action-apply-effect (instance rcll) (action ?action-id) (effect-type ALL)))
+  (assert (pddl-action-apply-effect (action ?action-id) (effect-type ALL)))
 )
 
 (defrule action-apply-effect-test-sub-action
@@ -91,11 +91,11 @@
   requesting the application of the effects.
 "
   (pddl-action (instance rcll) (id ?dispense-id) (name bs-dispense))
-  ?apply-effect <- (pddl-action-apply-effect (action ?dispense-id) (instance rcll) (state DONE))
+  ?apply-effect <- (pddl-action-apply-effect (action ?dispense-id) (state DONE))
   (pddl-action (instance rcll) (id ?transport) (name transport) (params ?wp ?bs-side rs2-input ring-blue1))
   =>
   (retract ?apply-effect)
   (bind ?id (gensym*))
   (assert (pddl-action (instance rcll) (id ?id) (name transport-step-1-drive-to) (params ?wp ?bs-side rs2-input ring-blue1)))
-  (assert (pddl-action-apply-effect (instance rcll) (action ?id) (effect-type START)))
+  (assert (pddl-action-apply-effect (action ?id) (effect-type START)))
 )

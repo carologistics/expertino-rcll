@@ -27,6 +27,7 @@
   ?aa <- (agenda-action-item (action ?action-id) (execution-state SELECTED))
   =>
   (modify ?aa (execution-state EXECUTING))
+  (assert (pddl-action-apply-effect (action ?action-id) (effect-type START)))
 )
 
 (defrule executor-succeeded
