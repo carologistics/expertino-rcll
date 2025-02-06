@@ -37,7 +37,7 @@
   (declare (salience ?*PRIORITY-PDDL-APPLY-EFFECT*))
   (pddl-manager (node ?node))
   ?pi-f <- (pddl-instance (name ?instance) (busy-with FALSE))
-  ?apply-effect-f <- (pddl-action-apply-effect (action ?id) (state START-EFFECT-APPLIED))
+  ?apply-effect-f <- (pddl-action-apply-effect (action ?id) (effect-type ALL) (state START-EFFECT-APPLIED))
   (pddl-action (id ?id) (instance ?instance))
   =>
   (modify ?pi-f (busy-with ACTION-EFFECTS))
@@ -58,7 +58,11 @@
   (bind ?next-state DONE)
   (if (and (member$ ?eff-type (create$ ALL START)) (eq ?state WAITING)) then
     (bind ?target-time-point START)
-    (bind ?next-state START-EFFECT-APPLIED)
+    (if (eq ?eff-type ALL) then
+      (bind ?next-state START-EFFECT-APPLIED)
+     else
+      (bind ?nex-state DONE)
+    )
    else
     (if (member$ ?eff-type (create$ ALL END)) then
       (bind ?target-time-point END)
@@ -118,7 +122,9 @@
    else
     (printout error "Failed to retrieve precondition \"" ?action-id "\":" ?error crlf)
   )
-  (ros-msgs-destroy-message ?ptr)
-  (retract ?msg-f)
-  (retract ?req-meta)
+  (if (eq ?next-state DONE) then
+    (ros-msgs-destroy-message ?ptr)
+    (retract ?msg-f)
+    (retract ?req-meta)
+  )
 )
