@@ -51,8 +51,6 @@
 
 
 (deffunction order-to-int (?order)
-  (printout yellow (sub-string 2 (str-length ?order) ?order) crlf)
-  (printout yellow (string-to-field (sub-string 2 (str-length ?order) ?order)) crlf)
   (return (integer (string-to-field (sub-string 2 (str-length ?order) ?order))))
 )
 
@@ -216,4 +214,16 @@
 
 (deffunction pddl-task-to-cap-color (?task)
   (return (sym-cat CAP _ (upcase (sub-string (+ (str-index "-" ?task) 1) (str-length ?task) ?task))))
+)
+
+(deffunction order-info-to-workpiece-colors (?order)
+  (bind ?base-col (fact-slot-value ?order base-color))
+  (bind ?ring-cols (fact-slot-value ?order ring-colors))
+  (bind ?cap-col (fact-slot-value ?order cap-color))
+  (bind ?ring-count (length$ ?ring-cols))
+  (if (< ?ring-count 3)
+   then
+     (loop-for-count (- 3 ?ring-count) (bind ?ring-cols (insert$ ?ring-cols (+ 1 ?ring-count) RING_NONE))) 
+  )
+  (return (create$ ?base-col ?ring-cols ?cap-col))
 )

@@ -15,6 +15,7 @@
   =>
   (bind ?instance (sym-cat ?instance-str))
   (bind ?wp (sym-cat (lowcase ?name) "-" (gensym*)))
+  (assert (workpiece-for-order (wp ?wp) (order ?name)))
   (assert (pending-pddl-object (instance ?instance) (name ?wp) (type product)))
   (assert (pending-pddl-fluent (instance ?instance) (name spawnable) (params ?wp)))
   (bind ?curr-step (wp-part-to-pddl ?base-col))
