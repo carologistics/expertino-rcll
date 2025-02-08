@@ -93,7 +93,7 @@
 (defrule agent-task-list-delete-active
   ?at-list <- (agent-task-list (executor-id ?id) (tasks ?cur-task $?rest) (current-task-id ?seq))
   (executor (id ?id) (state ACCEPTED) (pddl-action-id ?action-id))
-  ?at <- (rcll-agent-task (task-id ?seq) (task-name ?cur-task) (outcome ~UNKNOWN) (robot ?robot))
+  ?at <- (rcll-agent-task (task-id ?seq) (task-name ?cur-task) (outcome SUCCEEDED) (robot ?robot))
   ?cur-task-seq <- (current-rcll-agent-task-id (task-id ?seq) (robot ?robot))
   (pddl-action (id ?action-id) (name ?action) (instance ?instance) (params $?params))
   =>
