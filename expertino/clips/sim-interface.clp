@@ -60,8 +60,9 @@
 (defrule agent-task-recv-AgentTask-for-running-action
   ?pf <- (protobuf-msg (type "llsf_msgs.AgentTask") (ptr ?task-msg))
   ?at <- (rcll-agent-task (task-id ?task-seq) (robot ?robot)
-    (outcome UNKNOWN) (task-name ?task-name)
+    (outcome UNKNOWN) (task-name ?task-name) (executor-id ?ex-id)
   )
+  ?ex <- (executor (id ?ex-id))
   (not (rcll-agent-task (robot ?robot)
     (outcome FAILED)
   ))
@@ -77,8 +78,8 @@
     (if (pb-has-field ?task-msg "cancelled") then
       (bind ?cancelled (pb-field-value ?task-msg "cancelled"))
       (if ?cancelled then
-        (printout warn "Agent Task for " ?task-name " got cancelled" crlf))
-        (bind ?task-outcome CANCELLED)
+        (printout warn "Agent Task for " ?task-name " got cancelled" crlf)
+        (bind ?task-outcome CANCELLED))
     )
     (if (pb-has-field ?task-msg "successful") then
       (bind ?successful (pb-field-value ?task-msg "successful"))
@@ -86,6 +87,8 @@
         (bind ?task-outcome SUCCEEDED)
        else
         (bind ?task-outcome FAILED)
+        (modify ?ex (state ABORTED))
+        (printout warn "Executor with id " ?ex-id " got aborted" crlf)
       )
     )
     (if (neq ?task-outcome UNKNOWN) then
