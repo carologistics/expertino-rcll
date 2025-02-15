@@ -1,0 +1,6 @@
+string pddl_instance
+string[] action_names
+---
+bool success
+TimedPlanAction[] actions
+---

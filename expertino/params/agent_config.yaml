@@ -1,0 +1,38 @@
+game:
+  parameters:
+      simtest:
+        enabled: false
+        testbed: FULL  # defined in simtest.clp
+      rcll:
+        peer_address: 127.0.0.1
+        peer_recv_port: 4444
+        peer_send_port: 4445
+        cyan_recv_port: 4441
+        magenta_recv_port: 4442
+        cyan_send_port: 4446
+        magenta_send_port: 4447
+
+        team_name: Carologistics
+        crypto_key: randomkey
+        cipher: "aes-128-cbc"
+rcll-simulator:
+  enabled: true
+  host: 127.0.0.1
+  robot-send-ports: [2126, 2127, 2128]
+  robot-recv-ports: [2116, 2117, 2118]
+
+# Configuration for the integration of the external pddl manager.
+pddl:
+  # Name of the externally started pddl manager.
+  manager_node: "/pddl_manager"
+  # Directory relative to expertino share dir
+  # used to lookup all files specified below.
+  pddl_dir: "pddl"
+  # Name of the main pddl instance.
+  problem_instance: "rcll"
+  # Initial pddl model split in domain and problem file.
+  init_domain_file: "domain.jinja.pddl"
+  init_problem_file: "problem.jinja.pddl"
+  # For planning, a subset of actions is used, only actions from the provided domain file are used.
+  planning_instance: "planning"
+  planning_domain_file: "planning_domain.jinja.pddl"

@@ -1,0 +1,72 @@
+clips_manager:
+  ros__parameters:
+    environments: ["main"]
+    main:
+      plugins: ["executive",
+                "ament_index",
+                "config",
+                "protobuf",
+                "ros_msgs",
+                "plan_temporal_action",
+                "timed_plan_action_msg",
+                "files"]
+      log_clips_to_file: true
+      redirect_stdout_to_debug: true
+      watch: ["facts", "rules"]
+
+    ament_index:
+      plugin: "cx::AmentIndexPlugin"
+    protobuf:
+      plugin: "cx::ProtobufPlugin"
+      pkg_share_dirs: ["rcll_protobuf_msgs"]
+      proto_paths: ["rcll-protobuf-msgs"]
+
+    config:
+      plugin: "cx::ConfigPlugin"
+    executive:
+      plugin: "cx::ExecutivePlugin"
+      publish_on_refresh: false
+      assert_time: true
+      refresh_rate: 10
+    files:
+      plugin: "cx::FileLoadPlugin"
+      pkg_share_dirs: ["expertino", "cx_goal_reasoning"]
+      load: [
+        # Specific isolated concepts
+        "clips/expertino/unwatch.clp",
+        "clips/expertino/start-tasks/start-tasks.clp",
+        # General utility stuff
+        "clips/expertino/defglobals.clp",
+        "clips/expertino/deftemplates.clp",
+        "clips/expertino/deffunctions.clp",
+        # Startup
+        "clips/expertino/pddl/saliences.clp",
+        "clips/expertino/start-tasks/init-pddl.clp",
+        # Actual Reasoning
+        "clips/expertino/init.clp",
+        "clips/expertino/pddl/set-goals.clp",
+        "clips/expertino/pddl/clear-goals.clp",
+        "clips/expertino/pddl/objects.clp",
+        "clips/expertino/pddl/fluents.clp",
+        "clips/expertino/pddl/instances.clp",
+        "clips/expertino/pddl/get-action-names.clp",
+        "clips/expertino/pddl/get-fluents.clp",
+        "clips/expertino/pddl/numeric-fluents.clp",
+        "clips/expertino/pddl/plan.clp",
+        "clips/expertino/pddl/action-effect-apply.clp",
+        "clips/expertino/refbox-comm-init.clp",
+        "clips/expertino/refbox-recv.clp",
+        "clips/expertino/sim-interface.clp",
+        "clips/expertino/orders/order-selection.clp",
+        "clips/expertino/action-sim-bindings.clp",
+        "clips/expertino/action/action-agenda.clp",
+        "clips/expertino/action/action-precond-check.clp",
+        # Finalize
+        "clips/expertino/shutdown/finalize-ros.clp",
+        ]
+    ros_msgs:
+      plugin: "cx::RosMsgsPlugin"
+    plan_temporal_action:
+      plugin: "cx::CXExpertinoMsgsPlanTemporalPlugin"
+    timed_plan_action_msg:
+      plugin: "cx::CXExpertinoMsgsTimedPlanActionPlugin"

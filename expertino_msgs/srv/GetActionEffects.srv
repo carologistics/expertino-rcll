@@ -1,0 +1,6 @@
+expertino_msgs/Action action
+---
+bool success
+string error
+expertino_msgs/FunctionEffect[] function_effects
+expertino_msgs/FluentEffect[] fluent_effects
