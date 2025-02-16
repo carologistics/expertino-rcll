@@ -24,7 +24,25 @@
 
 (deftemplate order-scheduled
   (slot id))
+  
+(deftemplate order
+  (slot id (type INTEGER))
+  (slot name (type SYMBOL))
+  (slot workpiece (type SYMBOL))
+  (slot complexity (type SYMBOL))
 
+  (slot base-color (type SYMBOL))
+  (multislot ring-colors (type SYMBOL))
+  (slot cap-color (type SYMBOL))
+
+  (slot quantity-requested (type INTEGER))
+  (slot quantity-delivered (type INTEGER))
+  (slot quantity-delivered-other (type INTEGER))
+
+  (slot delivery-begin (type INTEGER))
+  (slot delivery-end (type INTEGER))
+  (slot competitive (type SYMBOL))
+)
 
 (deffacts initial-hardcoded-plan
   (plan-step (id 1) (task dispense) (start-time 0) (duration 5))
@@ -34,21 +52,21 @@
   (plan-step (id 5) (task finalize) (start-time 55) (duration 5)))
 
 
-;(deffacts new-order-O5
-;  (order 
-;    (id 5) 
-;    (name O5) 
-;    (workpiece nil) 
-;    (complexity C3) 
-;    (base-color BASE_SILVER) 
-;    (ring-colors (create$ RING_GREEN RING_YELLOW RING_ORANGE))
-;    (cap-color CAP_BLACK) 
-;    (quantity-requested 1) 
-;    (quantity-delivered 0) 
-;    (quantity-delivered-other 0) 
-;    (delivery-begin 383) 
-;    (delivery-end 513) 
-;    (competitive TRUE)))
+(deffacts new-order-O5
+  (order 
+    (id 5) 
+    (name O5) 
+    (workpiece nil) 
+    (complexity C3) 
+    (base-color BASE_SILVER) 
+    (ring-colors (create$ RING_GREEN RING_YELLOW RING_ORANGE))
+    (cap-color CAP_BLACK) 
+    (quantity-requested 1) 
+    (quantity-delivered 0) 
+    (quantity-delivered-other 0) 
+    (delivery-begin 383) 
+    (delivery-end 513) 
+    (competitive TRUE)))
 
 ;(deffacts new-order-O4
 ;  (order 
@@ -167,7 +185,7 @@
 (defrule set-goal-for-orders
   (startup-completed)
   (pddl-goal-fluent (instance ?rcll) (name step) (params ?wp1 $?))
-  (pddl-goal-fluent (instance ?rcll) (name step) (params ?wp2&:(neq ?wp1 ?wp2) $?))
+  ;(pddl-goal-fluent (instance ?rcll) (name step) (params ?wp2&:(neq ?wp1 ?wp2) $?))
   ?clear-f <- (pddl-clear-goals (instance ?rcll) (state DONE))
   =>
   (printout t "Setting goals for instance: " crlf)

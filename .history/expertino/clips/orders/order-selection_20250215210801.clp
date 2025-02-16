@@ -34,53 +34,53 @@
   (plan-step (id 5) (task finalize) (start-time 55) (duration 5)))
 
 
-;(deffacts new-order-O5
-;  (order 
-;    (id 5) 
-;    (name O5) 
-;    (workpiece nil) 
-;    (complexity C3) 
-;    (base-color BASE_SILVER) 
-;    (ring-colors (create$ RING_GREEN RING_YELLOW RING_ORANGE))
-;    (cap-color CAP_BLACK) 
-;    (quantity-requested 1) 
-;    (quantity-delivered 0) 
-;    (quantity-delivered-other 0) 
-;    (delivery-begin 383) 
-;    (delivery-end 513) 
-;    (competitive TRUE)))
+(deffacts new-order-O5
+  (order 
+    (id 5) 
+    (name O5) 
+    (workpiece nil) 
+    (complexity C3) 
+    (base-color BASE_SILVER) 
+    (ring-colors (create$ RING_GREEN RING_YELLOW RING_ORANGE))
+    (cap-color CAP_BLACK) 
+    (quantity-requested 1) 
+    (quantity-delivered 0) 
+    (quantity-delivered-other 0) 
+    (delivery-begin 383) 
+    (delivery-end 513) 
+    (competitive TRUE)))
 
-;(deffacts new-order-O4
-;  (order 
-;    (id 4) 
-;    (name O4) 
-;    (workpiece nil) 
-;    (complexity C3) 
-;    (base-color BASE_RED) 
-;    (ring-colors (create$ RING_YELLOW RING_GREEN RING_BLUE))
-;    (cap-color CAP_GREY) 
-;    (quantity-requested 1) 
-;    (quantity-delivered 0) 
-;    (quantity-delivered-other 0) 
-;   (delivery-begin 295) 
-;    (delivery-end 496) 
-;    (competitive FALSE)))
+(deffacts new-order-O4
+  (order 
+    (id 4) 
+    (name O4) 
+    (workpiece nil) 
+    (complexity C3) 
+    (base-color BASE_RED) 
+    (ring-colors (create$ RING_YELLOW RING_GREEN RING_BLUE))
+    (cap-color CAP_GREY) 
+    (quantity-requested 1) 
+    (quantity-delivered 0) 
+    (quantity-delivered-other 0) 
+    (delivery-begin 295) 
+    (delivery-end 496) 
+    (competitive FALSE)))
   
-;(deffacts new-order-O3
-;  (order 
-;    (id 3) 
-;    (name O3) 
-;    (workpiece nil) 
-;    (complexity C3) 
-;    (base-color BASE_RED) 
-;    (ring-colors (create$ RING_BLUE RING_GREEN RING_BLUE))
-;    (cap-color CAP_GREY) 
-;    (quantity-requested 1) 
-;    (quantity-delivered 0) 
-;    (quantity-delivered-other 0) 
-;    (delivery-begin 269) 
-;    (delivery-end 309) 
-;    (competitive FALSE)))
+(deffacts new-order-O3
+  (order 
+    (id 3) 
+    (name O3) 
+    (workpiece nil) 
+    (complexity C3) 
+    (base-color BASE_RED) 
+    (ring-colors (create$ RING_BLUE RING_GREEN RING_BLUE))
+    (cap-color CAP_GREY) 
+    (quantity-requested 1) 
+    (quantity-delivered 0) 
+    (quantity-delivered-other 0) 
+    (delivery-begin 269) 
+    (delivery-end 309) 
+    (competitive FALSE)))
   
 
 (defrule compute-last-end-time

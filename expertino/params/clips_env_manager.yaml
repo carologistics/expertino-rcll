@@ -57,7 +57,7 @@ clips_manager:
         "clips/expertino/refbox-comm-init.clp",
         "clips/expertino/refbox-recv.clp",
         "clips/expertino/sim-interface.clp",
-        "clips/expertino/orders/order-selection.clp",
+        "clips/expertino/orders/order-selection-refbox.clp",
         "clips/expertino/action-sim-bindings.clp",
         "clips/expertino/action/action-agenda.clp",
         "clips/expertino/action/action-precond-check.clp",
