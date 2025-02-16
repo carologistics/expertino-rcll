@@ -132,30 +132,8 @@
   )
 )
 
-(defrule add-ring-specs-to-problem
-  (startup-completed)
-  (not (added-ring-specs))
-  (confval (path "/pddl/problem_instance") (value ?instance-str))
-  (ring-spec (color RING_GREEN))
-  (ring-spec (color RING_YELLOW))
-  (ring-spec (color RING_BLUE))
-  (ring-spec (color RING_ORANGE))
-  =>
-  (bind ?instance (sym-cat ?instance-str))
-  (delayed-do-for-all-facts ((?ring-spec ring-spec)) TRUE
-    (bind ?value (float ?ring-spec:cost))
-    (foreach ?i (create$ 1 2 3)
-      (assert (pending-pddl-numeric-fluent (instance ?instance) (name price)
-                 (params (ring-color-to-pddl ?ring-spec:color ?i))
-                 (value ?value)))
-    )
-  )
-  (assert (added-ring-specs))
-)
-
 (defrule add-order-to-problem
   (startup-completed)
-  (added-ring-specs)
   (replan-required)  
   (insert-order (T-last-end ?last-end) (T-order-window ?window))
   ?order <- (order (id ?order-id) (name ?name))
@@ -166,9 +144,8 @@
   =>
   (bind ?rcll (sym-cat ?instance-str))
   (bind ?wp (sym-cat (lowcase ?name) "-" (gensym*)))
-  (assert (workpiece-for-order (wp ?wp) (order ?order-id)))
-  (assert (pending-pddl-object (instance ?instance) (name ?wp) (type product)))
-  (assert (pending-pddl-fluent (instance ?instance) (name spawnable) (params ?wp)))
+  (assert (pending-pddl-object (instance ?rcll) (name ?wp) (type product)))
+  (assert (pending-pddl-fluent (instance ?rcll) (name spawnable) (params ?wp)))
   (bind ?curr-step (wp-part-to-pddl ?base-col))
   (assert (pending-pddl-fluent (instance ?rcll) (name step) (params ?wp ?curr-step)))
   (bind ?ring-steps ?ring-cols)
