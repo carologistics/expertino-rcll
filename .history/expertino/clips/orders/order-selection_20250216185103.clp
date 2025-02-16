@@ -31,7 +31,7 @@
   (plan-step (id 2) (task transport) (start-time 5) (duration 20))
   (plan-step (id 3) (task mount) (start-time 25) (duration 10))
   (plan-step (id 4) (task transport) (start-time 35) (duration 20))
-  (plan-step (id 5) (task finalize) (start-time 195) (duration 5)))
+  (plan-step (id 5) (task finalize) (start-time 55) (duration 5)))
 
 
 ;(deffacts new-order-O5
