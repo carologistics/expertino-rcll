@@ -19,10 +19,10 @@
    (domain-loaded)
    (confval (path "/game/parameters/rcll/team_name") (value ?team-name))
    =>
-   (printout info "Initializing game-state and worker facts" crlf)
-   (foreach ?robot (create$ ROBOT1 ROBOT2 ROBOT3)
-     (assert (worker (id ?robot) (state IDLE) (type ROBOT)))
-   )
+;   (printout info "Initializing game-state and worker facts" crlf)
+;   (foreach ?robot (create$ ROBOT1 ROBOT2 ROBOT3)
+;     (assert (worker (id ?robot) (state IDLE) (type ROBOT)))
+;   )
    (assert (worker (id REFBOX) (state IDLE) (type REFBOX)))
 ;   (assert
 ;     (domain-object (name INPUT) (type mps-side))

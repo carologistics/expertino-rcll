@@ -27,8 +27,10 @@
    else
     (loop-for-count (?i (length$ ?recv-ports)) do
       (bind ?peer-id (pb-peer-create-local ?peer-address (string-to-field (nth$ ?i ?send-ports)) (string-to-field (nth$ ?i ?recv-ports))))
-      (assert (protobuf-peer (name (sym-cat "ROBOT" ?i)) (peer-id ?peer-id)))
-	  (assert (current-rcll-agent-task-id (robot (sym-cat "ROBOT" ?i)) (task-id 0)))
+      (bind ?robot-name (sym-cat "ROBOT" ?i))
+      (assert (protobuf-peer (name ?robot-name) (peer-id ?peer-id)))
+      (assert (current-rcll-agent-task-id (robot ?robot-name) (task-id 1)))
+      (assert (worker (id ?robot-name) (name nil) (type ROBOT) (state IDLE) (refbox-state ACTIVE)))
     )
   )
 )

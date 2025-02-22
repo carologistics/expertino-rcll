@@ -4,7 +4,7 @@ game:
         enabled: false
         testbed: FULL  # defined in simtest.clp
       rcll:
-        peer_address: 127.0.0.1
+        peer_address: 172.26.255.255
         peer_recv_port: 4444
         peer_send_port: 4445
         cyan_recv_port: 4441
@@ -17,9 +17,9 @@ game:
         cipher: "aes-128-cbc"
 rcll-simulator:
   enabled: true
-  host: 127.0.0.1
-  robot-send-ports: [2126, 2127, 2128]
-  robot-recv-ports: [2116, 2117, 2118]
+  host: 172.26.255.255
+  robot-send-ports: [5441]
+  robot-recv-ports: [5441]
 
 # Configuration for the integration of the external pddl manager.
 pddl:
