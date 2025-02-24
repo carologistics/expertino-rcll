@@ -36,3 +36,7 @@ pddl:
   # For planning, a subset of actions is used, only actions from the provided domain file are used.
   planning_instance: "planning"
   planning_domain_file: "planning_domain.jinja.pddl"
+  # differenciating between pddl actions carried out by different workers
+  actions:
+    refbox: ["bs-dispense", "dispense-pay", "cs-mount-cap", "cs-buffer", "rs-mount-ring", "rs-pay", "rs-pay-with-cc"]
+    robot: ["transport", "transport-to-slide", "carrier-to-input"]
