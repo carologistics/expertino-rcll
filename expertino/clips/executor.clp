@@ -46,3 +46,10 @@
   ;TODO set appropriate error message
   (modify ?aa (execution-state ERROR))
 )
+
+(defrule executor-succeed-agent-worker
+  ?ex <- (executor (pddl-action-id ?action-id) (worker AGENT) (state INIT))
+  =>
+  (modify ?ex (state SUCCEEDED))
+  (assert (pddl-action-apply-effect (action ?action-id) (effect-type ALL)))
+)

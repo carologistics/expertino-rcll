@@ -11,6 +11,7 @@
   (pddl-manager (node ?node))
   (pddl-action (id ?action-id) (name ?name) (params $?params) (instance ?instance))
   ?apply-effect-f <- (pddl-action-apply-effect (action ?action-id) (state PENDING))
+  (not (pddl-action-apply-effect (state START-EFFECT-APPLIED)))
   ?pi-f <- (pddl-instance (name ?instance) (state LOADED) (busy-with FALSE))
   (ros-msgs-client (service ?s&:(eq ?s (str-cat ?node "/get_action_effects"))) (type ?type))
   (not (service-request-meta (service ?s) (meta ?action-id)))
@@ -120,7 +121,7 @@
       (ros-msgs-destroy-message ?fluent-msg)
     ) 
    else
-    (printout error "Failed to retrieve precondition \"" ?action-id "\":" ?error crlf)
+    (printout error "Failed to retrieve effect for action \"" ?action-id "\":" ?error crlf)
   )
   (if (eq ?next-state DONE) then
     (ros-msgs-destroy-message ?ptr)

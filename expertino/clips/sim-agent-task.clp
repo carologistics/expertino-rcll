@@ -133,7 +133,7 @@
      (modify ?ex (state SUCCEEDED))
      (if (eq ?action-name carrier-to-input)
       then
-        (assert (pddl-action-apply-effect (action ?action-id) (effect-type ALL))) 
+        (assert (pddl-action-apply-effect (action ?action-id) (effect-type END))) 
      )
    else
      (modify ?ex (state ABORTED))

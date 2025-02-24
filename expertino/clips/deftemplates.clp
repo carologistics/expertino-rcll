@@ -400,7 +400,7 @@
   (slot action (type SYMBOL))
   (slot execution-state (type SYMBOL) (allowed-values INITIAL UNSAT PENDING SELECTED EXECUTING COMPLETED ERROR EFFECTS-APPLIED) (default INITIAL))
   (multislot priority (type INTEGER) (default (create$ 0)))
-  (slot worker-type (type SYMBOL) (allowed-values ROBOT REFBOX))
+  (slot worker-type (type SYMBOL) (allowed-values ROBOT REFBOX AGENT))
   (slot worker (type SYMBOL) (default UNSET))
 )
 
