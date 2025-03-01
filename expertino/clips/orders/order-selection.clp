@@ -7,8 +7,30 @@
   )
 )
 
+(defrule add-ring-specs-to-problem
+  (startup-completed)
+  (not (added-ring-specs))
+  (confval (path "/pddl/problem_instance") (value ?instance-str))
+  (ring-spec (color RING_GREEN))
+  (ring-spec (color RING_YELLOW))
+  (ring-spec (color RING_BLUE))
+  (ring-spec (color RING_ORANGE))
+  =>
+  (bind ?instance (sym-cat ?instance-str))
+  (delayed-do-for-all-facts ((?ring-spec ring-spec)) TRUE
+    (bind ?value (float ?ring-spec:cost))
+    (foreach ?i (create$ 1 2 3)
+      (assert (pending-pddl-numeric-fluent (instance ?instance) (name price)
+                 (params (ring-color-to-pddl ?ring-spec:color ?i))
+                 (value ?value)))
+    )
+  )
+  (assert (added-ring-specs))
+)
+
 (defrule add-order-to-problem
   (startup-completed)
+  (added-ring-specs)
   ?o-f <- (order (name ?name) (workpiece nil) (base-color ?base-col) (ring-colors $?ring-cols) (cap-color ?cap-col) (state OPEN))
   (not (added-one-order)) ;remove this eventually
   (confval (path "/pddl/problem_instance") (value ?instance-str))

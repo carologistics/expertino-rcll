@@ -227,7 +227,7 @@
   (slot problem (type STRING))
   (slot directory (type STRING))
   (slot state (type SYMBOL) (allowed-values PENDING LOADED ERROR) (default PENDING))
-  (slot busy-with (type SYMBOL) (allowed-values FALSE OBJECTS FLUENTS ACTION-EFFECTS CLEAR-GOALS SET-GOALS CHECK-CONDITIONS GET-FLUENTS GET-NUMERIC-FLUENTS GET-ACTION-NAMES) (default FALSE))
+  (slot busy-with (type SYMBOL) (allowed-values FALSE OBJECTS FLUENTS NUMERIC-FLUENTS ACTION-EFFECTS CLEAR-GOALS SET-GOALS CHECK-CONDITIONS GET-FLUENTS GET-NUMERIC-FLUENTS GET-ACTION-NAMES) (default FALSE))
   (slot error (type STRING))
 )
 
@@ -485,7 +485,7 @@
 (deftemplate worker
   (slot id (type SYMBOL))
   (slot name (type SYMBOL))
-  (slot type (type SYMBOL) (allowed-values ROBOT REFBOX))
+  (slot type (type SYMBOL) (allowed-values ROBOT REFBOX AGENT))
   (slot state (type SYMBOL) (allowed-values IDLE BUSY RECOVERY))
   (slot refbox-state (type SYMBOL) (allowed-values ACTIVE MAINTENANCE))
 )

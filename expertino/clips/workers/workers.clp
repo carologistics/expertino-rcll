@@ -15,7 +15,7 @@
 )
 
 (defrule worker-set-busy
-  ?worker <- (worker (id ?worker-id) (state IDLE))
+  ?worker <- (worker (id ?worker-id) (state IDLE) (type ~AGENT))
   (agenda-action-item (execution-state SELECTED|EXECUTING) (worker ?worker-id))
   =>
   (modify ?worker (state BUSY))

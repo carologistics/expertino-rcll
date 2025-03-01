@@ -42,7 +42,7 @@
 (defrule action-agenda-item-selection
   ?action <- (agenda-action-item (action ?action-id) (plan ?plan-id) (priority $?priority) (execution-state PENDING)
                  (worker-type ?worker-type&~AGENT))
-  (not (agenda-action-item (action ?some-action-id) (plan ?plan-id) (execution-state SELECTED) (worker-type ?worker-type)))
+  ;(not (agenda-action-item (action ?some-action-id) (plan ?plan-id) (execution-state SELECTED) (worker-type ?worker-type)))
   (not
       (and
           (agenda-action-item (action ?other-action-id) (plan ?plan-id) (priority $?other-priority) (execution-state PENDING) (worker-type ?worker-type))
@@ -69,7 +69,7 @@
 (defrule action-agenda-item-selection-worker-agent
   ?action <- (agenda-action-item (action ?action-id) (plan ?plan-id) (priority $?priority) (execution-state PENDING)
                  (worker-type ?worker-type&AGENT))
-  (not (agenda-action-item (action ?some-action-id) (plan ?plan-id) (execution-state SELECTED) (worker-type ?worker-type)))
+  ;(not (agenda-action-item (action ?some-action-id) (plan ?plan-id) (execution-state SELECTED) (worker-type ?worker-type)))
   (not
       (and
           (agenda-action-item (action ?other-action-id) (plan ?plan-id) (priority $?other-priority) (execution-state PENDING) (worker-type ?worker-type))

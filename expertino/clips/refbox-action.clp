@@ -49,10 +49,11 @@
     )
     (case finalize
       then
+        (bind ?mps (pddl-place-to-refbox-mps (nth$ 2 ?action-params) ?team-color))
         (bind ?ds-inst (pb-create "llsf_msgs.PrepareInstructionDS"))
 ;        (bind ?order (nth$ 1 ?instruction_info))
 ;        (bind ?order-id (float (string-to-field (sub-string 2 (length$ (str-cat ?order)) (str-cat ?order)))))
-;        (pb-set-field ?ds-inst "order_id" ?order-id)
+        (pb-set-field ?ds-inst "order_id" ?order-id)
         (pb-set-field ?machine-instruction "instruction_ds" ?ds-inst)
     )
   )
@@ -64,7 +65,7 @@
 )
 
 (defrule executor-mps-prepare-done
-  (machine (name ?mps) (state READY-AT-OUTPUT|PREPARED)) 
+  (machine (name ?mps) (state READY-AT-OUTPUT)) 
   ?ex <- (executor (pddl-action-id ?action-id) (worker REFBOX) (state ACCEPTED))
   ?pa <- (pddl-action (id ?action-id) (name ?action-name) (params $?action-params))
   (game-state (team-color ?team-color) (phase PRODUCTION))
