@@ -31,8 +31,9 @@
 (defrule add-order-to-problem
   (startup-completed)
   (added-ring-specs)
-  ?o-f <- (order (name ?name) (id ?order-id) (workpiece nil) (base-color ?base-col) (ring-colors $?ring-cols) (cap-color ?cap-col) (state OPEN))
-  (not (added-one-order)) ;remove this eventually
+  ?o-f <- (order (id ?order-id) (workpiece nil) (base-color ?base-col) (ring-colors $?ring-cols) (cap-color ?cap-col) (state OPEN))
+  (production-strategy-order-filter (name selected-orders) (orders $?orders&:(member$ ?order-id ?orders))) ;revise this later
+  (not (workpiece-for-order (order ?order-id)))
   (confval (path "/pddl/problem_instance") (value ?instance-str))
   =>
   (bind ?instance (sym-cat ?instance-str))
