@@ -44,7 +44,7 @@
          (bind ?max-finish (+ ?we ?window-length))
          (if (<= ?earliest-finish ?ws)
             then
-               (printout t "Order " ?id " not selected: finish before window @ " ?finish crlf)
+               (printout t "Order " ?id " not selected: finish before window-start @ " ?earliest-finish crlf)
             else
                (if (<= ?earliest-finish ?we)
                   then
