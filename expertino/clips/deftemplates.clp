@@ -494,3 +494,8 @@
   (slot worker (type SYMBOL))
   (slot start-time (type FLOAT) (default 0.0))
 )
+
+(deftemplate workpiece-for-order
+  (slot wp (type SYMBOL))
+  (slot order (type SYMBOL))
+)

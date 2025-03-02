@@ -4,13 +4,19 @@
   ?ex <- (executor (worker REFBOX) (state INIT) (pddl-action-id ?action-id)) 
   (pddl-action (id ?action-id) (name ?action-name) (params $?action-params))
   (protobuf-peer (name refbox-private) (peer-id ?peer-id))
+  (machine (name ?mps) (state IDLE))
+  (test (or 
+    (and (eq ?action-name dispense-pay)
+         (eq ?mps (pddl-place-to-refbox-mps (nth$ 3 ?action-params) ?team-color))
+    )
+    (eq ?mps (pddl-place-to-refbox-mps (nth$ 2 ?action-params) ?team-color))
+  ) )
   => 
   (bind ?machine-instruction (pb-create "llsf_msgs.PrepareMachine"))
   (pb-set-field ?machine-instruction "team_color" ?team-color)
   (switch ?action-name
     (case bs-dispense
       then
-        (bind ?mps (pddl-place-to-refbox-mps (nth$ 2 ?action-params) ?team-color))
         (bind ?bs-inst (pb-create "llsf_msgs.PrepareInstructionBS"))
         (pb-set-field ?bs-inst "side" (pddl-place-to-mps-side (nth$ 3 ?action-params)))
         (pb-set-field ?bs-inst "color" (pddl-task-to-base-color (nth$ 4 ?action-params)))
@@ -18,7 +24,6 @@
     )
     (case dispense-pay
       then
-        (bind ?mps (pddl-place-to-refbox-mps (nth$ 3 ?action-params) ?team-color))
         (bind ?color (nth$ (random 1 3) (create$ BASE_RED BASE_BLACK BASE_SILVER)))
         (bind ?bs-inst (pb-create "llsf_msgs.PrepareInstructionBS"))
         (pb-set-field ?bs-inst "side" (pddl-place-to-mps-side (nth$ 4 ?action-params)))
@@ -27,7 +32,6 @@
     )
     (case cs-mount-cap
       then
-        (bind ?mps (pddl-place-to-refbox-mps (nth$ 2 ?action-params) ?team-color))
         ;(bind ?color (pddl-task-to-cap-color (nth$ 5 ?action-params)))
       	(bind ?cs-inst (pb-create "llsf_msgs.PrepareInstructionCS"))
         (pb-set-field ?cs-inst "operation"  MOUNT_CAP)
@@ -35,24 +39,23 @@
     )
     (case cs-buffer
       then
-        (bind ?mps (pddl-place-to-refbox-mps (nth$ 2 ?action-params) ?team-color))
       	(bind ?cs-inst (pb-create "llsf_msgs.PrepareInstructionCS"))
         (pb-set-field ?cs-inst "operation" RETRIEVE_CAP)
         (pb-set-field ?machine-instruction "instruction_cs" ?cs-inst)
     )
     (case rs-mount-ring
       then
-        (bind ?mps (pddl-place-to-refbox-mps (nth$ 2 ?action-params) ?team-color))
         (bind ?rs-inst (pb-create "llsf_msgs.PrepareInstructionRS"))
         (pb-set-field ?rs-inst "ring_color" (pddl-task-to-ring-color (nth$ 5 ?action-params)))
         (pb-set-field ?machine-instruction "instruction_rs" ?rs-inst)
     )
     (case finalize
       then
-        (bind ?mps (pddl-place-to-refbox-mps (nth$ 2 ?action-params) ?team-color))
+        (bind ?wp (nth$ 1 ?action-params))
+        (do-for-fact ((?w-f workpiece-for-order)) (eq ?w-f:wp ?wp)
+          (bind ?order-id ?w-f:order)
+        )
         (bind ?ds-inst (pb-create "llsf_msgs.PrepareInstructionDS"))
-;        (bind ?order (nth$ 1 ?instruction_info))
-;        (bind ?order-id (float (string-to-field (sub-string 2 (length$ (str-cat ?order)) (str-cat ?order)))))
         (pb-set-field ?ds-inst "order_id" ?order-id)
         (pb-set-field ?machine-instruction "instruction_ds" ?ds-inst)
     )
@@ -64,7 +67,7 @@
   (modify ?ex (state ACCEPTED))
 )
 
-(defrule executor-mps-prepare-done
+(defrule executor-mps-ready-at-output
   (machine (name ?mps) (state READY-AT-OUTPUT)) 
   ?ex <- (executor (pddl-action-id ?action-id) (worker REFBOX) (state ACCEPTED))
   ?pa <- (pddl-action (id ?action-id) (name ?action-name) (params $?action-params))
@@ -82,3 +85,17 @@
     (assert (pddl-action-apply-effect (action ?action-id) (effect-type END)))
   ) 
 )
+
+(defrule executor-finalize-mps-processed
+  (machine (name ?mps) (state PROCESSED))
+  (game-state (team-color ?team-color) (phase PRODUCTION))
+  ?ex <- (executor (pddl-action-id ?action-id) (worker REFBOX) (state ACCEPTED))
+  ?pa <- (pddl-action (id ?action-id) (name finalize) (params $?action-params))
+  (test 
+    (eq (pddl-place-to-refbox-mps (nth$ 2 ?action-params) ?team-color) ?mps)
+  )
+  =>
+  (modify ?ex (state SUCCEEDED))
+  (assert (pddl-action-apply-effect (action ?action-id) (effect-type END)))
+)
+  
