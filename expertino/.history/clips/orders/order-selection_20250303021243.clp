@@ -85,30 +85,9 @@
   )
 )
 
-(defrule add-ring-specs-to-problem
-  (startup-completed)
-  (not (added-ring-specs))
-  (confval (path "/pddl/problem_instance") (value ?instance-str))
-  (ring-spec (color RING_GREEN))
-  (ring-spec (color RING_YELLOW))
-  (ring-spec (color RING_BLUE))
-  (ring-spec (color RING_ORANGE))
-  =>
-  (bind ?instance (sym-cat ?instance-str))
-  (delayed-do-for-all-facts ((?ring-spec ring-spec)) TRUE
-    (bind ?value (float ?ring-spec:cost))
-    (foreach ?i (create$ 1 2 3)
-      (assert (pending-pddl-numeric-fluent (instance ?instance) (name price)
-                 (params (ring-color-to-pddl ?ring-spec:color ?i))
-                 (value ?value)))
-    )
-  )
-  (assert (added-ring-specs))
-)
 
 (defrule add-order-to-problem
   (startup-completed)
-  (added-ring-specs)
   (insert-order (T-last-end ?last-end) (T-order-window ?window))
   (order-scheduled (id ?order-id))
   ?o-f <- (order (id ?order-id) (name ?name) (workpiece nil)  (base-color ?base-col) (ring-colors $?ring-cols) (cap-color ?cap-col)  (quantity-requested ?qty-requested)
@@ -120,7 +99,6 @@
   =>
   (bind ?instance (sym-cat ?instance-str))
   (bind ?wp (sym-cat (lowcase ?name) "-" (gensym*)))
-  (assert (workpiece-for-order (wp ?wp) (order ?order-id)))
   (assert (pending-pddl-object (instance ?instance) (name ?wp) (type product)))
   (assert (pending-pddl-fluent (instance ?instance) (name spawnable) (params ?wp)))
   (bind ?curr-step (wp-part-to-pddl ?base-col))
@@ -146,7 +124,7 @@
   ;(assert (added-one-order))
   (assert (order-processed (id ?order-id)))
   (printout t "=== Finished executing add-order-to-problem ===" crlf)
-  
+  (retract (order-scheduled (id ?order-id))) 
 )
 
 (defrule set-goal-for-orders

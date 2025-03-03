@@ -14,19 +14,11 @@
   (slot T-last-end)
   (slot T-order-window))
 
+
 (deftemplate order-scheduled
   (slot id)
-)
+ )
 
-(deftemplate order-processed
-  (slot id))
-
-(defrule check-all-orders-scheduled
-  (not (added-all-orders))
-  (not (order (state OPEN)))  ; No more open orders
-  =>
-  (assert (added-all-orders))
-  (printout t "All orders have been scheduled. No more orders will be added." crlf))
 
 
 (deffacts initial-hardcoded-plan
@@ -61,7 +53,7 @@
   (T-last-end (value ?T_last_end))
   (T-order-window (value ?T_order_window))
   (order (id ?order-id) (delivery-begin ?delivery-begin) (delivery-end ?delivery-end))
-  (not (order-scheduled (id ?order-id)))  
+  (not (order-scheduled (id ?order-id) (name ?name)  ))  
   =>
   (printout t "Checking scheduling for order " ?order-id ": Last End Time = " ?T_last_end ", Scheduling Window = " ?T_order_window ", Delivery Begin = " ?delivery-begin ", Delivery End = " ?delivery-end crlf)
   (bind ?available-gap (- ?delivery-end ?delivery-begin))
@@ -69,6 +61,7 @@
   (if (< ?T_last_end ?available-gap)
     then
       (assert (insert-order (T-last-end ?T_last_end) (T-order-window ?T_order_window)))
+      (assert (replan-required))
       (assert (order-scheduled (id ?order-id)))   
       (printout t "Order " ?order-id " can be scheduled! Requesting planner update..." crlf)
     else
@@ -85,42 +78,19 @@
   )
 )
 
-(defrule add-ring-specs-to-problem
-  (startup-completed)
-  (not (added-ring-specs))
-  (confval (path "/pddl/problem_instance") (value ?instance-str))
-  (ring-spec (color RING_GREEN))
-  (ring-spec (color RING_YELLOW))
-  (ring-spec (color RING_BLUE))
-  (ring-spec (color RING_ORANGE))
-  =>
-  (bind ?instance (sym-cat ?instance-str))
-  (delayed-do-for-all-facts ((?ring-spec ring-spec)) TRUE
-    (bind ?value (float ?ring-spec:cost))
-    (foreach ?i (create$ 1 2 3)
-      (assert (pending-pddl-numeric-fluent (instance ?instance) (name price)
-                 (params (ring-color-to-pddl ?ring-spec:color ?i))
-                 (value ?value)))
-    )
-  )
-  (assert (added-ring-specs))
-)
 
 (defrule add-order-to-problem
   (startup-completed)
-  (added-ring-specs)
+  (replan-required)  
   (insert-order (T-last-end ?last-end) (T-order-window ?window))
   (order-scheduled (id ?order-id))
   ?o-f <- (order (id ?order-id) (name ?name) (workpiece nil)  (base-color ?base-col) (ring-colors $?ring-cols) (cap-color ?cap-col)  (quantity-requested ?qty-requested)
             (quantity-delivered ?qty-delivered) (quantity-delivered-other ?qty-delivered-other) (delivery-begin ?delivery-begin) (delivery-end ?delivery-end) (competitive ?competitive) (state OPEN))
   ;(not (added-one-order)) ;remove this eventually
-  (added-all-orders) 
-  (not (order-processed (id ?order-id)))
   (confval (path "/pddl/problem_instance") (value ?instance-str))
   =>
   (bind ?instance (sym-cat ?instance-str))
   (bind ?wp (sym-cat (lowcase ?name) "-" (gensym*)))
-  (assert (workpiece-for-order (wp ?wp) (order ?order-id)))
   (assert (pending-pddl-object (instance ?instance) (name ?wp) (type product)))
   (assert (pending-pddl-fluent (instance ?instance) (name spawnable) (params ?wp)))
   (bind ?curr-step (wp-part-to-pddl ?base-col))
@@ -143,10 +113,8 @@
   (assert (pddl-goal-fluent (instance ?instance) (name step) (params ?wp done)))
   ; also, clear all old goals
   (assert (pddl-clear-goals (instance ?instance)))
+  (assert (order-scheduled (id ?order-id) ))
   ;(assert (added-one-order))
-  (assert (order-processed (id ?order-id)))
-  (printout t "=== Finished executing add-order-to-problem ===" crlf)
-  
 )
 
 (defrule set-goal-for-orders

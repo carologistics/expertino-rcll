@@ -227,7 +227,7 @@
   (slot problem (type STRING))
   (slot directory (type STRING))
   (slot state (type SYMBOL) (allowed-values PENDING LOADED ERROR) (default PENDING))
-  (slot busy-with (type SYMBOL) (allowed-values FALSE OBJECTS FLUENTS NUMERIC-FLUENTS ACTION-EFFECTS CLEAR-GOALS SET-GOALS CHECK-CONDITIONS GET-FLUENTS GET-NUMERIC-FLUENTS GET-ACTION-NAMES) (default FALSE))
+  (slot busy-with (type SYMBOL) (allowed-values FALSE OBJECTS FLUENTS ACTION-EFFECTS CLEAR-GOALS SET-GOALS CHECK-CONDITIONS GET-FLUENTS GET-NUMERIC-FLUENTS GET-ACTION-NAMES) (default FALSE))
   (slot error (type STRING))
 )
 
@@ -281,7 +281,6 @@
   (slot delete (type SYMBOL) (allowed-values FALSE TRUE) (default FALSE))
   (slot request-id (type INTEGER))
   (slot state (type SYMBOL) (allowed-values PENDING WAITING ERROR ON-HOLD) (default PENDING))
-  (slot error)
 )
 
 (deftemplate pending-pddl-numeric-fluent
@@ -401,7 +400,7 @@
   (slot action (type SYMBOL))
   (slot execution-state (type SYMBOL) (allowed-values INITIAL UNSAT PENDING SELECTED EXECUTING COMPLETED ERROR EFFECTS-APPLIED) (default INITIAL))
   (multislot priority (type INTEGER) (default (create$ 0)))
-  (slot worker-type (type SYMBOL) (allowed-values ROBOT REFBOX AGENT))
+  (slot worker-type (type SYMBOL) (allowed-values ROBOT REFBOX))
   (slot worker (type SYMBOL) (default UNSET))
 )
 
@@ -486,7 +485,7 @@
 (deftemplate worker
   (slot id (type SYMBOL))
   (slot name (type SYMBOL))
-  (slot type (type SYMBOL) (allowed-values ROBOT REFBOX AGENT))
+  (slot type (type SYMBOL) (allowed-values ROBOT REFBOX))
   (slot state (type SYMBOL) (allowed-values IDLE BUSY RECOVERY))
   (slot refbox-state (type SYMBOL) (allowed-values ACTIVE MAINTENANCE))
 )
@@ -494,9 +493,4 @@
 (deftemplate worker-idle-timer
   (slot worker (type SYMBOL))
   (slot start-time (type FLOAT) (default 0.0))
-)
-
-(deftemplate workpiece-for-order
-  (slot wp (type SYMBOL))
-  (slot order (type SYMBOL))
 )
