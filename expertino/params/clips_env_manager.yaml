@@ -58,7 +58,7 @@ clips_manager:
         "clips/expertino/refbox-recv.clp",
         "clips/expertino/refbox-action.clp",
         "clips/expertino/sim-interface.clp",
-        "clips/expertino/orders/order-selection-proto-2.clp",
+        "clips/expertino/orders/order-selection-early-tardy.clp",
         "clips/expertino/action/action-agenda.clp",
         "clips/expertino/action/action-precond-check.clp",
         "clips/expertino/sim-agent-task.clp",
