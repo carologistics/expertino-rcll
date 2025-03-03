@@ -14,19 +14,23 @@
   (slot T-last-end)
   (slot T-order-window))
 
-(deftemplate order-scheduled
-  (slot id)
-)
 
-(deftemplate order-processed
+(deftemplate order-scheduled
   (slot id))
 
-(defrule check-all-orders-scheduled
-  (not (added-all-orders))
-  (not (order (state OPEN)))  ; No more open orders
+(deftemplate orders-processed
+  (slot total)
+  (slot processed))
+
+(deffacts initialize-tracking
+  (orders-processed (total 0) (processed 0)))
+
+(defrule count-total-orders
+  (startup-completed)
+  (not (orders-processed)) ;; Ensure only one instance exists
   =>
-  (assert (added-all-orders))
-  (printout t "All orders have been scheduled. No more orders will be added." crlf))
+  (bind ?total-orders (length$ (find-all-facts ((?o order-scheduled)) TRUE))) 
+  (assert (orders-processed (total ?total-orders) (processed 0))))
 
 
 (deffacts initial-hardcoded-plan
@@ -87,15 +91,14 @@
 
 
 (defrule add-order-to-problem
-  (startup-completed)
+  (startup-completed) 
   (insert-order (T-last-end ?last-end) (T-order-window ?window))
   (order-scheduled (id ?order-id))
   ?o-f <- (order (id ?order-id) (name ?name) (workpiece nil)  (base-color ?base-col) (ring-colors $?ring-cols) (cap-color ?cap-col)  (quantity-requested ?qty-requested)
             (quantity-delivered ?qty-delivered) (quantity-delivered-other ?qty-delivered-other) (delivery-begin ?delivery-begin) (delivery-end ?delivery-end) (competitive ?competitive) (state OPEN))
   ;(not (added-one-order)) ;remove this eventually
-  (added-all-orders) 
-  (not (order-processed (id ?order-id)))
   (confval (path "/pddl/problem_instance") (value ?instance-str))
+  (orders-processed (total ?total) (processed ?processed))
   =>
   (bind ?instance (sym-cat ?instance-str))
   (bind ?wp (sym-cat (lowcase ?name) "-" (gensym*)))
@@ -122,9 +125,17 @@
   ; also, clear all old goals
   (assert (pddl-clear-goals (instance ?instance)))
   ;(assert (added-one-order))
-  (assert (order-processed (id ?order-id)))
-  (printout t "=== Finished executing add-order-to-problem ===" crlf)
-  
+    ;; Remove the processed order
+  (retract ?o-f)
+
+  ;; Update processed count
+  (retract (orders-processed (total ?total) (processed ?processed)))
+  (assert (orders-processed (total ?total) (processed (+ ?processed 1))))
+
+  ;; If all orders are processed, mark as completed
+  (if (= (+ ?processed 1) ?total) then
+    (assert (replan-completed TRUE))
+    (printout t "All orders have been processed. No further scheduling needed." crlf)))
 )
 
 (defrule set-goal-for-orders

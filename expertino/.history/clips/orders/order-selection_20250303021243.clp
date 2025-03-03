@@ -124,7 +124,7 @@
   ;(assert (added-one-order))
   (assert (order-processed (id ?order-id)))
   (printout t "=== Finished executing add-order-to-problem ===" crlf)
-  
+  (retract (order-scheduled (id ?order-id))) 
 )
 
 (defrule set-goal-for-orders

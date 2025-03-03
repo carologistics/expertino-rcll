@@ -1,81 +1,3 @@
-(deftemplate T-last-end
-  (slot value))
-
-(deftemplate T-order-window
-  (slot value))
-
-(deftemplate plan-step
-  (slot id)
-  (slot task)
-  (slot start-time)
-  (slot duration))
-
-(deftemplate insert-order
-  (slot T-last-end)
-  (slot T-order-window))
-
-(deftemplate order-scheduled
-  (slot id)
-)
-
-(deftemplate order-processed
-  (slot id))
-
-(defrule check-all-orders-scheduled
-  (not (added-all-orders))
-  (not (order (state OPEN)))  ; No more open orders
-  =>
-  (assert (added-all-orders))
-  (printout t "All orders have been scheduled. No more orders will be added." crlf))
-
-
-(deffacts initial-hardcoded-plan
-  (plan-step (id 1) (task dispense) (start-time 0) (duration 5))
-  (plan-step (id 2) (task transport) (start-time 5) (duration 20))
-  (plan-step (id 3) (task mount) (start-time 25) (duration 10))
-  (plan-step (id 4) (task transport) (start-time 35) (duration 20))
-  (plan-step (id 5) (task finalize) (start-time 195) (duration 5)))
-
-
-(defrule compute-last-end-time
-  (not (T-last-end)) 
-  =>
-  (bind ?max-end 0)
-  (do-for-all-facts ((?p plan-step)) TRUE
-    (bind ?step-end (+ (fact-slot-value ?p start-time) (fact-slot-value ?p duration)))
-    (if (> ?step-end ?max-end) then
-        (bind ?max-end ?step-end)))
-  (assert (T-last-end (value ?max-end))) 
-  (printout t "Computed last end time: " ?max-end crlf))
-
-
-(defrule compute-order-window
-  (order (id ?order-id) (delivery-begin ?begin) (delivery-end ?end))
-  =>
-  (bind ?T_order_window (- ?end ?begin))
-  (assert (T-order-window (value ?T_order_window)))
-  (printout t "Computed scheduling window for order " ?order-id ": " ?T_order_window crlf))
-
-
-(defrule check-order-scheduling
-  (T-last-end (value ?T_last_end))
-  (T-order-window (value ?T_order_window))
-  (order (id ?order-id) (delivery-begin ?delivery-begin) (delivery-end ?delivery-end))
-  (not (order-scheduled (id ?order-id)))  
-  =>
-  (printout t "Checking scheduling for order " ?order-id ": Last End Time = " ?T_last_end ", Scheduling Window = " ?T_order_window ", Delivery Begin = " ?delivery-begin ", Delivery End = " ?delivery-end crlf)
-  (bind ?available-gap (- ?delivery-end ?delivery-begin))
-  (printout t "Available gap for order " ?order-id ": " ?available-gap crlf)
-  (if (< ?T_last_end ?available-gap)
-    then
-      (assert (insert-order (T-last-end ?T_last_end) (T-order-window ?T_order_window)))
-      (assert (order-scheduled (id ?order-id)))   
-      (printout t "Order " ?order-id " can be scheduled! Requesting planner update..." crlf)
-    else
-      (printout t "Order " ?order-id " cannot be scheduled yet. Waiting for another order..." crlf)
-))
-
-
 (deffunction wp-part-to-pddl (?refbox-name $?number)
   (bind ?converted-name (str-replace (lowcase ?refbox-name) "_" "-"))
   (if (neq ?number (create$)) then
@@ -85,16 +7,10 @@
   )
 )
 
-
 (defrule add-order-to-problem
   (startup-completed)
-  (insert-order (T-last-end ?last-end) (T-order-window ?window))
-  (order-scheduled (id ?order-id))
-  ?o-f <- (order (id ?order-id) (name ?name) (workpiece nil)  (base-color ?base-col) (ring-colors $?ring-cols) (cap-color ?cap-col)  (quantity-requested ?qty-requested)
-            (quantity-delivered ?qty-delivered) (quantity-delivered-other ?qty-delivered-other) (delivery-begin ?delivery-begin) (delivery-end ?delivery-end) (competitive ?competitive) (state OPEN))
-  ;(not (added-one-order)) ;remove this eventually
-  (added-all-orders) 
-  (not (order-processed (id ?order-id)))
+  ?o-f <- (order (name ?name) (workpiece nil) (base-color ?base-col) (ring-colors $?ring-cols) (cap-color ?cap-col) (state OPEN))
+  (not (added-one-order)) ;remove this eventually
   (confval (path "/pddl/problem_instance") (value ?instance-str))
   =>
   (bind ?instance (sym-cat ?instance-str))
@@ -121,10 +37,7 @@
   (assert (pddl-goal-fluent (instance ?instance) (name step) (params ?wp done)))
   ; also, clear all old goals
   (assert (pddl-clear-goals (instance ?instance)))
-  ;(assert (added-one-order))
-  (assert (order-processed (id ?order-id)))
-  (printout t "=== Finished executing add-order-to-problem ===" crlf)
-  
+  (assert (added-one-order))
 )
 
 (defrule set-goal-for-orders

@@ -122,9 +122,8 @@
   ; also, clear all old goals
   (assert (pddl-clear-goals (instance ?instance)))
   ;(assert (added-one-order))
-  (assert (order-processed (id ?order-id)))
   (printout t "=== Finished executing add-order-to-problem ===" crlf)
-  
+  (retract (order-scheduled (id ?order-id))) 
 )
 
 (defrule set-goal-for-orders
