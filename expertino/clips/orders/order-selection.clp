@@ -32,6 +32,7 @@
   (startup-completed)
   (added-ring-specs)
   ?o-f <- (order (name ?name) (id ?order-id) (workpiece nil) (base-color ?base-col) (ring-colors $?ring-cols) (cap-color ?cap-col) (state OPEN))
+  ?so <- (SelectedOrder (id ?order-id))
   (not (added-one-order)) ;remove this eventually
   (confval (path "/pddl/problem_instance") (value ?instance-str))
   =>
