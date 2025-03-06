@@ -9,9 +9,6 @@
 
 (deftemplate SelectedOrder
    (slot id (type INTEGER))
-   (slot start-time (type INTEGER))
-   (slot finish-time (type INTEGER))
-   (slot punctuality (type SYMBOL))
 )
 
 ;; Rule: Select and process orders based on complexity and delivery window
@@ -21,14 +18,17 @@
    ?order <- (order (id ?id) (complexity ?c) (delivery-begin ?ws) (delivery-end ?we))
    =>
    (bind ?pt 0)
-   ;; Determine processing time based on complexity
+   ;; Determine processing time based on complexity:
    (if (eq ?c C0)
       then (bind ?pt ?*PRODUCTION_STRAT_C0_COMPLETION_TIME*)
-      else (if (eq ?c C1)
+      else
+         (if (eq ?c C1)
          then (bind ?pt ?*PRODUCTION_STRAT_C1_COMPLETION_TIME*)
-         else (if (eq ?c C2)
+            else
+               (if (eq ?c C2)
             then (bind ?pt ?*PRODUCTION_STRAT_C2_COMPLETION_TIME*)
-            else (if (eq ?c C3)
+                  else
+                     (if (eq ?c C3)
                then (bind ?pt ?*PRODUCTION_STRAT_C3_COMPLETION_TIME*)
                else (printout t "Unknown complexity " ?c crlf)
             )
@@ -44,27 +44,22 @@
          (bind ?max-finish (+ ?we ?window-length))
          (if (<= ?earliest-finish ?ws)
             then
-               (printout t "Order " ?id " not selected: finish before window-start @ " ?earliest-finish crlf)
+                        (printout t "Order " ?order-id " not selected: finish before window-start @ " ?earliest-finish crlf)
             else
                (if (<= ?earliest-finish ?we)
                   then
-                     (assert (SelectedOrder (id ?id) (start-time ?earliest)
-                                             (finish-time ?earliest-finish) 
-                                             (punctuality nil)))
+                               (assert (SelectedOrder (id ?order-id)))
                   else
                      (if (<= ?earliest-finish ?max-finish)
                         then
-                           (assert (SelectedOrder (id ?id) (start-time ?earliest)
-                                                   (finish-time ?earliest-finish) 
-                                                   (punctuality nil)))
+                                      (assert (SelectedOrder (id ?order-id)))
                         else
-                           (printout t "Order " ?id " rejected: exceeds max finish @ " ?max-finish crlf)
+                                      (printout t "Order " ?order-id " rejected: exceeds max finish @ " ?max-finish crlf)
                      )
-                (retract ?order)
                )
          )
       else
-         (printout t "Order " ?id " rejected: exceeds global time limit" crlf)
-
+                 (printout t "Order " ?order-id " rejected: exceeds global time limit" crlf)
+          )
    )
 )
