@@ -15,7 +15,8 @@
 (defrule select-order
    (declare (salience 10))
    ?ctFact <- (game-time ?gt)
-   ?order <- (order (id ?id) (complexity ?c) (delivery-begin ?ws) (delivery-end ?we))
+   ?order  <- (order (id ?order-id) (complexity ?c) (delivery-begin ?ws) (delivery-end ?we))
+   (not (SelectedOrder (id ?order-id)))
    =>
    (bind ?pt 0)
    ;; Determine processing time based on complexity:
@@ -23,42 +24,46 @@
       then (bind ?pt ?*PRODUCTION_STRAT_C0_COMPLETION_TIME*)
       else
          (if (eq ?c C1)
-         then (bind ?pt ?*PRODUCTION_STRAT_C1_COMPLETION_TIME*)
+            then (bind ?pt ?*PRODUCTION_STRAT_C1_COMPLETION_TIME*)
             else
                (if (eq ?c C2)
-            then (bind ?pt ?*PRODUCTION_STRAT_C2_COMPLETION_TIME*)
+                  then (bind ?pt ?*PRODUCTION_STRAT_C2_COMPLETION_TIME*)
                   else
                      (if (eq ?c C3)
-               then (bind ?pt ?*PRODUCTION_STRAT_C3_COMPLETION_TIME*)
-               else (printout t "Unknown complexity " ?c crlf)
-            )
-         )
-      )
-   )
-   ;; Check if processing can complete within time limit
-   (if (<= (+ ?gt ?pt) ?*MAX-TIMESTEPS*)
-      then
-         (bind ?earliest ?gt)
-         (bind ?earliest-finish (+ ?earliest ?pt))
-         (bind ?window-length (- ?we ?ws))
-         (bind ?max-finish (+ ?we ?window-length))
-         (if (<= ?earliest-finish ?ws)
-            then
-                        (printout t "Order " ?order-id " not selected: finish before window-start @ " ?earliest-finish crlf)
-            else
-               (if (<= ?earliest-finish ?we)
-                  then
-                               (assert (SelectedOrder (id ?order-id)))
-                  else
-                     (if (<= ?earliest-finish ?max-finish)
-                        then
-                                      (assert (SelectedOrder (id ?order-id)))
-                        else
-                                      (printout t "Order " ?order-id " rejected: exceeds max finish @ " ?max-finish crlf)
+                        then (bind ?pt ?*PRODUCTION_STRAT_C3_COMPLETION_TIME*)
+                        else (printout t "Unknown complexity " ?c crlf)
                      )
                )
          )
-      else
+   )
+   ;; If id equals 1 or 2, do not select the order.
+   (if (or (eq ?order-id 1) (eq ?order-id 2))
+       then
+          (printout t "Order not selected because id " ?order-id crlf)
+       else
+          (if (<= (+ ?gt ?pt) ?*MAX-TIMESTEPS*)
+              then
+                 (bind ?earliest ?gt)
+                 (bind ?earliest-finish (+ ?earliest ?pt))
+                 (bind ?window-length (- ?we ?ws))
+                 (bind ?max-finish (+ ?we ?window-length))
+                 (if (<= ?earliest-finish ?ws)
+                     then
+                        (printout t "Order " ?order-id " not selected: finish before window-start @ " ?earliest-finish crlf)
+                     else
+                        (if (<= ?earliest-finish ?we)
+                            then
+                               (assert (SelectedOrder (id ?order-id)))
+                            else
+                               (if (<= ?earliest-finish ?max-finish)
+                                   then
+                                      (assert (SelectedOrder (id ?order-id)))
+                                   else
+                                      (printout t "Order " ?order-id " rejected: exceeds max finish @ " ?max-finish crlf)
+                               )
+                        )
+                 )
+              else
                  (printout t "Order " ?order-id " rejected: exceeds global time limit" crlf)
           )
    )
