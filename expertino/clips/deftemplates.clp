@@ -45,8 +45,7 @@
 )
 
 (deftemplate order
-  (slot id (type INTEGER))
-  (slot name (type SYMBOL))
+  (slot id (type SYMBOL))
   (slot workpiece (type SYMBOL))
   (slot complexity (type SYMBOL))
 
@@ -73,15 +72,6 @@
 (deftemplate current-rcll-agent-task-id
    (slot robot (type SYMBOL))
    (slot task-id (type INTEGER))
-)
-
-(deftemplate action-task-executor-enable
-" Define this for plan actions that should be handled by the protobuf
-  executor that sends agent task messages to a suitable simulator.
-  The messages are created based on the agent task descriptions that are used
-  in beacon signals.
-"
-  (slot name (type SYMBOL) (default ?NONE))
 )
 
 (deftemplate service-request-meta
@@ -348,7 +338,7 @@
   (slot id (type SYMBOL))
   (slot instance (type SYMBOL))
   (slot duration (type FLOAT))
-  (slot state (type SYMBOL) (allowed-values PENDING EXECUTING) (default PENDING))
+  (slot state (type SYMBOL) (allowed-values PENDING SELECTED EXECUTING) (default PENDING))
 )
 
 (deftemplate pddl-action
@@ -503,4 +493,13 @@
 (deftemplate workpiece-for-order
   (slot wp (type SYMBOL))
   (slot order (type SYMBOL))
+)
+
+(deftemplate production-strategy-order-filter
+  (slot name (type SYMBOL)) 
+  (multislot orders (type SYMBOL) (default (create$)))
+)
+
+(deftemplate freeze-agenda
+  (slot instance (type SYMBOL))
 )

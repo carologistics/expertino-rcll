@@ -6,6 +6,7 @@
 
 (defrule agenda-action-sat-check-start
   (agenda-action-item (plan ?plan-id) (action ?action-id) (execution-state INITIAL) (worker-type ?worker-type))
+  (agenda (plan ?plan-id) (state ACTIVE))
   (not (pddl-action-precondition (plan ?plan-id) (id ?action-id) (context AGENDA-SELECTION)))
   (worker (id ?worker) (state IDLE) (type ?worker-type))
   (pddl-plan (id ?plan-id) (instance ?instance))
@@ -42,6 +43,7 @@
 (defrule action-agenda-item-selection
   ?action <- (agenda-action-item (action ?action-id) (plan ?plan-id) (priority $?priority) (execution-state PENDING)
                  (worker-type ?worker-type&~AGENT))
+  (agenda (plan ?plan-id) (state ACTIVE))
   ;(not (agenda-action-item (action ?some-action-id) (plan ?plan-id) (execution-state SELECTED) (worker-type ?worker-type)))
   (not
       (and
@@ -69,7 +71,7 @@
 (defrule action-agenda-item-selection-worker-agent
   ?action <- (agenda-action-item (action ?action-id) (plan ?plan-id) (priority $?priority) (execution-state PENDING)
                  (worker-type ?worker-type&AGENT))
-  ;(not (agenda-action-item (action ?some-action-id) (plan ?plan-id) (execution-state SELECTED) (worker-type ?worker-type)))
+  (agenda (plan ?plan-id) (state ACTIVE))
   (not
       (and
           (agenda-action-item (action ?other-action-id) (plan ?plan-id) (priority $?other-priority) (execution-state PENDING) (worker-type ?worker-type))
@@ -88,15 +90,16 @@
 (defrule action-agenda-item-update-selection
   ?action <- (agenda-action-item (action ?action-id) (plan ?plan-id) (priority $?priority) (execution-state SELECTED) (worker-type ?worker-type))
   ?other-action <- (agenda-action-item (action ?other-action-id) (plan ?plan-id) (priority $?other-priority) (execution-state PENDING) (worker-type ?worker-type))
+  (agenda (plan ?plan-id) (state ACTIVE))
   (test (> (+ (expand$ ?priority)) (+ (expand$ ?other-priority))))
   (pddl-action (id ?other-action-id) (name ?action-name) (params $?action-params))
   (worker (id ?worker) (state IDLE) (type ?worker-type))
   (worker-idle-timer (worker ?worker) (start-time ?start-time))
   (not (worker-idle-timer (worker ?other-worker) (start-time ?other-start-time&:(< ?other-start-time ?start-time))))
   =>
-  (modify ?action (execution-state PENDING) (worker ?worker))
+  (modify ?action (execution-state PENDING) (worker UNSET))
   (printout yellow "Deselected action " ?action-id " from agenda" crlf)
-  (modify ?other-action (execution-state SELECTED) (worker UNSET))
+  (modify ?other-action (execution-state SELECTED) (worker ?worker))
   (printout green "Selected action " ?action-name "[" ?other-action-id "]" ?action-params " from agenda" crlf)
   (printout green "Assigned worker  " ?worker " of type " ?worker-type ", waiting since " ?start-time crlf)
 )

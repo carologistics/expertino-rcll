@@ -14,7 +14,8 @@
 
 (defrule executor-create
   ?pa <- (pddl-action (id ?action-id))
-  ?aa <- (agenda-action-item (action ?action-id) (execution-state SELECTED) (worker ?worker))
+  ?aa <- (agenda-action-item (plan ?plan-id) (action ?action-id) (execution-state SELECTED) (worker ?worker))
+  (agenda (plan ?plan-id) (state ACTIVE))
   (not (executor (pddl-action-id ?action-id)))
   ;TODO agenda-action-item is also supposed to give an assigned worker to the action
   =>
@@ -28,6 +29,7 @@
   =>
   (modify ?aa (execution-state EXECUTING))
   (assert (pddl-action-apply-effect (action ?action-id) (effect-type START)))
+  ;(assert (selected-order (order 2)))
 )
 
 (defrule executor-succeeded

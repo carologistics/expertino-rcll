@@ -26,6 +26,7 @@
     )
   )
   (assert (added-ring-specs))
+  (assert (selected-order (order 1)))
 )
 
 (defrule add-order-to-problem
@@ -57,11 +58,12 @@
   (assert (pending-pddl-fluent (instance ?instance) (name next-step) (params ?wp ?next-step deliver)))
   (assert (pending-pddl-fluent (instance ?instance) (name next-step) (params ?wp deliver done)))
   (modify ?o-f (state ACTIVE))
+  ; remove existing pddl-goal-fluents
+  (do-for-all-facts ((?gf pddl-goal-fluent)) TRUE (retract ?gf))
   ; set the wp as a goal
   (assert (pddl-goal-fluent (instance ?instance) (name step) (params ?wp done)))
   ; also, clear all old goals
   (assert (pddl-clear-goals (instance ?instance) (goal base)))
-  (assert (added-one-order))
 )
 
 (defrule set-goal-for-orders
@@ -71,6 +73,11 @@
   =>
   ; notify to add the goal to the domain
   (assert (pddl-set-goals (instance ?instance)))
+  ;freeze the current agenda execution
+  (if (any-factp ((?agenda agenda) (?plan pddl-plan)) (and (eq ?agenda:plan ?plan:id) (eq ?plan:instance ?instance)))
+   then
+    (assert (freeze-agenda (instance ?instance)))
+  )
   (retract ?clear-f)
 )
 
@@ -80,7 +87,13 @@
   (pddl-manager (node ?node))
   (pddl-instance (name ?instance) (busy-with FALSE) (state LOADED))
   (expertino-msgs-plan-temporal-client (server ?server&:(eq ?server (str-cat ?node "/temp_plan"))))
-  (not (planned-for-main))
+  ;(not (planned-for-main))
+  (not (and 
+        (agenda (plan ?plan-id) (state ACTIVE))
+        (pddl-plan (id ?plan-id) (instance ?instance))
+       )
+  )
+  (not (freeze-agenda (instance ?instance)))
   =>
   (printout green "Start planning" crlf)
   (bind ?goal (expertino-msgs-plan-temporal-goal-create))
@@ -88,7 +101,8 @@
   (expertino-msgs-plan-temporal-goal-set-field ?goal "pddl_instance" ?instance)
   (expertino-msgs-plan-temporal-goal-set-field ?goal "goal_instance" "base")
   (expertino-msgs-plan-temporal-send-goal ?goal ?server)
-  (assert (planned-for-main))
+  ;(assert (planned-for-main))
+  (retract ?set-f)
 )
 
 ;(defrule action-apply-effect-test-main-action
