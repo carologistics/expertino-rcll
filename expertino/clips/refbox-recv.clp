@@ -153,8 +153,7 @@
   (game-state (team ?team) (team-color ?team-color))
   =>
   (foreach ?o (pb-field-list ?ptr "orders")
-    (bind ?id (pb-field-value ?o "id"))
-    (bind ?name (sym-cat O ?id))
+    (bind ?id (sym-cat O (pb-field-value ?o "id")))
     ;check if the order is new
     (bind ?complexity (pb-field-value ?o "complexity"))
     (bind ?competitive (pb-field-value ?o "competitive"))
@@ -177,7 +176,6 @@
     )
     (assert (order 
       (id ?id)
-      (name ?name)
       (complexity ?complexity)
       (competitive ?competitive)
       (quantity-requested ?quantity-requested)
