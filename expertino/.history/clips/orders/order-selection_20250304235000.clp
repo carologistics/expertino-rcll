@@ -28,7 +28,9 @@
   (assert (added-all-orders))
   (printout t "All orders have been scheduled. No more orders will be added." crlf))
 
-
+(deftemplate planned-for-main
+  (slot status))
+  
 (deffacts initial-hardcoded-plan
   (plan-step (id 1) (task dispense) (start-time 0) (duration 5))
   (plan-step (id 2) (task transport) (start-time 5) (duration 20))
@@ -75,6 +77,7 @@
       (printout t "Order " ?order-id " cannot be scheduled yet. Waiting for another order..." crlf)
 ))
 
+
 (deffunction wp-part-to-pddl (?refbox-name $?number)
   (bind ?converted-name (str-replace (lowcase ?refbox-name) "_" "-"))
   (if (neq ?number (create$)) then
@@ -105,18 +108,16 @@
   (assert (added-ring-specs))
 )
 
-
 (defrule add-order-to-problem
   (startup-completed)
   (added-ring-specs)
   (insert-order (T-last-end ?last-end) (T-order-window ?window))
   (order-scheduled (id ?order-id))
-  ?o-f <- (order (id 1) (name ?name) (workpiece nil)  (base-color ?base-col) (ring-colors $?ring-cols) (cap-color ?cap-col)  (quantity-requested ?qty-requested)
+  ?o-f <- (order (id ?order-id) (name ?name) (workpiece nil)  (base-color ?base-col) (ring-colors $?ring-cols) (cap-color ?cap-col)  (quantity-requested ?qty-requested)
             (quantity-delivered ?qty-delivered) (quantity-delivered-other ?qty-delivered-other) (delivery-begin ?delivery-begin) (delivery-end ?delivery-end) (competitive ?competitive) (state OPEN))
-  (added-all-orders) 
+  (not (added-one-order)) ;remove this eventually
+  ;(added-all-orders) 
   ;(not (order-processed (id ?order-id)))
-  (not (order-processed (id 1)))
-  ;(not (added-one-order)) ;remove this eventually
   (confval (path "/pddl/problem_instance") (value ?instance-str))
   =>
   (bind ?instance (sym-cat ?instance-str))
@@ -144,9 +145,10 @@
   (assert (pddl-goal-fluent (instance ?instance) (name step) (params ?wp done)))
   ; also, clear all old goals
   (assert (pddl-clear-goals (instance ?instance)))
+  (assert (added-one-order))
   ;(assert (order-processed (id ?order-id)))
-   (assert (order-processed (id 1)))
-  ;(assert (added-one-order))
+  (printout t "=== Finished executing add-order-to-problem ===" crlf)
+  
 )
 
 (defrule set-goal-for-orders
@@ -159,21 +161,8 @@
   (retract ?clear-f)
 )
 
-(defrule remove-goal
-  ?goal-f <- (pddl-goal-fluent (instance ?instance) (name step) (params $?))
-  ;?clear-f <- (pddl-clear-goals (instance ?instance) (state DONE))
-  ?set-f <- (pddl-set-goals (instance ?instance) (state DONE))
-  (not (removed))
-  =>
-  (retract ?goal-f)
-  ;(retract ?clear-f)
-  (retract ?set-f)
-  (assert (removed))
-)
-
 (defrule goal-updated-start-plan
   (startup-completed)
-  (order-processed (id 1))
   ?set-f <- (pddl-set-goals (instance ?instance) (state DONE))
   (pddl-manager (node ?node))
   (pddl-instance (name ?instance) (busy-with FALSE) (state LOADED))
@@ -189,96 +178,35 @@
   (expertino-msgs-plan-temporal-send-goal ?goal ?server)
   (assert (planned-for-main))
 )
-;(defrule remove-plan
-;  ?plan-f <- (pddl-planner-call (context test-plan) (goal ?goal))
-;  (not (removed-plan))
-;  =>
-;  (retract ?plan-f)
-;  (assert (removed-plan))
-;)
-(defrule goal-updated-start-plan-again
-  (startup-completed)
-  (order-processed (id 1))
-  ?set-f <- (pddl-set-goals (instance ?instance) (state DONE))
-  (pddl-manager (node ?node))
-  (pddl-instance (name ?instance) (busy-with FALSE) (state LOADED))
-  (planning-filter (action-names $?an))
-  (expertino-msgs-plan-temporal-client (server ?server&:(eq ?server (str-cat ?node "/temp_plan"))))
-  (planned-for-main)
-  ;(removed-plan)
-  =>
-  (printout green "Start planning again" crlf)
-  (bind ?goal (expertino-msgs-plan-temporal-goal-create))
-  (assert (pddl-planner-call (context test-plan) (goal ?goal)))
-  (expertino-msgs-plan-temporal-goal-set-field ?goal "pddl_instance" ?instance)
-  (expertino-msgs-plan-temporal-goal-set-field ?goal "action_names" ?an)
-  (expertino-msgs-plan-temporal-send-goal ?goal ?server)
-)
-;(defrule add-another-order-to-problem
-;  (startup-completed)
-;  (added-ring-specs)
-;  (insert-order (T-last-end ?last-end) (T-order-window ?window))
-;  (order-scheduled (id ?order-id))
-;  ?o-f <- (order (id 2) (name ?name) (workpiece nil)  (base-color ?base-col) (ring-colors $?ring-cols) (cap-color ?cap-col)  (quantity-requested ?qty-requested)
-;            (quantity-delivered ?qty-delivered) (quantity-delivered-other ?qty-delivered-other) (delivery-begin ?delivery-begin) (delivery-end ?delivery-end) (competitive ?competitive) (state OPEN))
-;  (added-all-orders) 
-;  ;(not (order-processed (id ?order-id)))
-;  (not (order-processed (id 2)))
-;  ;(not (added-one-order)) ;remove this eventually
-;  (confval (path "/pddl/problem_instance") (value ?instance-str))
-;  (agenda-action-item (execution-state COMPLETED))
-;  (removed)
-;  =>
-;  (bind ?instance (sym-cat ?instance-str))
-;  (bind ?wp (sym-cat (lowcase ?name) "-" (gensym*)))
-;  (assert (workpiece-for-order (wp ?wp) (order ?order-id)))
-;  (assert (pending-pddl-object (instance ?instance) (name ?wp) (type product)))
-;  (assert (pending-pddl-fluent (instance ?instance) (name spawnable) (params ?wp)))
-;  (bind ?curr-step (wp-part-to-pddl ?base-col))
-;  (assert (pending-pddl-fluent (instance ?instance) (name step) (params ?wp ?curr-step)))
-;  (bind ?ring-steps ?ring-cols)
-;  (bind ?ring-num 1)
-;  (while (neq ?ring-steps (create$))
-;    (bind ?next-step  (wp-part-to-pddl (nth$ 1 ?ring-steps) ?ring-num))
-;    (bind ?ring-steps  (rest$ ?ring-steps))
-;    (assert (pending-pddl-fluent (instance ?instance) (name next-step) (params ?wp ?curr-step ?next-step)))
-;    (bind ?curr-step ?next-step)
-;    (bind ?ring-num (+ ?ring-num 1))
-;  )
-;  (bind ?next-step (wp-part-to-pddl ?cap-col))
-;  (assert (pending-pddl-fluent (instance ?instance) (name next-step) (params ?wp ?curr-step ?next-step)))
-;  (assert (pending-pddl-fluent (instance ?instance) (name next-step) (params ?wp ?next-step deliver)))
-;  (assert (pending-pddl-fluent (instance ?instance) (name next-step) (params ?wp deliver done)))
-;  (modify ?o-f (state ACTIVE))
-  ; set the wp as a goal
-;  (assert (pddl-goal-fluent (instance ?instance) (name step) (params ?wp done)))
-  ; also, clear all old goals
-;  (assert (pddl-clear-goals (instance ?instance)))
-  ;(assert (order-processed (id ?order-id)))
-;   (assert (order-processed (id 2)))
-  ;(assert (added-one-order))
-;)
 
-;(defrule wm-updated-plan
-;  (startup-completed)
-;  (order-processed (id 2))
-;  ?set-f <- (pddl-set-goals (instance ?instance) (state DONE))
-;  (pddl-manager (node ?node))
-;  (pddl-instance (name ?instance) (busy-with FALSE) (state LOADED))
-;  (planning-filter (action-names $?an))
-;  (expertino-msgs-plan-temporal-client (server ?server&:(eq ?server (str-cat ?node "/temp_plan"))))
-;  (not (replanning))
-;  =>
-;  (printout green "Updating world model with new plan..." crlf)
-;  (bind ?goal (expertino-msgs-plan-temporal-goal-create))
-;  (assert (pddl-planner-call (context test-plan) (goal ?goal)))
-;  (printout green "The plan was updated." crlf)
-;  (expertino-msgs-plan-temporal-goal-set-field ?goal "pddl_instance" ?instance)
-;  (expertino-msgs-plan-temporal-goal-set-field ?goal "action_names" ?an)
-;  (expertino-msgs-plan-temporal-send-goal ?goal ?server)
-;  (assert (planned-for-main))
-;  (assert (replanning))
-;)
+
+(defrule planning-completed-add-next-order
+  ?plan-done <- (planning-finished)  ;; Replacing pddl-planner-call (context test-plan) with a dedicated fact
+  (not (added-all-orders))
+  (order (id ?order-id) (state OPEN))
+  =>
+  (retract ?plan-done)  ; Remove the old planning completion fact
+  (printout green "Planning completed, adding another order..." crlf)
+  (assert (added-one-order))
+  (assert (order-scheduled (id ?order-id)))
+  (assert (insert-order (T-last-end ?T_last_end) (T-order-window ?T_order_window)))
+  (printout green "Order " ?order-id " added, updating plan..." crlf)
+  (assert (append-new-plan))  ; Ensure new plan is appended to the existing one
+  (assert (pddl-set-goals (instance ?instance)))  ; Re-trigger goal setting
+  (retract (planned-for-main))  ; Allow re-planning
+)
+
+(defrule append-plan-to-existing
+  (append-new-plan)
+  (pddl-instance (name ?instance) (state LOADED))
+  (plan-step (id ?id) (task ?task) (start-time ?start-time) (duration ?duration))
+  =>
+  (assert (plan-step (id (+ ?id 1)) (task ?task) (start-time (+ ?start-time ?duration)) (duration ?duration)))
+  (printout green "Appended new plan step for task: " ?task crlf)
+  (retract (append-new-plan))
+)
+
+
 
 ;(defrule action-apply-effect-test-main-action
 ;" Showcase how to apply an action effect 'directly' (as in, the actual action

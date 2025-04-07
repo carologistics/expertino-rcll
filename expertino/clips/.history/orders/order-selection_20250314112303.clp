@@ -189,13 +189,7 @@
   (expertino-msgs-plan-temporal-send-goal ?goal ?server)
   (assert (planned-for-main))
 )
-;(defrule remove-plan
-;  ?plan-f <- (pddl-planner-call (context test-plan) (goal ?goal))
-;  (not (removed-plan))
-;  =>
-;  (retract ?plan-f)
-;  (assert (removed-plan))
-;)
+
 (defrule goal-updated-start-plan-again
   (startup-completed)
   (order-processed (id 1))
@@ -204,15 +198,15 @@
   (pddl-instance (name ?instance) (busy-with FALSE) (state LOADED))
   (planning-filter (action-names $?an))
   (expertino-msgs-plan-temporal-client (server ?server&:(eq ?server (str-cat ?node "/temp_plan"))))
-  (planned-for-main)
-  ;(removed-plan)
+  (not (planned-for-main))
   =>
-  (printout green "Start planning again" crlf)
+  (printout green "Start planning" crlf)
   (bind ?goal (expertino-msgs-plan-temporal-goal-create))
   (assert (pddl-planner-call (context test-plan) (goal ?goal)))
   (expertino-msgs-plan-temporal-goal-set-field ?goal "pddl_instance" ?instance)
   (expertino-msgs-plan-temporal-goal-set-field ?goal "action_names" ?an)
   (expertino-msgs-plan-temporal-send-goal ?goal ?server)
+  (assert (planned-for-main))
 )
 ;(defrule add-another-order-to-problem
 ;  (startup-completed)

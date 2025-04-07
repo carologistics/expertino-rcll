@@ -49,7 +49,7 @@ def generate_launch_description():
 
     declare_log_level_ = DeclareLaunchArgument(
         "log_level",
-        default_value="info",
+        default_value="debug",
         description="Logging level for cx_node executable",
     )
 
