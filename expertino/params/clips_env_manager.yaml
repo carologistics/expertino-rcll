@@ -65,6 +65,7 @@ clips_manager:
         "clips/expertino/executor.clp",
         "clips/expertino/action/action-selection.clp",
         "clips/expertino/workers/workers.clp",
+        "clips/expertino/production-strategy.clp",
         # Finalize
         "clips/expertino/shutdown/finalize-ros.clp",
         ]

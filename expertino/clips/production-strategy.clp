@@ -3,7 +3,7 @@
 )
 
 (defrule production-strategy-init-filter
-  (not (production-strategy-order-list (name possible-orders)))
+  (not (production-strategy-order-filter (name possible-orders)))
   =>
   (assert 
     (production-strategy-order-filter (name possible-orders))
@@ -23,7 +23,7 @@
   (game-time ?gt)
   (test (< ?gt ?begin))
   =>
-  (modify ?filter ($?possible-orders ?order-id))
+  (modify ?filter (orders $?possible-orders ?order-id))
 )
 
 (defrule production-strategy-remove-possible-order-active
@@ -43,7 +43,7 @@
   (order (id ?order-id))
   (production-strategy-order-filter (name possible-orders) (orders $?possible-orders&:(member$ ?order-id ?possible-orders)))
   ?filter <- (production-strategy-order-filter (name selected-orders) (orders $?selected-orders))
-  (production-strategy-order-filter (name active-orders) (order $?active-orders))
+  (production-strategy-order-filter (name active-orders) (orders $?active-orders))
   (test (< (length$ ?active-orders) ?*TOTAL-PRODUCTION-THRESHOLD*))
   (test (not (member$ ?order-id ?selected-orders)))
   =>
@@ -59,12 +59,32 @@
   (production-strategy-order-filter (name possible-orders) (orders $?possible-orders))
   (production-strategy-order-filter (name active-orders) (orders $?active-orders))
   (or
-    (not (member$ ?order-id ?possible-orders))
-    (not (member$ ?order-id ?active-orders))
+    (test (not (member$ ?order-id ?possible-orders)))
+    (test (not (member$ ?order-id ?active-orders)))
   )
   =>
   (modify ?filter (orders (delete-member$ ?selected-orders ?order-id)))
 )
 
 (defrule production-strategy-add-active-orders
-  (
+  ?filter <- (production-strategy-order-filter (name active-orders) (orders $?active-orders))
+  (workpiece-for-order (wp ?wp) (order ?order-id))
+  (agenda (plan ?plan-id) (state ACTIVE))
+  (pddl-action (id ?action) (plan ?plan-id) (params $?params))
+  (test (member$ ?wp ?params))
+  (test (not (member$ ?order-id ?active-orders)))
+  =>
+  (modify ?filter (orders ?active-orders ?order-id))
+)
+
+(defrule production-strategy-remove-active-orders
+  (order (id ?order-id))
+  ?filter <- (production-strategy-order-filter (name active-orders) (orders $?active-orders&:(member$ ?order-id ?active-orders)))
+  (or (not (workpiece-for-order (wp ?wp-o) (order ?order-id)))
+      (and (workpiece-for-order (wp ?wp) (order ?order-id))
+           (pddl-fluent (name step) (params ?wp done))
+      )
+  )
+  =>
+  (modify ?filter (orders (delete-member$ ?active-orders ?order-id)))
+)  

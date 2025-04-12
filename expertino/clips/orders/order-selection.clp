@@ -26,7 +26,6 @@
     )
   )
   (assert (added-ring-specs))
-  (assert (selected-order (order 1)))
 )
 
 (defrule add-order-to-problem
@@ -38,7 +37,7 @@
   (confval (path "/pddl/problem_instance") (value ?instance-str))
   =>
   (bind ?instance (sym-cat ?instance-str))
-  (bind ?wp (sym-cat (lowcase ?name) "-" (gensym*)))
+  (bind ?wp (sym-cat (lowcase ?order-id) "-" (gensym*)))
   (assert (workpiece-for-order (wp ?wp) (order ?order-id)))
   (assert (pending-pddl-object (instance ?instance) (name ?wp) (type product)))
   (assert (pending-pddl-fluent (instance ?instance) (name spawnable) (params ?wp)))
@@ -58,12 +57,17 @@
   (assert (pending-pddl-fluent (instance ?instance) (name next-step) (params ?wp ?next-step deliver)))
   (assert (pending-pddl-fluent (instance ?instance) (name next-step) (params ?wp deliver done)))
   (modify ?o-f (state ACTIVE))
-  ; remove existing pddl-goal-fluents
-  (do-for-all-facts ((?gf pddl-goal-fluent)) TRUE (retract ?gf))
   ; set the wp as a goal
   (assert (pddl-goal-fluent (instance ?instance) (name step) (params ?wp done)))
-  ; also, clear all old goals
+  ; also, clear all old goals in pddl_manager
   (assert (pddl-clear-goals (instance ?instance) (goal base)))
+)
+
+(defrule remove-achieved-goal
+  ?goal-f <- (pddl-goal-fluent (instance ?instance) (name ?f-name) (params $?f-params))
+  (pddl-fluent (instance ?instance) (name ?f-name) (params $?f-params))
+  =>
+  (retract ?goal-f)
 )
 
 (defrule set-goal-for-orders

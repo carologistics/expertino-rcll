@@ -104,3 +104,10 @@
   (ros-msgs-destroy-message ?inc-msg)
   (retract ?msg-f)
 )
+
+(defrule plan-select
+  "Select a plan for execution based on its feasibility"
+  ?p <- (pddl-plan (state PENDING))
+  =>
+  (modify ?p (state SELECTED))
+)

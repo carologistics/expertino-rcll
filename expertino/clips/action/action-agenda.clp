@@ -5,12 +5,13 @@
 ; before assigning them to executors. 
 
 (defrule agenda-select-first-plan
-  (not (pddl-plan (state EXECUTING)))
-  (not (agenda (plan ?)))
-  ?plan <- (pddl-plan (id ?plan-id))
+  ;(not (pddl-plan (state EXECUTING)))
+  ?plan <- (pddl-plan (id ?plan-id) (state SELECTED))
+  (not (agenda (plan ?plan-id)))
   =>
   (assert (agenda (plan ?plan-id) (state ACTIVE)))
-  (printout green "Initialiasing action agenda from plan " ?plan-id crlf)
+  (modify ?plan (state EXECUTING))
+  (printout green "Initialiasing new action agenda from plan " ?plan-id crlf)
 )
 
 (defrule agenda-step-ahead
