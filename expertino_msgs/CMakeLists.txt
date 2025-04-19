@@ -29,6 +29,10 @@ set(SERVICES
     "srv/ClearGoals.srv"
     "srv/GetFluents.srv"
     "srv/GetFunctions.srv"
+    "srv/SetActionFilter.srv"
+    "srv/SetFluentFilter.srv"
+    "srv/SetObjectFilter.srv"
+    "srv/CreateGoalInstance.srv"
     "srv/AddFluents.srv")
 set(ACTIONS "action/PlanTemporal.action")
 

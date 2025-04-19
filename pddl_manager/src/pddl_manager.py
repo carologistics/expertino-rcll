@@ -26,6 +26,10 @@ from expertino_msgs.srv import (
     GetFunctions,
     SetGoals,
     ClearGoals,
+    SetActionFilter,
+    SetObjectFilter,
+    SetFluentFilter,
+    CreateGoalInstance
 )
 from expertino_msgs.msg import Fluent as FluentMsg, FluentEffect, FunctionEffect, Function, TimedPlanAction, Action as ActionMsg
 from expertino_msgs.action import PlanTemporal
@@ -76,6 +80,7 @@ from rclpy.lifecycle import LifecycleNode
 from rclpy.lifecycle import State
 from rclpy.lifecycle import TransitionCallbackReturn
 
+from managed_problem import ManagedProblem, ManagedGoal
 
 class PddlManagerLifecycleNode(LifecycleNode):
     def __init__(self):
@@ -96,8 +101,12 @@ class PddlManagerLifecycleNode(LifecycleNode):
         self.set_goals_srv = None
         self.clear_goals_srv = None
         self.plan_action_server = None
+        self.set_action_filter_srv = None
+        self.set_fluent_filter_srv = None
+        self.set_object_filter_srv = None
+        self.create_goal_instance_srv = None
         self.reader = PDDLReader()
-        self.problems = {}
+        self.managed_problems = {}
         self.env = get_environment()
         # different CB groups for services and the action server to enable
         # responsive callbacks while actions are running
@@ -211,6 +220,33 @@ class PddlManagerLifecycleNode(LifecycleNode):
             self.handle_clear_goals,
             callback_group=self.srv_cb_group,
         )
+        self.set_action_filter_srv = self.create_service(
+            SetActionFilter,
+            f"{self.get_name()}/set_action_filter",
+            self.handle_set_action_filter,
+            callback_group=self.srv_cb_group,
+
+        )
+        self.set_object_filter_srv = self.create_service(
+            SetObjectFilter,
+            f"{self.get_name()}/set_object_filter",
+            self.handle_set_object_filter,
+            callback_group=self.srv_cb_group,
+
+        )
+        self.set_fluent_filter_srv = self.create_service(
+            SetFluentFilter,
+            f"{self.get_name()}/set_fluent_filter",
+            self.handle_set_fluent_filter,
+            callback_group=self.srv_cb_group,
+
+        )
+        self.create_goal_instance_srv = self.create_service(
+            CreateGoalInstance,
+            f"{self.get_name()}/create_goal_instance",
+            self.handle_create_goal_instance,
+            callback_group=self.srv_cb_group,
+        )
         self.plan_action_server = ActionServer(
             self,
             PlanTemporal,
@@ -252,14 +288,14 @@ class PddlManagerLifecycleNode(LifecycleNode):
         self.get_logger().debug(
             f"Received Object: name={obj.name}, type={obj.type}"
         )
-        if obj.pddl_instance not in self.problems.keys():
+        if obj.pddl_instance not in self.managed_problems.keys():
             return False, "Unknown pddl instance"
-        instance = self.problems[obj.pddl_instance]
+        managed_instance = self.managed_problems[obj.pddl_instance]
         try:
             if(value):
-              instance.add_object(obj.name, instance.user_type(obj.type))
+              managed_instance.add_object(obj.name, obj.type)
             else:
-              raise Exception("Deletion of objects is not supported yet")
+              managed_instance.remove_object(obj.name)
             return True, ""
         except Exception as e:
             return False, f"error while { "adding" if value else "removing" } object: {e}"
@@ -268,17 +304,11 @@ class PddlManagerLifecycleNode(LifecycleNode):
         self.get_logger().debug(
             f"Received Fluent: name={fluent.name}, args={fluent.args}"
         )
-        if fluent.pddl_instance not in self.problems.keys():
+        if fluent.pddl_instance not in self.managed_problems.keys():
             return False, "Unknown pddl instance"
-        instance = self.problems[fluent.pddl_instance]
-        args = []
+        managed_instance = self.managed_problems[fluent.pddl_instance]
         try:
-            for arg in fluent.args:
-                args.append(instance.object(arg))
-            grounded_fluent = self.fnode_manager.FluentExp(
-                instance.fluent(fluent.name), args
-            )
-            instance.set_initial_value(grounded_fluent, value)
+            managed_instance.set_fluent(fluent.name, fluent.args, value)
             return True, ""
         except Exception as e:
             return False, f"error while { "adding" if value else "removing" } fluent: {e}"
@@ -294,17 +324,12 @@ class PddlManagerLifecycleNode(LifecycleNode):
 
 
     def try_set_fluent_goal(self, fluent, value):
-        if fluent.pddl_instance not in self.problems.keys():
+        if fluent.pddl_instance not in self.managed_problems.keys():
             return False, "Unknown pddl instance"
-        instance = self.problems[fluent.pddl_instance]
+        managed_instance = self.managed_problems[fluent.pddl_instance]
         args = []
         try:
-            for arg in fluent.args:
-                args.append(instance.object(arg))
-            grounded_fluent = self.fnode_manager.FluentExp(
-                instance.fluent(fluent.name), args
-            )
-            instance.add_goal(grounded_fluent)
+            managed_instance.add_goal_fluent(fluent.name, fluent.args)
             return True, ""
         except Exception as e:
             return False, f"error while { "adding" if value else "removing" } fluent: {e}"
@@ -396,11 +421,11 @@ class PddlManagerLifecycleNode(LifecycleNode):
     def handle_clear_goals(self, request, response):
         response.success = True
         error = ""
-        if not request.pddl_instance in self.problems:
+        if not request.pddl_instance in self.managed_problems:
             response.success = False
             response.error = "Unknown pddl instance"
             return response
-        instance = self.problems[request.pddl_instance]
+        instance = self.managed_problems[request.pddl_instance].goals[request.goal_instance]
         try:
             instance.clear_goals()
             return response
@@ -433,6 +458,67 @@ class PddlManagerLifecycleNode(LifecycleNode):
         return response
 
 
+    def handle_set_object_filter(self, request, response):
+        success = True
+        error = ""
+        try:
+            self.managed_problems[request.pddl_instance].goals[request.goal_instance].object_filters = []
+
+            for obj in request.objects:
+                self.managed_problems[request.pddl_instance].goals[request.goal_instance].add_object_filter(obj)
+        except:
+            error = "Could not access goal/problem"
+            success = False
+
+        response.success = success
+        response.error = error
+        return response
+
+    def handle_set_action_filter(self, request, response):
+        success = True
+        error = ""
+        try:
+            self.managed_problems[request.pddl_instance].goals[request.goal_instance].action_filters = []
+
+            for action in request.actions:
+                self.managed_problems[request.pddl_instance].goals[request.goal_instance].add_action_filter(action)
+        except:
+            error = "Could not access goal/problem"
+            success = False
+
+        response.success = success
+        response.error = error
+        return response
+
+    def handle_set_fluent_filter(self, request, response):
+        success = True
+        error = ""
+        try:
+            self.managed_problems[request.pddl_instance].goals[request.goal_instance].fluent_filters = []
+
+            for fluent in request.fluents:
+                self.managed_problems[request.pddl_instance].goals[request.goal_instance].add_fluent_filter(fluent)
+        except:
+            error = "Could not access goal/problem"
+            success = False
+
+        response.success = success
+        response.error = error
+        return response
+
+    def handle_create_goal_instance(self, request, response):
+        success = True
+        error = ""
+        try:
+            self.managed_problems[request.pddl_instance].add_goal(request.name)
+        except:
+            error = "Could not access problem"
+            success = False
+
+        response.success = success
+        response.error = error
+        return response
+
     def handle_add_pddl_instance(self, request, response):
         directory = request.directory
         domain = request.domain_file
@@ -446,18 +532,16 @@ class PddlManagerLifecycleNode(LifecycleNode):
             if problem_exists:
                 problem_template = jinja_env.get_template(problem)
                 problem_rendered = problem_template.render()
-            if name in self.problems.keys():
+            if name in self.managed_problems.keys():
                 self.get_logger().warn(f"Overriding problem {name}")
 
             if problem_exists:
-                self.problems[name] = self.reader.parse_problem_string(
-                    domain_rendered, problem_rendered
-                )
+                self.managed_problems[name] = ManagedProblem(self.reader.parse_problem_string(domain_rendered, problem_rendered), self.env, name)
             else:
-                self.problems[name] = self.reader.parse_problem_string(domain_rendered)
+                self.managed_problems[name] = ManagedProblem(self.reader.parse_problem_string(domain_rendered), self.env, name)
             self.get_logger().info(f"Loading domain {domain} {problem}")
             response.success = True
-            self.get_logger().debug(f"{self.problems[name]}")
+            self.get_logger().debug(f"{self.managed_problems[name].base_problem}")
         except Exception as e:
             response.error = f"error while adding problem: {e}"
             self.get_logger().error(response.error)
@@ -465,11 +549,11 @@ class PddlManagerLifecycleNode(LifecycleNode):
         return response
 
     def handle_get_fluents(self, request, response):
-        if request.pddl_instance not in self.problems.keys():
+        if request.pddl_instance not in self.managed_problems.keys():
             response.success = False
             response.error = "Unknown pddl instance"
             return response
-        instance = self.problems[request.pddl_instance]
+        instance = self.managed_problems[request.pddl_instance].base_problem
         response.fluents = []
         for f, val in instance.initial_values.items():
             args = []
@@ -487,11 +571,11 @@ class PddlManagerLifecycleNode(LifecycleNode):
         return response
 
     def handle_get_functions(self, request, response):
-        if request.pddl_instance not in self.problems.keys():
+        if request.pddl_instance not in self.managed_problems.keys():
             response.success = False
             response.error = "Unknown pddl instance"
             return response
-        instance = self.problems[request.pddl_instance]
+        instance = self.managed_problems[request.pddl_instance].base_problem
         response.functions = []
         for f, val in instance.initial_values.items():
             args = []
@@ -523,11 +607,11 @@ class PddlManagerLifecycleNode(LifecycleNode):
         self.get_logger().debug(
             f"Received Action: name={action.name}, args={action.args}"
         )
-        if action.pddl_instance not in self.problems.keys():
+        if action.pddl_instance not in self.managed_problems.keys():
             response.success = False
             response.error = "Unknown pddl instance"
             return response
-        instance = self.problems[action.pddl_instance]
+        instance = self.managed_problems[action.pddl_instance].base_problem
         args = []
         try:
             # Ground action
@@ -567,7 +651,7 @@ class PddlManagerLifecycleNode(LifecycleNode):
         return response
 
     def ground_action(self, action):
-        instance = self.problems[action.pddl_instance]
+        instance = self.managed_problems[action.pddl_instance].base_problem
         args = []
         for arg in action.args:
             args.append(instance.object(arg))
@@ -584,12 +668,12 @@ class PddlManagerLifecycleNode(LifecycleNode):
         self.get_logger().debug(
             f"Received Action: name={action.name}, args={action.args}"
         )
-        if action.pddl_instance not in self.problems.keys():
+        if action.pddl_instance not in self.managed_problems.keys():
             response.success = False
             response.error = "Unknown pddl instance"
             return response
 
-        instance = self.problems[action.pddl_instance]
+        instance = self.managed_problems[action.pddl_instance].base_problem
         an = instance.actions
         action_names_new = []
         for action_name in an:
@@ -681,11 +765,11 @@ class PddlManagerLifecycleNode(LifecycleNode):
             return response
 
     def handle_get_action_names(self, request, response):
-        if request.pddl_instance not in self.problems.keys():
+        if request.pddl_instance not in self.managed_problems.keys():
             response.success = False
             response.error = "Unknown pddl instance"
             return response
-        instance = self.problems[request.pddl_instance]
+        instance = self.managed_problems[request.pddl_instance].base_problem
         try:
             actions = instance.actions
             action_names = []
@@ -705,78 +789,20 @@ class PddlManagerLifecycleNode(LifecycleNode):
       response = PlanTemporal.Result()
       request = goal_handle.request
 
-      if request.pddl_instance not in self.problems.keys():
+      if request.pddl_instance not in self.managed_problems.keys():
           response.success = False
           return response
 
-      problem = self.problems[request.pddl_instance].clone()
-      action_filter = request.action_names
-      if action_filter:
-        actions = problem.actions
-        problem.clear_actions()
-        for act in actions:
-          if act.name in  action_filter:
-            problem.add_action(act)
-      writer = PDDLWriter(problem)
-      dom = writer.get_domain()
-      prob = writer.get_problem()
-      future = self.my_executor.submit(run_planner_process, self.env, dom, prob)
-      result = future.result()
+      result = self.managed_problems[request.pddl_instance].goals[request.goal_instance].plan_in_pool()
       response.actions = []
       if result:
         response.success = True
         self.get_logger().info("Successfully planned")
-
-        delta_threshold = 0.1
-        last_time = 0.0
-        equiv_class_idx = 0
-        # iterate over all actions in the plan to compute regions and generate response
-        for time, act, duration in result.timed_actions:
-          plan_action = TimedPlanAction()
-          plan_action.pddl_instance = request.pddl_instance
-          if f"{act.action.name}" in writer.nto_renamings.keys():
-            plan_action.name=f"{writer.get_item_named(f"{act.action.name}").name}"
-          else:
-            plan_action.name = f"{act.action.name}"
-
-          plan_action.args = []
-          for arg in act.actual_parameters:
-            if f"{arg}" in writer.nto_renamings.keys():
-              plan_action.args.append(f"{writer.get_item_named(arg.__str__())}")
-            else:
-              plan_action.args.append(f"{arg}")
-          plan_action.start_time = float(time)
-          plan_action.duration = float(duration)
-          if float(time) - last_time > delta_threshold:
-            equiv_class_idx += 1
-            last_time = float(time)
-          plan_action.equiv_class = equiv_class_idx
-          response.actions.append(plan_action)
+        response.actions = result
       else:
         response.success = False
       goal_handle.succeed()
       return response
-
-def run_planner_process(env, dom, prob):
-  env = get_environment()
-  env.credits_stream = None
-  reader = PDDLReader()
-  problem = reader.parse_problem_string(dom,prob)
-  env.factory.add_engine("nextflap", __name__, "NextFLAPImpl")
-  with env.factory.OneshotPlanner(name="nextflap") as planner:
-    result = planner.solve(problem, timeout=60.0)  # Your expensive call
-    tPlan=None
-    # result = planner.solve(problem, timeout=60.0)
-    if result.status == PlanGenerationResultStatus.SOLVED_SATISFICING:
-        if result.plan.kind == PlanKind.TIME_TRIGGERED_PLAN:
-            tPlan = result.plan.convert_to(
-                PlanKind.TIME_TRIGGERED_PLAN, result.plan
-            )
-            plan = result.plan
-    else:
-        return False
-
-    return tPlan
 
 def main(args=None):
     rclpy.init(args=args)

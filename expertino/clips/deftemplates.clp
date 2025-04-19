@@ -430,7 +430,10 @@
 " This currently mainly is a transient layer betweeen the general pddl interface and our domain-specific usage.
   Can be extended later in case different kind of planning filters should be used or if planning is used in varying contexts.
 "
-  (multislot action-names (type SYMBOL) (default (create$ )))
+  (slot type (type SYMBOL) (allowed-values ACTIONS OBJECTS FLUENTS))
+  (multislot filter (type SYMBOL) (default (create$ )))
+  (slot instance (type SYMBOL))
+  (slot goal (type SYMBOL))
 )
 
 (deftemplate executor
