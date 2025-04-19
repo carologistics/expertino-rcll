@@ -124,6 +124,9 @@ class ManagedGoal():
     def remove_fluent_filter(self, fluent):
         self.fluent_filters.remove(fluent)
 
+    def clear_goals(self):
+        self.goal_fluents = []
+
     def plan_in_pool(self):
         action_filters = self.action_filters
         if len(self.action_filters) == 0:

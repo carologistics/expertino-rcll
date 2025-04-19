@@ -165,6 +165,7 @@
   @slot error: provide information on encountered errors.
 "
   (slot instance (type SYMBOL))
+  (slot goal (type SYMBOL))
   (slot state (type SYMBOL) (allowed-values PENDING DONE ERROR) (default PENDING))
   (slot error (type STRING))
 )
@@ -227,7 +228,7 @@
   (slot problem (type STRING))
   (slot directory (type STRING))
   (slot state (type SYMBOL) (allowed-values PENDING LOADED ERROR) (default PENDING))
-  (slot busy-with (type SYMBOL) (allowed-values FALSE OBJECTS FLUENTS ACTION-EFFECTS CLEAR-GOALS SET-GOALS CHECK-CONDITIONS GET-FLUENTS GET-NUMERIC-FLUENTS GET-ACTION-NAMES) (default FALSE))
+  (slot busy-with (type SYMBOL) (allowed-values FALSE OBJECTS FLUENTS ACTION-EFFECTS CLEAR-GOALS SET-GOALS CHECK-CONDITIONS GET-FLUENTS GET-NUMERIC-FLUENTS GET-ACTION-NAMES SET-ACTION-FILTER SET-OBJECT-FILTER SET-FLUENT-FILTER CREATE-GOAL-INSTANCE) (default FALSE))
   (slot error (type STRING))
 )
 
@@ -254,6 +255,7 @@
   (slot delete (type SYMBOL) (allowed-values FALSE TRUE) (default FALSE))
   (slot request-id (type INTEGER))
   (slot state (type SYMBOL) (allowed-values PENDING WAITING ERROR ON-HOLD) (default PENDING))
+  (slot error (type STRING))
 )
 
 (deftemplate pending-pddl-fluent

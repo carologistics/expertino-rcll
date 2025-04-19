@@ -1,6 +1,6 @@
 (defrule pddl-request-clear-goals
   (declare (salience ?*PRIORITY-PDDL-CLEAR-GOALS*))
-  (pddl-clear-goals (instance ?instance) (state PENDING))
+  (pddl-clear-goals (instance ?instance) (goal ?goal) (state PENDING))
   (pddl-manager (node ?node))
   ?pi-f <- (pddl-instance (name ?instance) (state LOADED) (busy-with FALSE))
   (ros-msgs-client (service ?s&:(eq ?s (str-cat ?node "/clear_goals"))) (type ?type))
@@ -9,6 +9,7 @@
   =>
   (bind ?new-req (ros-msgs-create-request ?type))
   (ros-msgs-set-field ?new-req "pddl_instance" ?instance)
+  (ros-msgs-set-field ?new-req "goal_instance" ?goal)
   (bind ?id (ros-msgs-async-send-request ?new-req ?s))
   (if ?id then
     (assert (service-request-meta (service ?s) (request-id ?id) (meta ?instance)))

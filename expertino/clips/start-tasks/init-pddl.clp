@@ -117,11 +117,12 @@
 
 (defrule pddl-init-problem-finish-planning-action-domain
   (confval (path "/pddl/planning_instance") (value ?instance-str))
+  (confval (path "/pddl/problem_instance") (value ?problem-instance-str))
   (pddl-instance (state LOADED) (name ?instance&:(eq ?instance (sym-cat ?instance-str))))
   ?pan-f <- (pddl-action-names (instance ?instance) (state DONE) (action-names $?an))
   ?st <- (start-task (name pddl) (state ACTIVE) (parts init-planning-actions $?rest-parts))
   =>
-  (assert (planning-filter (action-names ?an)))
+  (assert (planning-filter (filter ?an) (instance (sym-cat ?problem-instance-str)) (goal base) (type ACTIONS)))
   (retract ?pan-f)
   (modify ?st (parts ?rest-parts))
 )
