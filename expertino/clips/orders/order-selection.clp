@@ -31,7 +31,7 @@
 (defrule add-order-to-problem
   (startup-completed)
   (added-ring-specs)
-  ?o-f <- (order (id ?order-id) (workpiece nil) (base-color ?base-col) (ring-colors $?ring-cols) (cap-color ?cap-col) (state OPEN))
+  ?o-f <- (order (id ?order-id) (workpiece nil) (base-color ?base-col) (ring-colors $?ring-cols) (cap-color ?cap-col))
   (production-strategy-order-filter (name selected-orders) (orders $?orders&:(member$ ?order-id ?orders))) ;revise this later
   (not (workpiece-for-order (order ?order-id)))
   (confval (path "/pddl/problem_instance") (value ?instance-str))
@@ -56,7 +56,6 @@
   (assert (pending-pddl-fluent (instance ?instance) (name next-step) (params ?wp ?curr-step ?next-step)))
   (assert (pending-pddl-fluent (instance ?instance) (name next-step) (params ?wp ?next-step deliver)))
   (assert (pending-pddl-fluent (instance ?instance) (name next-step) (params ?wp deliver done)))
-  (modify ?o-f (state ACTIVE))
   ; set the wp as a goal
   (assert (pddl-goal-fluent (instance ?instance) (name step) (params ?wp done)))
   ; also, clear all old goals in pddl_manager

@@ -31,7 +31,8 @@
   (bind ?time (pb-field-value ?p "game_time"))
   (bind ?sec (pb-field-value ?time "sec"))
   (bind ?nsec (pb-field-value ?time "nsec"))
-  (assert (game-time (+ ?sec (/  ?nsec 1000000))))
+  ;(assert (game-time (+ ?sec (/  ?nsec 1000000))))
+  (assert (game-time ?sec))
   (if (and (pb-has-field ?p "team_cyan")
            (eq (pb-field-value ?p "team_cyan") ?team))
     then 

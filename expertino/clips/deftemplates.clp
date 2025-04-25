@@ -60,8 +60,6 @@
   (slot delivery-begin (type INTEGER))
   (slot delivery-end (type INTEGER))
   (slot competitive (type SYMBOL))
-
-  (slot state (type SYMBOL) (default OPEN) (allowed-values OPEN ACTIVE COMPLETED CANCELLED))
 )
 
 (deftemplate protobuf-peer

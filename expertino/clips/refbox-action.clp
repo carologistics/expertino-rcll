@@ -56,7 +56,7 @@
           (bind ?order-id ?w-f:order)
         )
         (bind ?ds-inst (pb-create "llsf_msgs.PrepareInstructionDS"))
-        (pb-set-field ?ds-inst "order_id" ?order-id)
+        (pb-set-field ?ds-inst "order_id" (order-to-int ?order-id))
         (pb-set-field ?machine-instruction "instruction_ds" ?ds-inst)
     )
   )
