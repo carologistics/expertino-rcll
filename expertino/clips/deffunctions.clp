@@ -51,8 +51,6 @@
 
 
 (deffunction order-to-int (?order)
-  (printout yellow (sub-string 2 (str-length ?order) ?order) crlf)
-  (printout yellow (string-to-field (sub-string 2 (str-length ?order) ?order)) crlf)
   (return (integer (string-to-field (sub-string 2 (str-length ?order) ?order))))
 )
 

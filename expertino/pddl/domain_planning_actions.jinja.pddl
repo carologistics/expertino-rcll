@@ -47,6 +47,7 @@
        (at start (step-place ?step ?to))
        (at start (free ?to))
        (at start (usable ?prod))
+       (at start (not (= ?from ?to)))
        (over all (free ?to))
      )
      :effect (and
