@@ -39,8 +39,14 @@
   (not (agenda-action-item (plan ?plan-id) (action ?action-id)))
   (confval (path "/pddl/actions/robot") (list-value $?robot-actions))
   (confval (path "/pddl/actions/refbox") (list-value $?refbox-actions))
+  (confval (path "/pddl/actions/agent") (list-value $?agent-actions))
   =>
-  (bind ?worker-type (if (member$ (str-cat ?action-name) ?robot-actions) then ROBOT else REFBOX))
+  (bind ?worker-type (if (member$ (str-cat ?action-name) ?robot-actions)
+                       then ROBOT
+                       else 
+                         (if (member$ (str-cat ?action-name) ?refbox-actions)
+                          then REFBOX
+                          else AGENT)))
   (assert (agenda-action-item (action ?action-id) (plan ?plan-id) (priority 0 1) (worker-type ?worker-type)))
   (printout yellow "Added action " ?action-id "(ordering " ?ordering-class ") to agenda" crlf)
 )
@@ -52,8 +58,14 @@
   (not (agenda-action-item (plan ?plan-id) (action ?action-id)))
   (confval (path "/pddl/actions/robot") (list-value $?robot-actions))
   (confval (path "/pddl/actions/refbox") (list-value $?refbox-actions))
+  (confval (path "/pddl/actions/agent") (list-value $?agent-actions))
   =>
-  (bind ?worker-type (if (member$ (str-cat ?action-name) ?robot-actions) then ROBOT else REFBOX))
+  (bind ?worker-type (if (member$ (str-cat ?action-name) ?robot-actions)
+                       then ROBOT
+                       else 
+                         (if (member$ (str-cat ?action-name) ?refbox-actions)
+                          then REFBOX
+                          else AGENT)))
   (assert (agenda-action-item (action ?action-id) (plan ?plan-id) (priority 0 0) (worker-type ?worker-type)))
   (retract ?precon)
   (printout yellow "Added action " ?action-id "(" ?plan-order-class ") to agenda (relaxed condition, precondition satisfied)" crlf)

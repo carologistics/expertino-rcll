@@ -15,7 +15,7 @@
 )
 
 (defrule worker-set-busy
-  ?worker <- (worker (id ?worker-id) (state IDLE))
+  ?worker <- (worker (id ?worker-id) (state IDLE) (type ~AGENT))
   (agenda-action-item (execution-state SELECTED|EXECUTING) (worker ?worker-id))
   =>
   (modify ?worker (state BUSY))
@@ -23,15 +23,17 @@
 
 (defrule worker-set-idle
   ?worker <- (worker (id ?worker-id) (state BUSY))
-  (agenda-action-item (execution-state COMPLETED|EFFECTS-APPLIED) (worker ?worker-id))
+  ?aa <- (agenda-action-item (execution-state COMPLETED) (worker ?worker-id))
   =>
   (modify ?worker (state IDLE))
+  (modify ?aa (worker UNSET))
 )
 
-(defrule worker-set-idle
+(defrule worker-set-recovery
   ?worker <- (worker (id ?worker-id) (state BUSY|IDLE))
-  (agenda-action-item (execution-state ERROR) (worker ?worker-id))
+  ?aa <- (agenda-action-item (execution-state ERROR) (worker ?worker-id))
   =>
   (modify ?worker (state RECOVERY))
+  (modify ?aa (worker UNSET))
 )
 

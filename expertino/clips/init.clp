@@ -24,6 +24,7 @@
      (assert (worker (id ?robot) (state IDLE) (type ROBOT)))
    )
    (assert (worker (id REFBOX) (state IDLE) (type REFBOX)))
+   (assert (worker (id AGENT) (state IDLE) (type AGENT)))
 ;   (assert
 ;     (domain-object (name INPUT) (type mps-side))
 ;     (domain-object (name OUTPUT) (type mps-side))

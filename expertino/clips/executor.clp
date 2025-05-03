@@ -27,6 +27,7 @@
   ?aa <- (agenda-action-item (action ?action-id) (execution-state SELECTED))
   =>
   (modify ?aa (execution-state EXECUTING))
+  (assert (pddl-action-apply-effect (action ?action-id) (effect-type START)))
 )
 
 (defrule executor-succeeded
@@ -44,4 +45,13 @@
   =>
   ;TODO set appropriate error message
   (modify ?aa (execution-state ERROR))
+)
+
+(defrule executor-succeed-agent-worker
+  ?ex <- (executor (pddl-action-id ?action-id) (worker AGENT) (state INIT))
+  ?aa <- (agenda-action-item (action ?action-id) (execution-state SELECTED))
+  =>
+  (modify ?ex (state SUCCEEDED))
+  (modify ?aa (execution-state EXECUTING))
+  (assert (pddl-action-apply-effect (action ?action-id) (effect-type ALL)))
 )

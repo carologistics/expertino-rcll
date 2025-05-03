@@ -38,5 +38,6 @@ pddl:
   planning_domain_file: "planning_domain.jinja.pddl"
   # differenciating between pddl actions carried out by different workers
   actions:
-    refbox: ["bs-dispense", "dispense-pay", "cs-mount-cap", "cs-buffer", "rs-mount-ring", "rs-pay", "rs-pay-with-cc"]
+    refbox: ["bs-dispense", "dispense-pay", "cs-mount-cap", "cs-buffer", "rs-mount-ring", "finalize"]
     robot: ["transport", "transport-to-slide", "carrier-to-input"]
+    agent: ["rs-pay", "rs-pay-with-cc"]

@@ -2,6 +2,7 @@
   (pddl-action (id ?action-id) (name ?name) (instance ?instance) (params $?params))
   ?check-fact <- (pddl-action-precondition (id ?action-id) (state PENDING))
   (not (pddl-action-precondition (id ?action-id) (state CHECK-PRECONDITION)))
+  ?pi-f <- (pddl-instance (name ?instance) (state LOADED) (busy-with FALSE))
   (confval (path "/pddl/manager_node") (value ?node))
   (ros-msgs-client (service ?s&:(eq ?s (str-cat ?node "/check_action_precondition"))) (type ?type))
   (not (service-request-meta (service ?s) (meta ?action-id)))
@@ -15,6 +16,7 @@
   (bind ?id (ros-msgs-async-send-request ?new-req ?s))
   (if ?id then
     (assert (service-request-meta (service ?s) (request-id ?id) (meta ?action-id)))
+    (modify ?pi-f (busy-with CHECK-CONDITIONS))
    else
     (printout error "Sending of request failed, is the service " ?s " running?" crlf)
   )
@@ -26,11 +28,13 @@
 (defrule action-precond-check-response
   ?action-fact <- (pddl-action (id ?action-id))
   ?check-fact <- (pddl-action-precondition (id ?action-id) (state CHECK-PRECONDITION))
+  ?pi-f <- (pddl-instance (name ?instance) (busy-with CHECK-CONDITIONS))
   (confval (path "/pddl/manager_node") (value ?node))
   (ros-msgs-client (service ?s&:(eq ?s (str-cat ?node "/check_action_precondition"))) (type ?type))
   ?msg-f <- (ros-msgs-response (service ?s) (msg-ptr ?ptr) (request-id ?id))
   ?req-meta <- (service-request-meta (service ?s) (request-id ?id) (meta ?action-id))
   =>
+  (modify ?pi-f (busy-with FALSE))
   (bind ?success (ros-msgs-get-field ?ptr "success"))
   (bind ?error (ros-msgs-get-field ?ptr "error"))
   (if ?success then
@@ -59,6 +63,7 @@
 (defrule action-precond-response-no-action
   (confval (path "/pddl/manager_node") (value ?node))
   (ros-msgs-client (service ?s&:(eq ?s (str-cat ?node "/check_action_precondition"))) (type ?type))
+  ?pi-f <- (pddl-instance (name ?instance) (busy-with CHECK-CONDITIONS))
   ?msg-f <- (ros-msgs-response (service ?s) (msg-ptr ?ptr) (request-id ?id))
   ?req-meta <- (service-request-meta (service ?s) (request-id ?id) (meta ?action-id))
   (not
@@ -68,6 +73,7 @@
     )
   )
   =>
+  (modify ?pi-f (busy-with FALSE))
   (printout warn "Received precondition check response without belonging action " ?action-id crlf)
   (ros-msgs-destroy-message ?ptr)
   (retract ?msg-f)
