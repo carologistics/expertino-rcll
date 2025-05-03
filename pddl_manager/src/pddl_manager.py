@@ -756,7 +756,7 @@ class PddlManagerLifecycleNode(LifecycleNode):
                             )
                         elif val.value.is_fluent_exp():
                             # this is a function change effect
-                            rhs_fnode = self.problems[action.pddl_instance].initial_value(val.value)
+                            rhs_fnode = self.managed_problems[action.pddl_instance].base_problem.initial_value(val.value)
                             if rhs_fnode.is_real_constant():
                                 rhs_val = rhs_fnode.real_constant_value()
                             elif rhs_fnode.is_int_constant():
