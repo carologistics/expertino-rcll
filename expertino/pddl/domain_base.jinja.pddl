@@ -12,6 +12,8 @@
 ; See the License for the specific language governing permissions and
 ; limitations under the License.
 
+;; Basic definitions sufficient for high-level planning
+
 (define (domain workpiece_flow)
   ; standalone parser of nextflap crashes when you both have an
   ; instance of an object and a sub-object of the same type!
@@ -19,20 +21,30 @@
   ; type "inner"
   ; This is fixed by using the parser from the unified planning framework
   (:types
-    interactable place side task - object
+    interactable place side step-name - object
     workpiece machine - interactable
-    carrier product payment - workpiece
-    shelf-slot - object
-    meta base ring cap - task
+
+    ;; machines
     base-station cap-station ring-station storage-station delivery-station - machine
     slide bs-place cs-place rs-place ss-place ds-place - place
+
+    ;; moveable entities
+    ; products are named entities (1 pddl object per physical object)
+	; tokens are unnamed entitites (1 pddl object for N pysical objects)
+    token product - workpiece
+    carrier payment - token
+    meta base ring cap - step-name
+{% block types %}
+{% endblock %}
   )
+
   (:constants
     bs - base-station
     cs1 cs2 - cap-station
     rs1 rs2 - ring-station
     ss - storage-station
     ds - delivery-station
+
     bs-input bs-output - bs-place
     cs1-input cs1-output cs2-input cs2-output - cs-place
     rs1-slide rs2-slide - slide
@@ -43,41 +55,49 @@
     base-red base-silver base-black - base
     ring-blue1 ring-yellow1 ring-green1 ring-orange1 ring-blue2 ring-yellow2 ring-green2 ring-orange2 ring-blue3 ring-yellow3 ring-green3 ring-orange3 - ring
     cap-grey cap-black - cap
+{% block constants %}
+{% endblock %}
   )
+
   (:predicates
      ;; Locations of workpieces
-     (at ?wp - workpiece ?p - place) ; Workpiece is at a machine side
+     (at ?wp - workpiece ?place - place) ; Workpiece is at a machine side
 
-     ;; Workpiece tasks
-     (step ?wp - workpiece ?r - task) ; Current active task
-     (next-step ?wp - workpiece ?task1 - task ?task2 - task) ; Requirement order
+     ;; Workpiece step-names
+     (step ?prod - product ?step - step-name) ; Current active step-name
+     (next-step ?prod - product ?curr-step - step-name ?next-step - step-name) ; Requirement order
+     (token-step ?token - token ?place - place ?step - step-name) ; 
 
      ;; Machine capabilities
-     (step-place ?task - task ?p - place) ; Machine can process a task
+     (step-place ?step - step-name ?place - place) ; Machine can process a step
 
      ;; Side availability
-     (free ?p - place)
-     (spawnable ?wp - workpiece)
-     (usable ?i - interactable)
-     (in ?m - machine ?p - place)
-     (out ?m - machine ?p - place)
+     (free ?place - place)
+     (spawnable ?product - product)
+     (usable ?i - interactable) ; do not use this for tokens
+     (in ?m - machine ?place - place)
+     (out ?m - machine ?place - place)
+     ; specific version of usable to distinguish tokens at different places
+     (token-usable ?token - token ?place - place)
 
-     (rs-slide ?m - ring-station ?s - slide)
+     (on-shelf ?carrier - carrier ?cs - cap-station)
 
-     (buffered ?m - cap-station ?c - cap)
-     (can-buffer ?m - cap-station ?c - cap)
+     (rs-slide ?rs - ring-station ?slide - slide)
 
-     (on-shelf ?c - workpiece ?m - cap-station)
-     (next-shelf ?c - carrier ?next-c - carrier)
-     (next-payment ?curr - payment ?next -payment)
+     (buffered ?cs - cap-station ?cap - cap)
+     (can-buffer ?cs - cap-station ?cap - cap)
+{% block predicates %}
+{% endblock %}
   )
+
   ; make sure functions are defined after predicates
   (:functions
-    (order)
-    (price ?r - ring)
+    (price ?ring - ring)
     (pay-count ?rs - ring-station)
+{% block functions %}
+{% endblock %}
   )
-{% block actions %}
 
+{% block actions %}
 {% endblock %}
 )
