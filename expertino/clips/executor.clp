@@ -54,6 +54,6 @@
   ?aa <- (agenda-action-item (action ?action-id) (execution-state SELECTED))
   =>
   (modify ?ex (state SUCCEEDED))
-  (modify ?aa (execution-state EXECUTING))
+  (modify ?aa (execution-state COMPLETED))
   (assert (pddl-action-apply-effect (action ?action-id) (effect-type ALL)))
 )

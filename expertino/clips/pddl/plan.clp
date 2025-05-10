@@ -70,11 +70,6 @@
    else
     (printout red "plan not found!" crlf)
   )
-  ;de-freeze the agenda if frozen
-  (do-for-all-facts ((?agenda agenda))
-    (eq ?agenda:state INACTIVE)
-    (modify ?agenda (state ACTIVE))
-  )
   (expertino-msgs-plan-temporal-result-destroy ?res-ptr)
   (expertino-msgs-plan-temporal-goal-destroy ?goal-ptr)
   (expertino-msgs-plan-temporal-client-goal-handle-destroy ?cgh-ptr)

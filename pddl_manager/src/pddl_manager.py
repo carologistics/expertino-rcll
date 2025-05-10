@@ -823,6 +823,7 @@ class PddlManagerLifecycleNode(LifecycleNode):
         self.get_logger().info("Successfully planned")
         response.actions = result
       else:
+        writer.write_problem("plan_not_found_problem.pddl")
         response.success = False
       goal_handle.succeed()
       return response
