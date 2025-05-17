@@ -18,7 +18,9 @@
   (not (executor (pddl-action-id ?action-id)))
   ;TODO agenda-action-item is also supposed to give an assigned worker to the action
   =>
-  (assert (executor (id (sym-cat EXECUTOR-(gensym*))) (pddl-action-id ?action-id) (worker ?worker) (state INIT)))
+  (bind ?executor-id (sym-cat EXECUTOR-(gensym*)))
+  (assert (executor (id ?executor-id) (pddl-action-id ?action-id) (worker ?worker) (state INIT)))
+  (assert (executor-monitor (id (sym-cat EXECUTOR-MONITOR-(gensym*))) (executor-id (?executor-id))))
 )
 
 (defrule executor-accepted
