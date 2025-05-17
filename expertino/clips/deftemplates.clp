@@ -454,6 +454,15 @@
   (slot state (type SYMBOL) (allowed-values INIT REQUESTED ACCEPTED ABORTED CANCELLED SUCCEEDED))
 )
 
+(deftemplate executor-monitor
+" Interface to monitor the execution layer. Asserted once the action has started executing. Throughout the duration of action,
+  feedback is received and progress is monitored.
+"
+  (slot id (type SYMBOL))
+  (slot executor-id (type SYMBOL))
+  (slot error-code (type SYMBOL))
+)
+
 (deftemplate rcll-agent-task
   (slot task-id (type INTEGER))
   (slot task-name (type SYMBOL))
