@@ -455,12 +455,21 @@
 )
 
 (deftemplate executor-monitor
-" Interface to monitor the execution layer. Asserted once the action has started executing. Throughout the duration of action,
-  feedback is received and progress is monitored.
-"
+  " Interface to monitor the execution layer. "
   (slot id (type SYMBOL))
   (slot executor-id (type SYMBOL))
-  (slot error-code (type SYMBOL))
+  (slot status       ; INIT, WAITING, SUCCEEDED, FAILED
+        (type SYMBOL)
+        (default INIT))
+  (slot current-subaction-id   ; which subtask we’re watching
+        (type SYMBOL)
+        (default nil))
+  (slot current-subaction-state  ; MONITORING, SUCCEEDED, FAILED
+        (type SYMBOL)
+        (default nil))
+  (slot error-code    ; for diagnostics on failure
+        (type SYMBOL)
+        (default NONE))
 )
 
 (deftemplate rcll-agent-task
