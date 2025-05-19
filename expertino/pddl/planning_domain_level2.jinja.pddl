@@ -14,7 +14,7 @@
 
 {% extends "domain_base.jinja.pddl" %}
 
-{% set templates = ['domain_planning_actions.jinja.pddl', 'spawn_and_transport.jinja.pddl', 'pay_from_bs.jinja.pddl', 'sub_actions/base_transport.jinja.pddl', 'sub_actions/transport.jinja.pddl', sub_actions/transport_to_slide.jinja.pddl] %}
+{% set templates = ['pay_from_bs.jinja.pddl', 'spawn_and_transport.jinja.pddl'] %}
 
 {% block actions %}
 {% for template in templates %}

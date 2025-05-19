@@ -1,0 +1,46 @@
+
+   (:durative-action bs-dispense
+     :parameters (?prod - product ?step - step-name ?next - step-name ?m - base-station ?p - bs-place)
+     :duration (= ?duration 5)
+     :condition (and
+       (at start (spawnable ?prod))
+       (at start (step ?prod ?step))
+       (at start (next-step ?prod ?step ?next))
+       (at start (usable ?m)) 
+       (at start (free bs-input))
+       (at start (free bs-output))
+     )
+     :effect (and
+       (at start (not (spawnable ?prod)))
+       (at start (not (usable ?m)))
+       (at end (usable ?m))
+       (at end (usable ?prod))
+       (at end (at ?prod ?p))
+       (at end (not (free ?p)))
+     )
+   )
+    
+   (:durative-action base-transport 
+     :parameters (?prod - product ?from - bs-place ?to - place ?step - step-name ?next - step-name)  
+     :duration (= ?duration 5) 
+     :condition (and 
+       (at start (at ?prod ?from)) 
+       (at start (step ?prod ?step)) 
+       (at start (next-step ?prod ?step ?next))
+       (at start (step-place ?next ?to)) 
+       (at start (free ?to)) 
+       (at start (usable ?prod)) 
+       (at start (not (= ?from ?to))) 
+       (over all (free ?to)) 
+     ) 
+     :effect (and 
+       (at start (not (usable ?prod))) 
+       (at end (at ?prod ?to)) 
+       (at end (not (free ?to))) 
+       (at end (free ?from)) 
+       (at end (usable ?prod)) 
+       (at end (not (at ?prod ?from))) 
+       (at end (not (step ?prod ?step)))
+       (at end (step ?prod ?next))
+     ) 
+   )
