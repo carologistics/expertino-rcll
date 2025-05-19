@@ -69,6 +69,8 @@
      (token-step grey-carrier cs1-output dispose)
      (token-step black-carrier cs2-input cap-black)
      (token-step black-carrier cs2-output dispose)
+     (token-step pay-token bs-output dispose)
+     (token-step pay-token bs-input dispose)
 
      (= (pay-count rs1) 0)
      (= (pay-count rs2) 0)

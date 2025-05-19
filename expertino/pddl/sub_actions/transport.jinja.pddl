@@ -3,7 +3,6 @@
      :parameters (?wp - workpiece ?from - place ?to - place ?r - task)
      :duration (= ?duration 5)
      :condition (and
-       (at start (= (order) 0))
        (at start (at ?wp ?from))
        (at start (step ?wp ?r))
        (at start (step-place ?r ?to))
@@ -13,7 +12,6 @@
      )
      :effect (and
        (at start (not (usable ?wp)))
-       (at end (increase (order) 1))
      )
    )
 
@@ -22,11 +20,9 @@
      :duration (= ?duration 5)
      :condition (and
        (at start (at ?wp ?from))
-       (at start (= (order) 1))
      )
      :effect (and
        (at end (free ?from))
-       (at end (increase (order) 1))
        (at end (not (at ?wp ?from)))
      )
    )
@@ -35,7 +31,6 @@
      :parameters (?wp - workpiece ?from - place ?to - place ?r - task)
      :duration (= ?duration 5)
      :condition (and
-       (at start (= (order) 2))
        (at start (step ?wp ?r))
        (at start (step-place ?r ?to))
        (at start (free ?to))
@@ -45,6 +40,5 @@
        (at end (at ?wp ?to))
        (at end (not (free ?to)))
        (at end (usable ?wp))
-       (at end (increase (order) 1))
      )
    )

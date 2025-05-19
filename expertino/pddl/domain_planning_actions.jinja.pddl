@@ -33,7 +33,6 @@
        (at end (usable ?prod))
        (at end (not (step ?prod ?step)))
        (at end (step ?prod ?next))
-       (at end (usable ?prod))
      )
    )
 
