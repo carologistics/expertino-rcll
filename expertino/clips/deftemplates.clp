@@ -458,16 +458,10 @@
   " Interface to monitor the execution layer. "
   (slot id (type SYMBOL))
   (slot executor-id (type SYMBOL))
-  (slot status       ; INIT, WAITING, SUCCEEDED, FAILED
+  (slot feedback-code    ; for diagnostics on failure
         (type SYMBOL)
-        (default INIT))
-  (slot current-subaction-id   ; which subtask we’re watching
-        (type SYMBOL)
-        (default nil))
-  (slot current-subaction-state  ; MONITORING, SUCCEEDED, FAILED
-        (type SYMBOL)
-        (default nil))
-  (slot error-code    ; for diagnostics on failure
+        (default NONE))
+  (slot sub-action-id    ; ID of the sub-action related to the current feedback
         (type SYMBOL)
         (default NONE))
 )
