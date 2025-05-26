@@ -53,6 +53,18 @@
      (free ss-output)
      (free ds-input)
 
+     (= (price ring-blue1) 0)
+     (= (price ring-yellow1) 0)
+     (= (price ring-green1) 0)
+     (= (price ring-orange1) 0)
+     (= (price ring-blue2) 0)
+     (= (price ring-yellow2) 0)
+     (= (price ring-green2) 0)
+     (= (price ring-orange2) 0)
+     (= (price ring-blue3) 0)
+     (= (price ring-yellow3) 0)
+     (= (price ring-green3) 0)
+     (= (price ring-orange3) 0)
      (spawnable pay1)
 
      (next-payment pay1 pay2)
