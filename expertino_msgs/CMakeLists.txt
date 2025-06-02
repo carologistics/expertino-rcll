@@ -14,7 +14,8 @@ set(MSGS
     "msg/FluentEffect.msg"
     "msg/TimedPlanAction.msg"
     "msg/Action.msg"
-    "msg/Object.msg")
+    "msg/Object.msg"
+    "msg/Predicate.msg")
 set(SERVICES
     "srv/CheckActionPrecondition.srv"
     "srv/GetActionEffects.srv"
@@ -33,7 +34,9 @@ set(SERVICES
     "srv/SetFluentFilter.srv"
     "srv/SetObjectFilter.srv"
     "srv/CreateGoalInstance.srv"
-    "srv/AddFluents.srv")
+    "srv/AddFluents.srv"
+    "srv/GetPredicates.srv"
+    "srv/GetObjects.srv")
 set(ACTIONS "action/PlanTemporal.action")
 
 # set(ACTIONS
