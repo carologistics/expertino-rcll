@@ -393,6 +393,7 @@
   (slot instance (type SYMBOL))
   (slot name (type SYMBOL))
   (multislot param-types (type SYMBOL) (default (create$)))
+  (multislot param-names (type SYMBOL) (default (create$)))
 )
 
 (deftemplate pddl-object

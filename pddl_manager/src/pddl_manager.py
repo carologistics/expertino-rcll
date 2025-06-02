@@ -629,12 +629,15 @@ class PddlManagerLifecycleNode(LifecycleNode):
         for fluent in instance.fluents:
             if fluent.type.is_bool_type():
                 param_types = []
+                param_names = []
                 for param in fluent.signature:
                     param_types.append(param.type)
+                    param_names.append(param.name)
                 predicate = PredicateMsg(
                     pddl_instance=request.pddl_instance,
                     name=fluent.name,
-                    param_types=param_types
+                    param_types=param_types,
+                    param_names=param_names
                 )
                 response.predicates.append(predicate)
         response.success = True
