@@ -76,17 +76,18 @@
     (pddl-action (id ?action-id) (plan ?plan-id) (plan-order-class ?plan-order-class&:(>= ?ordering-class-selected  (- ?plan-order-class ?relaxation))))
     (not (pddl-action-precondition (plan ?plan-id) (id ?action-id) (context AGENDA-LOOKAHEAD)))
     (not (agenda-action-item (plan ?plan-id) (action ?action-id)))
+    (pddl-plan (id ?plan-id) (instance ?instance))
+    (pddl-instance-update (instance ?instance) (last-updated ?last-update-time))
     =>
-    (assert (pddl-action-precondition (plan ?plan-id) (id ?action-id) (state PENDING) (context AGENDA-LOOKAHEAD)))
+    (assert (pddl-action-precondition (instance ?instance) (plan ?plan-id) (id ?action-id) (state PENDING) (context AGENDA-LOOKAHEAD) (instance-update ?last-update-time)))
     (printout yellow "Checking action " ?action-id "(ordering " ?plan-order-class ") for preconditions, relaxed agenda candidate" crlf)
 )
 
 (defrule agenda-add-action-relaxed-reset
   (agenda (plan ?plan-id) (class-selection ?ordering-class-selected) (class-relaxation ?relaxation))
   (pddl-action (id ?action-id) (plan ?plan-id) (plan-order-class ?plan-order-class&:(>= ?ordering-class-selected  (- ?plan-order-class ?relaxation))))
-  (not (agenda-action-item (plan ?plan-id) (action ?action-id)))
-  (agenda-action-item (plan ?plan-id) (action ?completed-action-id&:(neq ?completed-action-id ?action-id)) (execution-state EFFECTS-APPLIED))
-  ?precon <- (pddl-action-precondition (plan ?plan-id) (id ?action-id) (context AGENDA-LOOKAHEAD) (state PRECONDITION-UNSAT|PRECONDITION-SAT|PENDING))
+  ?precon <- (pddl-action-precondition (plan ?plan-id) (id ?action-id) (context AGENDA-LOOKAHEAD) (state PRECONDITION-UNSAT|PRECONDITION-SAT|PENDING) (instance-update ?update-time))
+  (pddl-instance-update (instance ?instance) (last-updated ?last-update-time&:(> ?last-update-time ?update-time)))
   =>
   (retract ?precon)
 )
