@@ -31,7 +31,7 @@
      :duration (= ?duration 5)
      :condition (and
        (at start (step ?prod ?step))
-       (at start (step-place ?prod ?to))
+       (at start (step-place ?next ?to))
        (at start (free ?to))
        (over all (free ?to))
      )

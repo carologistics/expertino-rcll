@@ -58,9 +58,11 @@
     (= (price ring-green1) 1)
     (= (price ring-green2) 1)
     (= (price ring-green3) 1)
+    (token-usable black-carrier cs2-output) 
+    (at black-carrier cs2-output)
 {% endblock %}
 {% block goals %}
-    (step wp1 done)
+    ;(step wp1 done)
     ;(step wp1 base-red)
     ;(step wp1 ring-blue1)
     ;(step wp1 ring-yellow2)
@@ -71,11 +73,11 @@
     ; (buffered cs1 cap-grey)
     ; (buffered cs2 cap-black)
     ;(= (pay-count rs1) 3)
-    ;(= (pay-count rs2) 3)
+    (= (pay-count rs2) 2)
       ;(at wp2 rs1-input)
       ;(at pay2 rs1-slide)
       ;(can-buffer cs1 cap-grey)
       ;(can-buffer cs2 cap-black)
-    (step wp2 done)
+    ;(step wp2 done)
     ;(step wp3 done)
 {% endblock %}
