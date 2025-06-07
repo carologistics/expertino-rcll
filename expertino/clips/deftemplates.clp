@@ -136,6 +136,7 @@
   @slot error: provide information on encountered errors.
 "
   (slot instance (type SYMBOL))
+  (slot goal (type SYMBOL))
   (slot state (type SYMBOL) (allowed-values PENDING DONE ERROR) (default PENDING))
   (slot error (type STRING))
 )
@@ -156,6 +157,49 @@
   (slot goal (type SYMBOL))
   (slot state (type SYMBOL) (allowed-values PENDING DONE ERROR) (default PENDING))
   (slot error (type STRING))
+)
+
+(deftemplate pddl-create-goal-instance
+" Interface for create-goal-instance.clp
+  Assert a fact of this type in order to create a new ManagedGoal instance of a given
+  pddl instance with the external pddl manager.
+  @slot instance: pddl instance for which to add the goal.
+  Slots set automatically:
+  @slot state:
+   - PENDING: The goal instance is not created in the pddl manager yet.
+   - DONE: The goal instance is created with the pddl manager.
+   - ERROR: The goal instance is not created due to some error.
+  @slot error: provide information on encountered errors.
+"
+  (slot instance (type SYMBOL))
+  (slot goal (type SYMBOL))
+  (slot state (type SYMBOL) (allowed-values PENDING DONE ERROR) (default PENDING))
+  (slot error (type STRING))
+)
+
+(deftemplate pddl-effect-fluent
+" Facts to represent pddl action effects.
+  Each fact of this template represent one boolean fluent in an action effect.
+"
+  (slot instance (type SYMBOL))
+  (slot action (type SYMBOL))
+  (slot name (type SYMBOL))
+  (multislot params (type SYMBOL) (default (create$)))
+  (slot effect-type (type SYMBOL) (allowed-values ALL START END) (default ALL))
+)
+
+(deftemplate pddl-effect-numeric-fluent
+" Facts to represent pddl action effects.
+  Each fact of this template represent one numeric fluent in an action effect at a specific time.
+  Note that this is a rather limited representation for numeric fluent
+  conditions and can therefore only represent a subset of valid conditions.
+"
+  (slot instance (type SYMBOL))
+  (slot action (type SYMBOL))
+  (slot name (type SYMBOL))
+  (multislot params (type SYMBOL) (default (create$)))
+  (slot value (type FLOAT))
+  (slot effect-type (type SYMBOL) (allowed-values ALL START END) (default ALL))
 )
 
 (deftemplate pddl-get-fluents
@@ -216,7 +260,7 @@
   (slot problem (type STRING))
   (slot directory (type STRING))
   (slot state (type SYMBOL) (allowed-values PENDING LOADED ERROR) (default PENDING))
-  (slot busy-with (type SYMBOL) (allowed-values FALSE OBJECTS FLUENTS NUMERIC-FLUENTS ACTION-EFFECTS CLEAR-GOALS SET-GOALS CHECK-CONDITIONS GET-FLUENTS GET-NUMERIC-FLUENTS GET-ACTION-NAMES SET-ACTION-FILTER SET-OBJECT-FILTER SET-FLUENT-FILTER CREATE-GOAL-INSTANCE) (default FALSE))
+  (slot busy-with (type SYMBOL) (allowed-values FALSE OBJECTS FLUENTS NUMERIC-FLUENTS ACTION-EFFECTS CREATE-GOAL-INSTANCE CLEAR-GOALS SET-GOALS CHECK-CONDITIONS GET-FLUENTS GET-NUMERIC-FLUENTS GET-ACTION-NAMES SET-ACTION-FILTER SET-OBJECT-FILTER SET-FLUENT-FILTER CREATE-GOAL-INSTANCE) (default FALSE))
   (slot error (type STRING))
 )
 
@@ -358,14 +402,15 @@
   (slot planned-duration (type FLOAT))
 )
 
-(deftemplate pddl-action-apply-effect
-" Apply the effect of a grounded pddl action.
+(deftemplate pddl-action-get-effect
+" request the effect of a grounded pddl action.
   @slot action: id of the action.
   @slot state: TBD
 "
   (slot action (type SYMBOL))
   (slot effect-type (type SYMBOL) (allowed-values ALL START END) (default ALL))
   (slot state (type SYMBOL) (allowed-values PENDING WAITING START-EFFECT-APPLIED DONE ERROR) (default PENDING))
+  (slot apply (type SYMBOL) (allowed-values FALSE TRUE) (default FALSE))
 )
 
 (deftemplate pddl-action-precondition
@@ -415,6 +460,7 @@
 " This currently mainly is a transient layer betweeen the general pddl interface and our domain-specific usage.
   Can be extended later in case different kind of planning filters should be used or if planning is used in varying contexts.
 "
+  (slot id (type SYMBOL))
   (slot type (type SYMBOL) (allowed-values ACTIONS OBJECTS FLUENTS))
   (multislot filter (type SYMBOL) (default (create$ )))
   (slot instance (type SYMBOL))

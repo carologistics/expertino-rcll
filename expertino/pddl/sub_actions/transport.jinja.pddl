@@ -1,44 +1,44 @@
    ;; Sub-action example for the transport planning action.
    (:durative-action transport-step-1-drive-to
-     :parameters (?wp - workpiece ?from - place ?to - place ?r - task)
+     :parameters (?prod - product ?from - place ?to - place ?step - step-name)
      :duration (= ?duration 5)
      :condition (and
-       (at start (at ?wp ?from))
-       (at start (step ?wp ?r))
-       (at start (step-place ?r ?to))
+       (at start (at ?prod ?from))
+       (at start (step ?prod ?step))
+       (at start (step-place ?step ?to))
        (at start (free ?to))
-       (at start (usable ?wp))
+       (at start (usable ?prod))
        (over all (free ?to))
      )
      :effect (and
-       (at start (not (usable ?wp)))
+       (at start (not (usable ?prod)))
      )
    )
 
    (:durative-action transport-step-2-pick-up
-     :parameters (?wp - workpiece ?from - place ?to - place ?r - task)
+     :parameters (?prod - product ?from - place ?to - place ?step - step-name)
      :duration (= ?duration 5)
      :condition (and
-       (at start (at ?wp ?from))
+       (at start (at ?prod ?from))
      )
      :effect (and
        (at end (free ?from))
-       (at end (not (at ?wp ?from)))
+       (at end (not (at ?prod ?from)))
      )
    )
 
    (:durative-action transport-step-4-place-down
-     :parameters (?wp - workpiece ?from - place ?to - place ?r - task)
+     :parameters (?prod - product ?from - place ?to - place ?step - step-name)
      :duration (= ?duration 5)
      :condition (and
-       (at start (step ?wp ?r))
-       (at start (step-place ?r ?to))
+       (at start (step ?prod ?step))
+       (at start (step-place ?step ?to))
        (at start (free ?to))
        (over all (free ?to))
      )
      :effect (and
-       (at end (at ?wp ?to))
+       (at end (at ?prod ?to))
        (at end (not (free ?to)))
-       (at end (usable ?wp))
+       (at end (usable ?prod))
      )
    )

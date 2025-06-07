@@ -49,7 +49,7 @@
   (modify ?aa (execution-state ERROR))
 )
 
-(defrule executor-succeed-agent-worker
+(defrule executor-agent-worker-replan
   ?ex <- (executor (pddl-action-id ?action-id) (worker AGENT) (state INIT))
   ?aa <- (agenda-action-item (action ?action-id) (execution-state SELECTED))
   =>
