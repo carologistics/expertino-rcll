@@ -1,0 +1,122 @@
+clips_manager:
+  ros__parameters:
+    environments: ["main"]
+    main:
+        plugins: ["executive",
+                  "ament_index",
+                  "config",
+                  "ros_msgs",
+                  "create_rl_env_state",
+                  "exec_action_selection",
+                  "get_observable_objects",
+                  "get_observable_predicates",
+                  "get_predefined_observables",
+                  "get_action_list",
+                  "get_action_list_robot",
+                  "set_rl_mode",
+                  "get_free_robot",
+                  "action_selection",
+                  "reset_cx",
+                  "plan_temporal_action",
+                  "files"]
+        log_clips_to_file: true
+        watch: ["facts", "rules"]
+        redirect_stdout_to_debug: true
+
+    ament_index:
+      plugin: "cx::AmentIndexPlugin"
+    
+    config:
+      plugin: "cx::ConfigPlugin"
+
+    executive:
+      plugin: "cx::ExecutivePlugin"
+      publish_on_refresh: false
+      assert_time: true
+      refresh_rate: 10
+    
+    create_rl_env_state:
+      plugin: "cx::CXCxRlInterfacesCreateRLEnvStatePlugin"
+
+    exec_action_selection:
+      plugin: "cx::CXCxRlInterfacesExecActionSelectionPlugin"
+
+    get_observable_objects:
+      plugin: "cx::CXCxRlInterfacesGetObservableObjectsPlugin"
+    
+    get_observable_predicates:
+      plugin: "cx::CXCxRlInterfacesGetObservablePredicatesPlugin"
+
+    get_predefined_observables:
+      plugin: "cx::CXCxRlInterfacesGetPredefinedObservablesPlugin"
+
+    get_action_list:
+      plugin: "cx::CXCxRlInterfacesGetActionListPlugin"
+
+    get_action_list_robot:
+      plugin: "cx::CXCxRlInterfacesGetActionListRobotPlugin"
+
+    set_rl_mode:
+      plugin: "cx::CXCxRlInterfacesSetRLModePlugin"
+
+    get_free_robot:
+      plugin: "cx::CXCxRlInterfacesGetFreeRobotPlugin"
+
+    action_selection:
+      plugin: "cx::CXCxRlInterfacesActionSelectionPlugin"
+
+    reset_cx:
+      plugin: "cx::CXCxRlInterfacesResetCXPlugin"
+
+    plan_temporal_action:
+      plugin: "cx::CXExpertinoMsgsPlanTemporalPlugin"
+
+    files:
+      plugin: "cx::FileLoadPlugin"
+      pkg_share_dirs: ["expertino", "cx_goal_reasoning", "cx_reinforcement_learning_plugin", "expertino_blocksworld"]
+      load: [
+        # Specific isolated concepts
+        "clips/expertino/start-tasks/start-tasks.clp",
+        # General utility stuff
+        "clips/expertino/defglobals.clp",
+        "clips/expertino/deftemplates.clp",
+        # Startup
+        "clips/expertino/pddl/saliences.clp",
+        "clips/expertino_blocksworld/init-pddl.clp",
+        # PDDL
+        "clips/expertino/pddl/set-goals.clp",
+        "clips/expertino/pddl/clear-goals.clp",
+        "clips/expertino/pddl/objects.clp",
+        "clips/expertino/pddl/fluents.clp",
+        "clips/expertino_blocksworld/pddl/instances.clp",
+        "clips/expertino/pddl/get-action-names.clp",
+        "clips/expertino/pddl/get-fluents.clp",
+        "clips/expertino/pddl/get-objects.clp",
+        "clips/expertino/pddl/get-predicates.clp",
+        "clips/expertino/pddl/numeric-fluents.clp",
+        "clips/expertino/pddl/action-effect-apply.clp",
+        "clips/expertino/action/action-precond-check.clp",
+        "clips/expertino_blocksworld/point-mapping.clp",
+        "clips/rl_plugin/reinforcementlearning.clp",
+        "clips/rl_plugin/reset-game.clp",
+        "clips/rl_plugin/rl-utils.clp",
+        "clips/rl_plugin/create-rl-env-state-srv.clp",
+        "clips/rl_plugin/exec-action-selection-client.clp",
+        "clips/rl_plugin/get-observable-objects-srv.clp",
+        "clips/rl_plugin/get-observable-predicates-srv.clp",
+        "clips/rl_plugin/get-predefined-observables-srv.clp",
+        "clips/rl_plugin/get-action-list-srv.clp",
+        "clips/rl_plugin/get-action-list-robot-srv.clp",
+        "clips/rl_plugin/set-rl-mode-srv.clp",
+        "clips/rl_plugin/get-free-robot-action.clp",
+        "clips/rl_plugin/action-selection-action.clp",
+        "clips/rl_plugin/reset-cx-action.clp",
+        "clips/expertino_blocksworld/init.clp",
+        "clips/expertino_blocksworld/action-executability.clp",
+        "clips/expertino_blocksworld/action-execution.clp"
+        ]
+    ros_msgs:
+      plugin: "cx::RosMsgsPlugin"
+
+
+        
