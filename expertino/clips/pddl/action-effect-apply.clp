@@ -62,7 +62,7 @@
     (if (eq ?eff-type ALL) then
       (bind ?next-state START-EFFECT-APPLIED)
      else
-      (bind ?nex-state DONE)
+      (bind ?next-state DONE)
     )
    else
     (if (member$ ?eff-type (create$ ALL END)) then
