@@ -35,12 +35,17 @@
     (foreach ?predicate ?predicates
       (bind ?instance (sym-cat (ros-msgs-get-field ?predicate "pddl_instance")))
       (bind ?name (sym-cat (ros-msgs-get-field ?predicate "name")))
-      (bind ?param-types (ros-msgs-get-field ?predicate "param-types"))
+      (bind ?param-types (ros-msgs-get-field ?predicate "param_types"))
       (bind ?type-syms (create$))
       (foreach ?type ?param-types
         (bind ?type-syms (create$ ?type-syms (sym-cat ?type)))
       )
-      (assert (pddl-predicate (name ?name) (param-types ?type-syms) (instance ?instance)))
+      (bind ?param-names (ros-msgs-get-field ?predicate "param_names"))
+      (bind ?name-syms (create$))
+      (foreach ?name ?param-names
+        (bind ?name-syms (create$ ?name-syms (sym-cat ?name)))
+      )
+      (assert (pddl-predicate (name ?name) (param-types ?type-syms) (param-names ?name-syms) (instance ?instance)))
     )
     (modify ?get-facts-f (state DONE))
    else

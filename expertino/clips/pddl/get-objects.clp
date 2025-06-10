@@ -36,7 +36,7 @@
       (bind ?instance (sym-cat (ros-msgs-get-field ?object "pddl_instance")))
       (bind ?name (sym-cat (ros-msgs-get-field ?object "name")))
       (bind ?type (ros-msgs-get-field ?object "type"))
-      (assert (pddl-object (name ?name) (type ?type) (instance ?instance)))
+      (assert (pddl-object (name ?name) (type (sym-cat ?type)) (instance ?instance)))
     )
     (modify ?get-facts-f (state DONE))
    else

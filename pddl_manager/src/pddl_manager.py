@@ -631,7 +631,7 @@ class PddlManagerLifecycleNode(LifecycleNode):
                 param_types = []
                 param_names = []
                 for param in fluent.signature:
-                    param_types.append(param.type)
+                    param_types.append(param.type.name)
                     param_names.append(param.name)
                 predicate = PredicateMsg(
                     pddl_instance=request.pddl_instance,
@@ -655,7 +655,7 @@ class PddlManagerLifecycleNode(LifecycleNode):
             object = ObjectMsg(
                 pddl_instance=request.pddl_instance,
                 name=obj.name,
-                type=obj.type
+                type=obj.type.name
             )
             response.objects.append(object)
         response.success = True
