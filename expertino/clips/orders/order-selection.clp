@@ -72,10 +72,10 @@
 (defrule set-goal-for-orders
   (startup-completed)
   (pddl-goal-fluent (instance ?instance) (name step) (params ?wp1 $?))
-  ?clear-f <- (pddl-clear-goals (instance ?instance) (state DONE))
+  ?clear-f <- (pddl-clear-goals (instance ?instance) (state DONE) (goal ?goal&:(eq ?goal ?*GOAL-INSTANCE-BASE*)))
   =>
   ; notify to add the goal to the domain
-  (assert (pddl-set-goals (instance ?instance)))
+  (assert (pddl-set-goals (instance ?instance) (goal ?*GOAL-INSTANCE-BASE*)))
   ;freeze the current agenda execution
   (if (any-factp ((?agenda agenda) (?plan pddl-plan)) (and (eq ?agenda:plan ?plan:id) (eq ?plan:instance ?instance)))
    then
@@ -84,9 +84,9 @@
   (retract ?clear-f)
 )
 
-(defrule goal-updated-start-plan
+(defrule goal-updated-start-planning-for-orders
   (startup-completed)
-  ?set-f <- (pddl-set-goals (instance ?instance) (state DONE))
+  ?set-f <- (pddl-set-goals (instance ?instance) (state DONE) (goal ?goal&:(eq ?goal ?*GOAL-INSTANCE-BASE*)))
   (pddl-manager (node ?node))
   (pddl-instance (name ?instance) (busy-with FALSE) (state LOADED))
   (expertino-msgs-plan-temporal-client (server ?server&:(eq ?server (str-cat ?node "/temp_plan"))))
@@ -102,7 +102,7 @@
   (bind ?goal (expertino-msgs-plan-temporal-goal-create))
   (assert (pddl-planner-call (context test-plan) (goal ?goal)))
   (expertino-msgs-plan-temporal-goal-set-field ?goal "pddl_instance" ?instance)
-  (expertino-msgs-plan-temporal-goal-set-field ?goal "goal_instance" "base")
+  (expertino-msgs-plan-temporal-goal-set-field ?goal "goal_instance" (str-cat ?*GOAL-INSTANCE-BASE*))
   (expertino-msgs-plan-temporal-send-goal ?goal ?server)
   ;(assert (planned-for-main))
   (retract ?set-f)

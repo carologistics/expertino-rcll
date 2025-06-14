@@ -43,7 +43,7 @@
 )
 
 (defrule plan-get-result
-  ?pc-f <- (pddl-planner-call (client-goal-handle ?cgh-ptr) (goal ?goal-ptr) (uuid ?goal-id))
+  ?pc-f <- (pddl-planner-call (client-goal-handle ?cgh-ptr) (goal ?goal-ptr) (uuid ?goal-id) (context ?context))
   ?wr-f <- (expertino-msgs-plan-temporal-wrapped-result (server "/pddl_manager/temp_plan") (goal-id ?goal-id) (code SUCCEEDED) (result-ptr ?res-ptr))
   =>
   (bind ?plan-found (expertino-msgs-plan-temporal-result-get-field ?res-ptr "success"))
@@ -65,7 +65,7 @@
       (bind ?p-duration (expertino-msgs-timed-plan-action-get-field ?action "duration"))
       (assert (pddl-action (id (gensym*)) (plan ?plan-id) (instance ?instance) (name ?name) (params ?arg-syms) 
                    (plan-order-class ?equiv_class) (planned-start-time ?ps-time) (planned-duration ?p-duration)))
-      (assert (pddl-plan (id ?plan-id) (instance ?instance)))
+      (assert (pddl-plan (id ?plan-id) (instance ?instance) (context ?context)))
     )
    else
     (printout red "plan not found!" crlf)

@@ -28,7 +28,7 @@
   ?aa <- (agenda-action-item (action ?action-id) (execution-state SELECTED))
   =>
   (modify ?aa (execution-state EXECUTING))
-  (assert (pddl-action-apply-effect (action ?action-id) (effect-type START)))
+  (assert (pddl-action-get-effect (action ?action-id) (apply TRUE) (effect-type START)))
   ;(assert (selected-order (order 2)))
 )
 
@@ -49,11 +49,65 @@
   (modify ?aa (execution-state ERROR))
 )
 
-(defrule executor-agent-worker-replan
+(defrule executor-agent-worker-replan-get-effect-request
   ?ex <- (executor (pddl-action-id ?action-id) (worker AGENT) (state INIT))
   ?aa <- (agenda-action-item (action ?action-id) (execution-state SELECTED))
   =>
+  (modify ?ex (state REQUESTED))
+  (printout debug "replanning ...." crlf)
+  (assert (pddl-action-get-effect (action ?action-id) (effect-type END)))
+)
+
+(defrule executor-agent-worker-replan-set-goals
+  ?ex <- (executor (pddl-action-id ?action-id) (worker AGENT) (state REQUESTED))
+  (or (pddl-effect-fluent (action ?action-id))
+      (pddl-effect-numeric-fluent (action ?action-id)))
+  (confval (path "/pddl/problem_instance") (value ?instance-str))
+  =>
+  (bind ?instance (sym-cat ?instance-str))
+  (delayed-do-for-all-facts ((?effect-f pddl-effect-fluent)) (eq ?effect-f:action ?action-id)
+    (assert (pddl-goal-fluent (instance ?effect-f:instance) (name ?effect-f:name) (params ?effect-f:params)))
+  )
+  (delayed-do-for-all-facts ((?effect-f pddl-effect-numeric-fluent)) (eq ?effect-f:action ?action-id)
+    (assert (pddl-goal-numeric-fluent (instance ?effect-f:instance) (name ?effect-f:name) 
+      (params ?effect-f:params) (value ?effect-f:value)))
+  )
+  (assert (pddl-clear-goals (instance ?instance) (goal ?*GOAL-INSTANCE-REPLANNING*)))
+  (modify ?ex (state ACCEPTED))
+) 
+
+(defrule executor-set-goal-for-replanning                                                    
+  ?ex <- (executor (pddl-action-id ?action-id) (worker AGENT) (state ACCEPTED))
+  (or (pddl-goal-fluent (instance ?instance))          
+    (pddl-goal-numeric-fluent (instance ?instance)))          
+  ?clear-f <- (pddl-clear-goals (instance ?instance) (state DONE) (goal ?goal&:(eq ?goal ?*GOAL-INSTANCE-REPLANNING*))) 
+  =>                                                                            
+  ; notify to add the goal to the domain                                        
+  (assert (pddl-set-goals (instance ?instance) (goal ?*GOAL-INSTANCE-REPLANNING*)))   
+  (retract ?clear-f)                                                            
+)  
+
+(defrule executor-start-replanning                               
+  (executor (id ?ex-id) (pddl-action-id ?action-id) (worker AGENT) (state ACCEPTED))
+  ?set-f <- (pddl-set-goals (instance ?instance) (state DONE) (goal ?goal&:(eq ?goal ?*GOAL-INSTANCE-REPLANNING*)))
+  (pddl-manager (node ?node))                                                   
+  (pddl-instance (name ?instance) (busy-with FALSE) (state LOADED))             
+  (expertino-msgs-plan-temporal-client (server ?server&:(eq ?server (str-cat ?node "/temp_plan"))))
+  =>                                                                            
+  (printout green "Start re-planning" crlf)                                        
+  (bind ?goal (expertino-msgs-plan-temporal-goal-create))                       
+  (assert (pddl-planner-call (context ?ex-id) (goal ?goal)))                 
+  (expertino-msgs-plan-temporal-goal-set-field ?goal "pddl_instance" ?instance) 
+  (expertino-msgs-plan-temporal-goal-set-field ?goal "goal_instance" ?*GOAL-INSTANCE-REPLANNING*)    
+  (expertino-msgs-plan-temporal-send-goal ?goal ?server)                        
+  (retract ?set-f)                                                              
+)
+
+(defrule executor-agent-worker-succeeded
+  ?ex <- (executor (id ?ex-id) (pddl-action-id ?action-id) (worker AGENT) (state ACCEPTED))
+  (pddl-plan (id ?plan-id) (context ?ex-id))
+  (agenda (plan ?plan-id))
+  (not (agenda-action-item (plan ?plan-id) (execution-state ?state&~COMPLETED)))
+  =>
   (modify ?ex (state SUCCEEDED))
-  (modify ?aa (execution-state COMPLETED))
-  (assert (pddl-action-apply-effect (action ?action-id) (effect-type ALL)))
 )

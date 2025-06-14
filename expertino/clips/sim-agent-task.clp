@@ -4,18 +4,26 @@
   (confval (path "/rcll-simulator/enabled") (value TRUE))
   (protobuf-peer (name ?robot) (peer-id ?peer-id))
   (not (agent-task-list (executor-id ?ex-id)))
-  ?pa <- (pddl-action (id ?action-id) (name ?action-name&transport|transport-to-slide|carrier-to-input) (params $?action-params))
+  ?pa <- (pddl-action (id ?action-id) 
+           (name ?action-name&transport|transport-to-slide|carrier-to-input|base-transport|pay-with-carrier)
+           (params $?action-params))
   (game-state (team-color ?team-color))
   =>
   (bind ?wp (nth$ 1 ?action-params))
   (switch ?action-name
     (case carrier-to-input then
-      (bind ?from-mps (pddl-place-to-refbox-mps (nth$ 4 ?action-params) ?team-color))
+      (bind ?from-mps (pddl-place-to-refbox-mps (nth$ 3 ?action-params) ?team-color))
       (bind ?from-side SHELF)
-      (bind ?to-side (pddl-place-to-mps-side (nth$ 5 ?action-params)))
+      (bind ?to-side (pddl-place-to-mps-side (nth$ 4 ?action-params)))
       (bind ?to-mps ?from-mps)
     )
-    (default
+    (case pay-with-carrier then
+      (bind ?from-mps (pddl-place-to-refbox-mps (nth$ 3 ?action-params) ?team-color))
+      (bind ?from-side (pddl-place-to-mps-side (nth$ 3 ?action-params)))
+      (bind ?to-mps (pddl-place-to-refbox-mps (nth$ 4 ?action-params) ?team-color))
+      (bind ?to-side (pddl-place-to-mps-side (nth$ 4 ?action-params)))
+    )
+    (case default then
       (bind ?from-mps (pddl-place-to-refbox-mps (nth$ 2 ?action-params) ?team-color))
       (bind ?from-side (pddl-place-to-mps-side (nth$ 2 ?action-params)))
       (bind ?to-mps (pddl-place-to-refbox-mps (nth$ 3 ?action-params) ?team-color))
@@ -122,7 +130,7 @@
       then
         (bind ?sub-action-id (gensym*)) 
         (assert (pddl-action (id ?sub-action-id) (name ?sub-action) (instance ?instance) (params ?params)))
-        (assert (pddl-action-apply-effect (action ?sub-action-id) (effect-type ALL)))
+        (assert (pddl-action-get-effect (action ?sub-action-id) (effect-type ALL) (apply TRUE)))
      )
   ) 
 )
@@ -138,7 +146,7 @@
      (modify ?ex (state SUCCEEDED))
      (if (eq ?action-name carrier-to-input)
       then
-        (assert (pddl-action-apply-effect (action ?action-id) (effect-type END))) 
+        (assert (pddl-action-get-effect (action ?action-id) (effect-type END) (apply TRUE))) 
      )
    else
      (modify ?ex (state ABORTED))
