@@ -381,6 +381,7 @@
   (slot instance (type SYMBOL))
   (slot duration (type FLOAT))
   (slot state (type SYMBOL) (allowed-values PENDING SELECTED EXECUTING) (default PENDING))
+  (slot context (type SYMBOL) (default nil))
 )
 
 (deftemplate pddl-action

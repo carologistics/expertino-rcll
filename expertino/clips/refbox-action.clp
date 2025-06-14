@@ -18,15 +18,15 @@
     (case bs-dispense
       then
         (bind ?bs-inst (pb-create "llsf_msgs.PrepareInstructionBS"))
-        (pb-set-field ?bs-inst "side" (pddl-place-to-mps-side (nth$ 3 ?action-params)))
-        (pb-set-field ?bs-inst "color" (pddl-task-to-base-color (nth$ 4 ?action-params)))
+        (pb-set-field ?bs-inst "side" (pddl-place-to-mps-side (nth$ 5 ?action-params)))
+        (pb-set-field ?bs-inst "color" (pddl-task-to-base-color (nth$ 2 ?action-params)))
         (pb-set-field ?machine-instruction "instruction_bs" ?bs-inst)
     )
-    (case dispense-pay
+    (case bs-dispense-pay
       then
         (bind ?color (nth$ (random 1 3) (create$ BASE_RED BASE_BLACK BASE_SILVER)))
         (bind ?bs-inst (pb-create "llsf_msgs.PrepareInstructionBS"))
-        (pb-set-field ?bs-inst "side" (pddl-place-to-mps-side (nth$ 4 ?action-params)))
+        (pb-set-field ?bs-inst "side" (pddl-place-to-mps-side (nth$ 3 ?action-params)))
         (pb-set-field ?bs-inst "color" ?color)
         (pb-set-field ?machine-instruction "instruction_bs" ?bs-inst)
     )
@@ -82,7 +82,7 @@
   (if (eq ?o-mps ?mps)
    then
     (modify ?ex (state SUCCEEDED))
-    (assert (pddl-action-apply-effect (action ?action-id) (effect-type END)))
+    (assert (pddl-action-get-effect (apply TRUE) (action ?action-id) (effect-type END)))
   ) 
 )
 
@@ -96,6 +96,6 @@
   )
   =>
   (modify ?ex (state SUCCEEDED))
-  (assert (pddl-action-apply-effect (action ?action-id) (effect-type END)))
+  (assert (pddl-action-get-effect (apply TRUE) (action ?action-id) (effect-type END)))
 )
   

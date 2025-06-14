@@ -122,7 +122,7 @@
   (not (pending-pddl-fluent (instance ?instance)))
   (not (pending-pddl-numeric-fluent (instance ?instance)))
   (not (pending-pddl-object (instance ?instance)))
-  (not (pddl-action-apply-effect (state ~DONE)))
+  (not (pddl-action-get-effect (state ~DONE)))
   =>
   (retract ?fa) 
 )

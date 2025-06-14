@@ -72,6 +72,7 @@
   ?action <- (agenda-action-item (action ?action-id) (plan ?plan-id) (priority $?priority) (execution-state PENDING)
                  (worker-type ?worker-type&AGENT))
   (agenda (plan ?plan-id) (state ACTIVE))
+  (not (agenda-action-item (action ?another-action-id) (plan ?plan-id) (worker ?worker-type) (execution-state SELECTED|EXECUTING)))
   (not
       (and
           (agenda-action-item (action ?other-action-id) (plan ?plan-id) (priority $?other-priority) (execution-state PENDING) (worker-type ?worker-type))
