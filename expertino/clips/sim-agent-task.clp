@@ -98,7 +98,7 @@
 (defrule agent-task-list-delete-active
   ?at-list <- (agent-task-list (executor-id ?id) (tasks ?cur-task $?rest) (current-task-id ?seq))
   ?ex <- (executor (id ?id) (state ACCEPTED) (pddl-action-id ?action-id))
-  ?exm <- (executor-monitor (executor-id ?id)) ; Match executor-monitor by executor-id
+  ?exm <- (executor-monitor (executor-id ?id))
   ?at <- (rcll-agent-task (task-id ?seq) (task-name ?cur-task) (outcome SUCCEEDED) (robot ?robot))
   ?cur-task-seq <- (current-rcll-agent-task-id (task-id ?seq) (robot ?robot))
   (pddl-action (id ?action-id) (name ?action) (instance ?instance) (params $?params))
@@ -108,26 +108,25 @@
   (if (or (eq ?action transport) (eq ?action transport-to-slide))
    then
      (bind ?sub-action nil)
-     (bind ?feedback-code-for-subaction NONE) ; Initialize feedback code
-          (switch ?cur-task
+     (bind ?feedback-code-for-subaction NONE)
+      (switch ?cur-task
        (case Move-src then
          (bind ?sub-action (sym-cat ?action -step-1-drive-to))
          (bind ?feedback-code-for-subaction SUBTASK-DRIVE-TO-SRC-SUCCESS)
        )
        (case Retrieve then
-         (bind ?sub-action-name (sym-cat ?action -step-2-pick-up))
+         (bind ?sub-action (sym-cat ?action -step-2-pick-up))
          (bind ?feedback-code-for-subaction SUBTASK-PICK-UP-SUCCESS)
-                )
+       )
        (case Deliver then 
-         (bind ?sub-action-name (sym-cat ?action -step-4-place-down))
+         (bind ?sub-action (sym-cat ?action -step-4-place-down))
          (bind ?feedback-code-for-subaction SUBTASK-PLACE-DOWN-SUCCESS)
        )
-     )
+      )
      (if (neq ?sub-action nil)
       then
         (bind ?sub-action-id (gensym*)) 
         (assert (pddl-action (id ?sub-action-id) (name ?sub-action) (instance ?instance) (params ?params)))
-        ; Pass the sub-action-id along with the feedback
         (modify ?exm (feedback-code ?feedback-code-for-subaction) (sub-action-id ?sub-action-id))
      )
   ) 
@@ -136,7 +135,7 @@
 (defrule agent-task-list-mark-done
   ?at-list <- (agent-task-list (tasks) (executor-id ?ex-id) (current-task-id ?seq))
   ?ex <- (executor (id ?ex-id) (state ACCEPTED) (pddl-action-id ?action-id))
-  ?exm <- (executor-monitor (executor-id ?ex-id)) ; Match executor-monitor by executor-id
+  ?exm <- (executor-monitor (executor-id ?ex-id)) 
   (rcll-agent-task (task-id ?seq) (outcome ?outcome&~UNKNOWN))
   (pddl-action (id ?action-id) (name ?action-name) (params $?params))
   =>
@@ -146,12 +145,14 @@
       then
         (modify ?exm (feedback-code CARRIER-TO-INPUT-SUCCESS))
        else
-        ; For other actions, use ACTION-GENERIC-SUCCESS
         (modify ?exm (feedback-code ACTION-GENERIC-SUCCESS))
      )
    else
-
-
+   (if (eq ?action-name carrier-to-input)
+      then
      (modify ?exm (feedback-code CARRIER-TO-INPUT-FAILED))
+     else
+     (modify ?exm (feedback-code ACTION-GENERIC-FAILED))
+   )
   )
 )

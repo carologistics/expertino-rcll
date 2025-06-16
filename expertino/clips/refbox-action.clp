@@ -69,8 +69,9 @@
 
 (defrule executor-mps-ready-at-output
   (machine (name ?mps) (state READY-AT-OUTPUT)) 
-  ?ex <- (executor (pddl-action-id ?action-id) (worker REFBOX) (state ACCEPTED))
+  ?ex <- (executor (id ?ex-id) (pddl-action-id ?action-id) (worker REFBOX) (state ACCEPTED))
   ?pa <- (pddl-action (id ?action-id) (name ?action-name) (params $?action-params))
+  ?mon <- (executor-monitor (executor-id ?ex-id))
   (game-state (team-color ?team-color) (phase PRODUCTION))
   =>
   (if (eq ?action-name dispense-pay)
@@ -81,21 +82,25 @@
   )
   (if (eq ?o-mps ?mps)
    then
-    (modify ?ex (state SUCCEEDED))
-    (assert (pddl-action-apply-effect (action ?action-id) (effect-type END)))
+    (printout t "Refbox Action: " ?action-id " (" ?action-name ") SUCCEEDED. MPS " ?mps " is READY-AT-OUTPUT." crlf)
+    (modify ?mon (feedback-code ?*REFBOX-ACTION-DIRECT-SUCCESS*))
+    else
+    (printout t "Refbox Action: " ?action-id " (" ?action-name ") FAILED. MPS " ?mps " is not READY-AT-OUTPUT." crlf)
+    (modify ?mon (feedback-code ?*REFBOX-ACTION-DIRECT-FAILED*))
   ) 
 )
 
 (defrule executor-finalize-mps-processed
   (machine (name ?mps) (state PROCESSED))
   (game-state (team-color ?team-color) (phase PRODUCTION))
-  ?ex <- (executor (pddl-action-id ?action-id) (worker REFBOX) (state ACCEPTED))
+  ?ex <- (executor (id ?ex-id) (pddl-action-id ?action-id) (worker REFBOX) (state ACCEPTED))
   ?pa <- (pddl-action (id ?action-id) (name finalize) (params $?action-params))
+  ?mon <- (executor-monitor (executor-id ?ex-id))
   (test 
     (eq (pddl-place-to-refbox-mps (nth$ 2 ?action-params) ?team-color) ?mps)
   )
   =>
-  (modify ?ex (state SUCCEEDED))
-  (assert (pddl-action-apply-effect (action ?action-id) (effect-type END)))
+  (printout t "Refbox Action: " ?action-id " (finalize) SUCCEEDED. MPS " ?mps " is PROCESSED." crlf)
+  (modify ?mon (feedback-code ?*REFBOX-ACTION-DIRECT-SUCCESS*))
 )
   

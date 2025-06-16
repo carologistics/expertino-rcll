@@ -20,16 +20,17 @@
   =>
   (bind ?executor-id (sym-cat EXECUTOR-(gensym*)))
   (assert (executor (id ?executor-id) (pddl-action-id ?action-id) (worker ?worker) (state INIT)))
-  (assert (executor-monitor (id (sym-cat EXECUTOR-MONITOR-(gensym*))) (executor-id (?executor-id))))
+  (assert (executor-monitor (id (sym-cat EXECUTOR-MONITOR-(gensym*))) (executor-id ?executor-id)))
 )
 
 (defrule executor-accepted
-  (executor (id ?ex-id) (state ACCEPTED) (pddl-action-id ?action-id))
+  ?ex <- (executor (id ?ex-id) (state ACCEPTED) (pddl-action-id ?action-id))
+  ?mon <- (executor-monitor (executor-id ?ex-id))
   (pddl-action (id ?action-id) (params $?action-params))
   ?aa <- (agenda-action-item (action ?action-id) (execution-state SELECTED))
   =>
   (modify ?aa (execution-state EXECUTING))
-  (assert (pddl-action-apply-effect (action ?action-id) (effect-type START)))
+  (modify ?mon (feedback-code ?*EXECUTOR-ACTION-ACCEPTED*))
 )
 
 (defrule executor-succeeded
@@ -50,10 +51,12 @@
 )
 
 (defrule executor-succeed-agent-worker
-  ?ex <- (executor (pddl-action-id ?action-id) (worker AGENT) (state INIT))
+  ?ex <- (executor (id ?ex-id) (pddl-action-id ?action-id) (worker AGENT) (state INIT))
+  ?mon <- (executor-monitor (executor-id ?ex-id))
   ?aa <- (agenda-action-item (action ?action-id) (execution-state SELECTED))
   =>
-  (modify ?ex (state SUCCEEDED))
+  (printout t "Executor: Signaling success for AGENT action " ?action-id " to monitor." crlf)
+  (modify ?mon (feedback-code ?*AGENT-ACTION-SUCCESS*))
   (modify ?aa (execution-state EXECUTING))
-  (assert (pddl-action-apply-effect (action ?action-id) (effect-type ALL)))
+  
 )
