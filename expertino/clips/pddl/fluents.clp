@@ -10,7 +10,7 @@
   (bind ?fluent-add-msgs (create$))
   (bind ?fluent-rm-msgs (create$))
   (do-for-all-facts ((?ppf pending-pddl-fluent)) (and (eq ?ppf:state PENDING) (eq ?ppf:instance ?instance))
-    (bind ?fluent-msg (ros-msgs-create-message "expertino_msgs/msg/Fluent"))
+    (bind ?fluent-msg (ros-msgs-create-message "pddl_msgs/msg/Fluent"))
     (ros-msgs-set-field ?fluent-msg "pddl_instance" ?ppf:instance)
     (ros-msgs-set-field ?fluent-msg "name" ?ppf:name)
     (ros-msgs-set-field ?fluent-msg "args" ?ppf:params)

@@ -7,7 +7,7 @@
   (not (service-request-meta (service ?s) (meta ?action-id)))
   =>
   (bind ?new-req (ros-msgs-create-request ?type))
-  (bind ?action-msg (ros-msgs-create-message "expertino_msgs/msg/Fluent"))
+  (bind ?action-msg (ros-msgs-create-message "pddl_msgs/msg/Fluent"))
   (ros-msgs-set-field ?action-msg "pddl_instance" ?instance)
   (ros-msgs-set-field ?action-msg "name" ?name)
   (ros-msgs-set-field ?action-msg "args" ?params)

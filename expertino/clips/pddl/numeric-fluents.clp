@@ -9,7 +9,7 @@
   =>
   (bind ?function-msgs (create$))
   (do-for-all-facts ((?ppf pending-pddl-numeric-fluent)) (and (eq ?ppf:state PENDING) (eq ?ppf:instance ?instance))
-    (bind ?function-msg (ros-msgs-create-message "expertino_msgs/msg/Function"))
+    (bind ?function-msg (ros-msgs-create-message "pddl_msgs/msg/Function"))
     (ros-msgs-set-field ?function-msg "pddl_instance" ?ppf:instance)
     (ros-msgs-set-field ?function-msg "name" ?ppf:name)
     (ros-msgs-set-field ?function-msg "args" ?ppf:params)

@@ -12,7 +12,7 @@
   (bind ?object-add-msgs (create$))
   (bind ?object-rm-msgs (create$))
   (delayed-do-for-all-facts ((?ppo pending-pddl-object)) (and (eq ?ppo:state PENDING) (eq ?ppo:instance ?instance))
-    (bind ?object-msg (ros-msgs-create-message "expertino_msgs/msg/Object"))
+    (bind ?object-msg (ros-msgs-create-message "pddl_msgs/msg/Object"))
     (ros-msgs-set-field ?object-msg "pddl_instance" ?ppo:instance)
     (ros-msgs-set-field ?object-msg "name" ?ppo:name)
     (ros-msgs-set-field ?object-msg "type" ?ppo:type)

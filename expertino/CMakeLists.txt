@@ -17,8 +17,8 @@ find_package(cx_plugin REQUIRED)
 find_package(cx_ros_comm_gen REQUIRED)
 
 # plugins for pddl planner action client and nested message of it
-cx_generate_msg_bindings("expertino_msgs" "TimedPlanAction")
-cx_generate_action_bindings("expertino_msgs" "PlanTemporal")
+cx_generate_msg_bindings("pddl_msgs" "TimedPlanAction")
+cx_generate_action_bindings("pddl_msgs" "PlanTemporal")
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)

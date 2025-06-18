@@ -1,0 +1,21 @@
+diff --git a/expertino/clips/pddl/plan.clp b/expertino/clips/pddl/plan.clp
+index 885aa8b..938ca73 100644
+--- a/expertino/clips/pddl/plan.clp
++++ b/expertino/clips/pddl/plan.clp
+@@ -28,6 +28,7 @@
+     (status (client-status-to-sym ?status))
+     (client-goal-handle ?cgh-ptr)
+   )
++  (retract ?gr-f)
+ )
+ 
+ (defrule plan-update-plan-status
+@@ -42,7 +43,7 @@
+ )
+ 
+ (defrule plan-get-result
+-  ?pc-f <- (pddl-planner-call (client-goal-handle ?cgh-ptr) (goal ?goal-ptr) (uuid ?goal-id))
++  ?pc-f <- (pddl-planner-call (client-goal-handle ?cgh-ptr) (goal ?goal-ptr) (uuid ?goal-id) (status SUCCEEDED))
+   ?wr-f <- (expertino-msgs-plan-temporal-wrapped-result (server "/pddl_manager/temp_plan") (goal-id ?goal-id) (code SUCCEEDED) (result-ptr ?res-ptr))
+   =>
+   (bind ?plan-found (expertino-msgs-plan-temporal-result-get-field ?res-ptr "success"))

@@ -88,7 +88,7 @@
   ?set-f <- (pddl-set-goals (instance ?instance) (state DONE) (goal ?goal&:(eq ?goal ?*GOAL-INSTANCE-BASE*)))
   (pddl-manager (node ?node))
   (pddl-instance (name ?instance) (busy-with FALSE) (state LOADED))
-  (expertino-msgs-plan-temporal-client (server ?server&:(eq ?server (str-cat ?node "/temp_plan"))))
+  (pddl-msgs-plan-temporal-client (server ?server&:(eq ?server (str-cat ?node "/temp_plan"))))
   ;(not (planned-for-main))
   (not (and 
         (agenda (plan ?plan-id) (state ACTIVE))
@@ -98,11 +98,11 @@
   (not (freeze-agenda (instance ?instance)))
   =>
   (printout green "Start planning" crlf)
-  (bind ?goal (expertino-msgs-plan-temporal-goal-create))
+  (bind ?goal (pddl-msgs-plan-temporal-goal-create))
   (assert (pddl-planner-call (context test-plan) (goal ?goal)))
-  (expertino-msgs-plan-temporal-goal-set-field ?goal "pddl_instance" ?instance)
-  (expertino-msgs-plan-temporal-goal-set-field ?goal "goal_instance" (str-cat ?*GOAL-INSTANCE-BASE*))
-  (expertino-msgs-plan-temporal-send-goal ?goal ?server)
+  (pddl-msgs-plan-temporal-goal-set-field ?goal "pddl_instance" ?instance)
+  (pddl-msgs-plan-temporal-goal-set-field ?goal "goal_instance" (str-cat ?*GOAL-INSTANCE-BASE*))
+  (pddl-msgs-plan-temporal-send-goal ?goal ?server)
   ;(assert (planned-for-main))
   (retract ?set-f)
   ;clear all old goals in pddl_manager                                           

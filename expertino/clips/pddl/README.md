@@ -8,7 +8,7 @@ As PDDL is an expressive formalism, this module relies on an external pddl manag
 
 1. A running instance of the external pddl manager node
 2. The [RosMsgsPlugin](https://planning.wiki/guide/whatis/pddl)
-3. (for planning:) [Generated CLIPS plugins](https://fawkesrobotics.github.io/ros2-clips-executive/clips_executive/plugins/ros_msgs_plugin.html) `cx::CXExpertinoMsgsPlanTemporalPlugin` and `cx::CXExpertinoMsgsTimedPlanActionPlugin`
+3. (for planning:) [Generated CLIPS plugins](https://fawkesrobotics.github.io/ros2-clips-executive/clips_executive/plugins/ros_msgs_plugin.html) `cx::CXPDDLMsgsPlanTemporalPlugin` and `cx::CXPDDLMsgsTimedPlanActionPlugin`
 4. Open the respective ROS interfaces
 
 ## Basic Usage

@@ -1,6 +1,0 @@
-expertino_msgs/Fluent[] fluents
-expertino_msgs/Function[] functions
-string goal_instance
----
-bool success
-string error
