@@ -73,7 +73,7 @@
      (bind ?service-type (nth$ (+ ?index 1) ?services))
      (ros-msgs-create-client
        (str-cat ?node "/" ?service-name)
-       (str-cat "expertino_msgs/srv/" ?service-type)
+       (str-cat "pddl_msgs/srv/" ?service-type)
      )
      (bind ?index (+ ?index 2))
   )
@@ -152,12 +152,12 @@
   (confval (path "/pddl/manager_node") (value ?node))
   (start-task (name pddl) (state ACTIVE) (parts init-planner $?rest-parts))
   =>
-  (expertino-msgs-plan-temporal-create-client (str-cat ?node "/temp_plan"))
+  (pddl-msgs-plan-temporal-create-client (str-cat ?node "/temp_plan"))
 )
 
 (defrule pddl-init-plan-client-successful
   (confval (path "/pddl/manager_node") (value ?node))
-  (expertino-msgs-plan-temporal-client (server ?s&:(eq ?s (str-cat ?node "/temp_plan"))))
+  (pddl-msgs-plan-temporal-client (server ?s&:(eq ?s (str-cat ?node "/temp_plan"))))
   ?st <- (start-task (name pddl) (state ACTIVE) (parts init-planner $?rest-parts))
   =>
   (modify ?st (parts ?rest-parts))

@@ -1,4 +1,0 @@
-expertino_msgs/Fluent[] fluents
----
-bool success
-string error

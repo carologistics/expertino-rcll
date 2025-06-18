@@ -1,5 +1,6 @@
 clips_manager:
   ros__parameters:
+    autostart_node: true
     environments: ["main"]
     main:
       plugins: ["executive",
@@ -71,6 +72,6 @@ clips_manager:
     ros_msgs:
       plugin: "cx::RosMsgsPlugin"
     plan_temporal_action:
-      plugin: "cx::CXExpertinoMsgsPlanTemporalPlugin"
+      plugin: "cx::CXPddlMsgsPlanTemporalPlugin"
     timed_plan_action_msg:
-      plugin: "cx::CXExpertinoMsgsTimedPlanActionPlugin"
+      plugin: "cx::CXPddlMsgsTimedPlanActionPlugin"

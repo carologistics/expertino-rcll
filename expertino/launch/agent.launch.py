@@ -26,7 +26,7 @@ def launch_with_context(context, *args, **kwargs):
     launch_pddl_manager = os.path.join(pddl_manager_dir, 'launch', 'pddl_manager.launch.py')
 
     cx_node = Node(
-        package='cx_bringup',
+        package='cx_clips_env_manager',
         executable='cx_node',
         output='screen',
         emulate_tty=True,

@@ -98,4 +98,4 @@
   (modify ?ex (state SUCCEEDED))
   (assert (pddl-action-apply-effect (action ?action-id) (effect-type END)))
 )
-  
+
