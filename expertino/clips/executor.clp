@@ -25,7 +25,7 @@
 (defrule executor-accepted
   (executor (id ?ex-id) (state ACCEPTED) (pddl-action-id ?action-id))
   (pddl-action (id ?action-id) (params $?action-params))
-  ?aa <- (agenda-action-item (action ?action-id) (execution-state SELECTED))
+  ?aa <- (agenda-action-item (action ?action-id) (execution-state SELECTED) (worker ?worker&~AGENT))
   =>
   (modify ?aa (execution-state EXECUTING))
   (assert (pddl-action-get-effect (action ?action-id) (apply TRUE) (effect-type START)))
@@ -51,7 +51,7 @@
 
 (defrule executor-agent-worker-replan-get-effect-request
   ?ex <- (executor (pddl-action-id ?action-id) (worker AGENT) (state INIT))
-  ?aa <- (agenda-action-item (action ?action-id) (execution-state SELECTED))
+  (agenda-action-item (action ?action-id) (execution-state SELECTED))
   =>
   (modify ?ex (state REQUESTED))
   (printout debug "replanning ...." crlf)
@@ -60,20 +60,35 @@
 
 (defrule executor-agent-worker-replan-set-goals
   ?ex <- (executor (pddl-action-id ?action-id) (worker AGENT) (state REQUESTED))
+  ?aa <- (agenda-action-item (action ?action-id) (execution-state SELECTED))
   (or (pddl-effect-fluent (action ?action-id))
       (pddl-effect-numeric-fluent (action ?action-id)))
   (confval (path "/pddl/problem_instance") (value ?instance-str))
   =>
   (bind ?instance (sym-cat ?instance-str))
+  ;clear existing goals for the goal-instance
+  (do-for-all-facts ((?goal-fluent pddl-goal-fluent)) 
+    (eq ?goal-fluent:instance ?instance)
+    (retract ?goal-fluent)
+  )
+  (do-for-all-facts ((?goal-fluent pddl-goal-numeric-fluent)) 
+    (eq ?goal-fluent:instance ?instance)
+    (retract ?goal-fluent)
+  )
+  (assert (pddl-clear-goals (instance ?instance) (goal ?*GOAL-INSTANCE-REPLANNING*)))
+
+  ;assert new goals
   (delayed-do-for-all-facts ((?effect-f pddl-effect-fluent)) (eq ?effect-f:action ?action-id)
     (assert (pddl-goal-fluent (instance ?effect-f:instance) (name ?effect-f:name) (params ?effect-f:params)))
+    (retract ?effect-f)
   )
   (delayed-do-for-all-facts ((?effect-f pddl-effect-numeric-fluent)) (eq ?effect-f:action ?action-id)
     (assert (pddl-goal-numeric-fluent (instance ?effect-f:instance) (name ?effect-f:name) 
-      (params ?effect-f:params) (value ?effect-f:value)))
+       (params ?effect-f:params) (value ?effect-f:value)))
+    (retract ?effect-f)
   )
-  (assert (pddl-clear-goals (instance ?instance) (goal ?*GOAL-INSTANCE-REPLANNING*)))
   (modify ?ex (state ACCEPTED))
+  (modify ?aa (execution-state EXECUTING))
 ) 
 
 (defrule executor-set-goal-for-replanning                                                    
@@ -107,6 +122,7 @@
   ?ex <- (executor (id ?ex-id) (pddl-action-id ?action-id) (worker AGENT) (state ACCEPTED))
   (pddl-plan (id ?plan-id) (context ?ex-id))
   (agenda (plan ?plan-id))
+  (agenda-action-item (plan ?plan-id))
   (not (agenda-action-item (plan ?plan-id) (execution-state ?state&~COMPLETED)))
   =>
   (modify ?ex (state SUCCEEDED))

@@ -23,7 +23,7 @@
       (bind ?to-mps (pddl-place-to-refbox-mps (nth$ 4 ?action-params) ?team-color))
       (bind ?to-side (pddl-place-to-mps-side (nth$ 4 ?action-params)))
     )
-    (case default then
+    (default
       (bind ?from-mps (pddl-place-to-refbox-mps (nth$ 2 ?action-params) ?team-color))
       (bind ?from-side (pddl-place-to-mps-side (nth$ 2 ?action-params)))
       (bind ?to-mps (pddl-place-to-refbox-mps (nth$ 3 ?action-params) ?team-color))
@@ -112,7 +112,7 @@
   =>
   (modify ?at-list (tasks $?rest))
   (modify ?cur-task-seq (task-id (+ 1 ?seq)))
-  (if (or (eq ?action transport) (eq ?action transport-to-slide))
+  (if (not (eq ?action carrier-to-input))
    then
      (bind ?sub-action nil)
      (switch ?cur-task

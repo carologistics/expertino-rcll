@@ -56,10 +56,18 @@
   (assert (pending-pddl-fluent (instance ?instance) (name next-step) (params ?wp ?curr-step ?next-step)))
   (assert (pending-pddl-fluent (instance ?instance) (name next-step) (params ?wp ?next-step deliver)))
   (assert (pending-pddl-fluent (instance ?instance) (name next-step) (params ?wp deliver done)))
+  ;clear all old goals in pddl_manager
+  (do-for-all-facts ((?goal-fluent pddl-goal-fluent))                           
+    (eq ?goal-fluent:instance ?instance)                                        
+    (retract ?goal-fluent)                                                      
+  )                                                                             
+  (do-for-all-facts ((?goal-fluent pddl-goal-numeric-fluent))                   
+    (eq ?goal-fluent:instance ?instance)                                        
+    (retract ?goal-fluent)                                                      
+  )
+  (assert (pddl-clear-goals (instance ?instance) (goal ?*GOAL-INSTANCE-BASE*)))
   ; set the wp as a goal
   (assert (pddl-goal-fluent (instance ?instance) (name step) (params ?wp done)))
-  ; also, clear all old goals in pddl_manager
-  (assert (pddl-clear-goals (instance ?instance) (goal ?*GOAL-INSTANCE-BASE*)))
 )
 
 (defrule remove-achieved-goal
