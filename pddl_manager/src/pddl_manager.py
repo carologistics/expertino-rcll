@@ -329,7 +329,7 @@ class PddlManagerLifecycleNode(LifecycleNode):
         managed_instance = self.managed_problems[fluent.pddl_instance]
         args = []
         try:
-            managed_instance.add_goal_fluent(fluent.name, fluent.args, goal_instance)
+            managed_instance.add_goal_fluent(fluent.name, fluent.args, value, goal_instance)
             return True, ""
         except Exception as e:
             return False, f"error while { "adding" if value else "removing" } fluent: {e}"
@@ -441,7 +441,7 @@ class PddlManagerLifecycleNode(LifecycleNode):
         for fluent in request.fluents:
             if not success:
                 break
-            curr_success, curr_error = self.try_set_fluent_goal(fluent, True, request.goal_instance)
+            curr_success, curr_error = self.try_set_fluent_goal(fluent, None, request.goal_instance)
             success = success and curr_success
             error = f"{error} {curr_error}"
 
@@ -823,7 +823,7 @@ class PddlManagerLifecycleNode(LifecycleNode):
         self.get_logger().info("Successfully planned")
         response.actions = result
       else:
-        self.get_logger().info(f"could not plan on problem {request.pddl_instnace} with goal {request.goal_instance")
+        self.get_logger().info(f"could not plan on problem {request.pddl_instance} with goal {request.goal_instance}")
         problem_goal = self.managed_problems[request.pddl_instance].goals[request.goal_instance]
         filtered_problem = self.managed_problems[request.pddl_instance].filter_problem(
                             problem_goal.action_filters, 

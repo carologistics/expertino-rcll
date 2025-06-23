@@ -6,10 +6,10 @@
   (protobuf-peer (name refbox-private) (peer-id ?peer-id))
   (machine (name ?mps) (state IDLE))
   (test (or 
-    (and (eq ?action-name dispense-pay)
-         (eq ?mps (pddl-place-to-refbox-mps (nth$ 3 ?action-params) ?team-color))
+    (and (eq ?action-name bs-dispense)
+         (eq ?mps (pddl-place-to-refbox-mps (nth$ 5 ?action-params) ?team-color))
     )
-    (eq ?mps (pddl-place-to-refbox-mps (nth$ 2 ?action-params) ?team-color))
+    (eq ?mps (pddl-place-to-refbox-mps (nth$ 3 ?action-params) ?team-color))
   ) )
   => 
   (bind ?machine-instruction (pb-create "llsf_msgs.PrepareMachine"))
@@ -73,11 +73,11 @@
   ?pa <- (pddl-action (id ?action-id) (name ?action-name) (params $?action-params))
   (game-state (team-color ?team-color) (phase PRODUCTION))
   =>
-  (if (eq ?action-name dispense-pay)
+  (if (eq ?action-name bs-dispense)
    then
-    (bind ?o-mps (pddl-place-to-refbox-mps (nth$ 3 ?action-params) ?team-color))
+    (bind ?o-mps (pddl-place-to-refbox-mps (nth$ 5 ?action-params) ?team-color))
    else
-    (bind ?o-mps (pddl-place-to-refbox-mps (nth$ 2 ?action-params) ?team-color))
+    (bind ?o-mps (pddl-place-to-refbox-mps (nth$ 3 ?action-params) ?team-color))
   )
   (if (eq ?o-mps ?mps)
    then
