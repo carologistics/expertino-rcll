@@ -51,7 +51,7 @@
     add_fluents AddFluents
     rm_fluents RemoveFluents
     add_objects AddObjects
-    rm_objects RemoveFluents
+    rm_objects RemoveObjects
     set_functions SetFunctions
     add_pddl_instance AddPddlInstance
     check_action_precondition CheckActionPrecondition

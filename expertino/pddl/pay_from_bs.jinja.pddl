@@ -1,6 +1,6 @@
    
    (:durative-action bs-dispense-pay
-     :parameters (?token - payment ?bs - base-station ?from - bs-place ?rs - ring-station)
+     :parameters (?token - payment ?bs - base-station ?from - bs-place)
      :duration (= ?duration 5)
      :condition (and
        (at start (not (token-usable ?token ?from)))
@@ -8,7 +8,6 @@
        (at start (usable ?bs)) 
        (at start (free bs-input))
        (at start (free bs-output))
-       (at start (<= (pay-count ?rs) 2))                                        
      )
      :effect (and
        (at start (not (usable ?bs)))

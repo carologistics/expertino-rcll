@@ -66,25 +66,15 @@
   (confval (path "/pddl/problem_instance") (value ?instance-str))
   =>
   (bind ?instance (sym-cat ?instance-str))
-  ;clear existing goals for the goal-instance
-  (do-for-all-facts ((?goal-fluent pddl-goal-fluent)) 
-    (eq ?goal-fluent:instance ?instance)
-    (retract ?goal-fluent)
-  )
-  (do-for-all-facts ((?goal-fluent pddl-goal-numeric-fluent)) 
-    (eq ?goal-fluent:instance ?instance)
-    (retract ?goal-fluent)
-  )
   (assert (pddl-clear-goals (instance ?instance) (goal ?*GOAL-INSTANCE-REPLANNING*)))
 
   ;assert new goals
   (delayed-do-for-all-facts ((?effect-f pddl-effect-fluent)) (eq ?effect-f:action ?action-id)
-    (assert (pddl-goal-fluent (instance ?effect-f:instance) (name ?effect-f:name) (params ?effect-f:params)))
+    (assert (pddl-goal-fluent (goal ?*GOAL-INSTANCE-REPLANNING*) (instance ?effect-f:instance) (name ?effect-f:name) (params ?effect-f:params)))
     (retract ?effect-f)
   )
   (delayed-do-for-all-facts ((?effect-f pddl-effect-numeric-fluent)) (eq ?effect-f:action ?action-id)
-    (assert (pddl-goal-numeric-fluent (instance ?effect-f:instance) (name ?effect-f:name) 
-       (params ?effect-f:params) (value ?effect-f:value)))
+    (assert (pddl-goal-numeric-fluent (goal ?*GOAL-INSTANCE-REPLANNING*) (instance ?effect-f:instance) (name ?effect-f:name) (params ?effect-f:params) (value ?effect-f:value)))
     (retract ?effect-f)
   )
   (modify ?ex (state ACCEPTED))
@@ -93,8 +83,8 @@
 
 (defrule executor-set-goal-for-replanning                                                    
   ?ex <- (executor (pddl-action-id ?action-id) (worker AGENT) (state ACCEPTED))
-  (or (pddl-goal-fluent (instance ?instance))          
-    (pddl-goal-numeric-fluent (instance ?instance)))          
+  (or (pddl-goal-fluent (instance ?instance) (goal ?goal&:(eq ?goal ?*GOAL-INSTANCE-REPLANNING*)))          
+    (pddl-goal-numeric-fluent (instance ?instance) (goal ?goal&:(eq ?goal ?*GOAL-INSTANCE-REPLANNING*))))          
   ?clear-f <- (pddl-clear-goals (instance ?instance) (state DONE) (goal ?goal&:(eq ?goal ?*GOAL-INSTANCE-REPLANNING*))) 
   =>                                                                            
   ; notify to add the goal to the domain                                        
@@ -116,6 +106,15 @@
   (expertino-msgs-plan-temporal-goal-set-field ?goal "goal_instance" ?*GOAL-INSTANCE-REPLANNING*)    
   (expertino-msgs-plan-temporal-send-goal ?goal ?server)                        
   (retract ?set-f)                                                              
+  ;clear existing goals for the goal-instance
+  (do-for-all-facts ((?goal-fluent pddl-goal-fluent)) 
+    (and (eq ?goal-fluent:instance ?instance) (eq ?goal-fluent:goal ?goal))
+    (retract ?goal-fluent)
+  )
+  (do-for-all-facts ((?goal-fluent pddl-goal-numeric-fluent)) 
+    (and (eq ?goal-fluent:instance ?instance) (eq ?goal-fluent:goal ?goal))
+    (retract ?goal-fluent)
+  )
 )
 
 (defrule executor-agent-worker-succeeded

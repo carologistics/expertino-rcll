@@ -64,6 +64,7 @@
      :duration (= ?duration 5)
      :condition (and
        (at start (at ?carrier ?from))
+       (at start (rs-slide ?m ?to))
        (at start (token-usable ?carrier ?from))
        (at start (token-step ?carrier ?from dispose))
        (at start (step-place dispose ?to))

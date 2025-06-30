@@ -75,7 +75,7 @@
    else
     (printout error "Failed to add fluents \"" ?instance "\":" ?error crlf)
     (delayed-do-for-all-facts ((?ppf pending-pddl-fluent)) (and (eq ?ppf:state WAITING) (eq ?ppf:instance ?instance) (not ?ppf:delete))
-      (modify ?ppf (state ERROR) (error ?error))
+      (modify ?ppf (state ERROR))
     )
   )
   (ros-msgs-destroy-message ?ptr)

@@ -208,6 +208,7 @@ class ManagedProblem():
         for object in objects:
             if object_filter is None or object.name in object_filter:
                 target_problem.add_object(object)
+                print(f"filtered object {object.name}")
 
         # add the liftd fluents based on the fluent filters
         for fluent in self.base_problem.fluents:
@@ -218,8 +219,9 @@ class ManagedProblem():
         for f, val in self.base_problem.initial_values.items():
             args = [f"{arg}" for arg in f.args]
 
-            if fluent_filter is None or (f.fluent().name in fluent_filter and len([obj for obj in args if obj not in object_filter]) == 0):
-                target_problem.set_initial_value(f, val)
+            if fluent_filter is None or (f.fluent().name in fluent_filter):
+                if object_filter is None or (len([obj for obj in args if obj not in object_filter]) == 0):
+                    target_problem.set_initial_value(f, val)
 
         # apply the actions based on the action filters
         for action in self.base_problem.actions:
@@ -236,11 +238,11 @@ class ManagedProblem():
 
     def remove_object(self, name):
         object_list = self.get_object_list()
+        object_filter = []
         for obj in object_list:
-            if obj.name == name:
-                object_list.remove(obj)
-                break
-        self.base_problem = self.filter_problem(self.get_action_list(), object_list, self.get_fluent_list())
+            if obj.name != name:
+                object_filter.append(obj.name)
+        self.base_problem = self.filter_problem(None, object_filter, None)
 
     def get_fluent_list(self):
         return self.base_problem.fluents
