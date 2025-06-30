@@ -99,3 +99,17 @@
   (assert (pddl-action-get-effect (apply TRUE) (action ?action-id) (effect-type END)))
 )
   
+(defrule executor-machine-broken
+  (machine (name ?mps) (state BROKEN))
+  (game-state (team-color ?team-color) (phase PRODUCTION))
+  ?ex <- (executor (pddl-action-id ?action-id) (worker REFBOX) (state ACCEPTED))
+  ?pa <- (pddl-action (id ?action-id) (name finalize) (params $?action-params))
+  (test 
+    (or 
+      (eq (pddl-place-to-refbox-mps (nth$ 2 ?action-params) ?team-color) ?mps)
+      (eq (pddl-place-to-refbox-mps (nth$ 3 ?action-params) ?team-color) ?mps)
+      (eq (pddl-place-to-refbox-mps (nth$ 5 ?action-params) ?team-color) ?mps)
+    )
+  )
+  =>
+  (modify ?ex (state ABORTED)))

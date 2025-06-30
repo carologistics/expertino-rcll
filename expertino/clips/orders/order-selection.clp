@@ -56,18 +56,9 @@
   (assert (pending-pddl-fluent (instance ?instance) (name next-step) (params ?wp ?curr-step ?next-step)))
   (assert (pending-pddl-fluent (instance ?instance) (name next-step) (params ?wp ?next-step deliver)))
   (assert (pending-pddl-fluent (instance ?instance) (name next-step) (params ?wp deliver done)))
-  ;clear all old goals in pddl_manager
-  (do-for-all-facts ((?goal-fluent pddl-goal-fluent))                           
-    (eq ?goal-fluent:instance ?instance)                                        
-    (retract ?goal-fluent)                                                      
-  )                                                                             
-  (do-for-all-facts ((?goal-fluent pddl-goal-numeric-fluent))                   
-    (eq ?goal-fluent:instance ?instance)                                        
-    (retract ?goal-fluent)                                                      
-  )
   (assert (pddl-clear-goals (instance ?instance) (goal ?*GOAL-INSTANCE-BASE*)))
   ; set the wp as a goal
-  (assert (pddl-goal-fluent (instance ?instance) (name step) (params ?wp done)))
+  (assert (pddl-goal-fluent (instance ?instance) (goal ?*GOAL-INSTANCE-BASE*) (name step) (params ?wp done)))
 )
 
 (defrule remove-achieved-goal
@@ -79,7 +70,7 @@
 
 (defrule set-goal-for-orders
   (startup-completed)
-  (pddl-goal-fluent (instance ?instance) (name step) (params ?wp1 $?))
+  (pddl-goal-fluent (instance ?instance) (goal ?goal&:(eq ?goal ?*GOAL-INSTANCE-BASE*)) (name step) (params ?wp1 $?))
   ?clear-f <- (pddl-clear-goals (instance ?instance) (state DONE) (goal ?goal&:(eq ?goal ?*GOAL-INSTANCE-BASE*)))
   =>
   ; notify to add the goal to the domain
@@ -114,4 +105,20 @@
   (expertino-msgs-plan-temporal-send-goal ?goal ?server)
   ;(assert (planned-for-main))
   (retract ?set-f)
+  ;clear all old goals in pddl_manager                                           
+  (do-for-all-facts ((?goal-fluent pddl-goal-fluent))                            
+    (and (eq ?goal-fluent:instance ?instance) (eq ?goal-fluent ?goal))          
+    (retract ?goal-fluent)                                                       
+  )                                                                              
+  (do-for-all-facts ((?goal-fluent pddl-goal-numeric-fluent))                    
+    (and (eq ?goal-fluent:instance ?instance) (eq ?goal-fluent ?goal))          
+    (retract ?goal-fluent)                                                       
+  )
 )
+
+;(defrule remove-delivered-product-objects
+;  (confval (path "/pddl/problem_instance") (value ?instance-str))
+;  (pddl-fluent (instance ?instance&:(eq ?instance (sym-cat ?instance-str))) (name step) (params ?wp done))
+;  =>
+;  (assert (pending-pddl-object (instance ?instance) (name ?wp) (type product) (delete TRUE)))
+;)

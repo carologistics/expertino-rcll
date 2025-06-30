@@ -115,14 +115,35 @@
 (defrule agenda-frozen
   (declare (salience ?*SALIENCE-FREEZE-AGENDA*))
   ?fa <- (freeze-agenda (instance ?instance))
-  (pddl-plan (id ?plan-id) (instance ?instance))
   (pddl-instance (name ?instance) (busy-with FALSE))
-  (not (agenda (plan ?plan-id) (state ACTIVE)))
-  (not (agenda-action-item (plan ?plan-id) (execution-state EXECUTING)))
-  (not (pending-pddl-fluent (instance ?instance)))
-  (not (pending-pddl-numeric-fluent (instance ?instance)))
-  (not (pending-pddl-object (instance ?instance)))
-  (not (pddl-action-get-effect (state ~DONE)))
+  (not (and 
+         (pddl-plan (id ?plan-id) (instance ?instance))
+         (or
+           (agenda (plan ?plan-id) (state ACTIVE))
+           (agenda-action-item (plan ?plan-id) (execution-state EXECUTING))
+           (pending-pddl-fluent (instance ?instance))
+           (pending-pddl-numeric-fluent (instance ?instance))
+           (pending-pddl-object (instance ?instance))
+           (pddl-action-get-effect (state ~DONE))
+         )
+       )
+  )
   =>
   (retract ?fa) 
 )
+
+(defrule agenda-complete
+  ?agenda <- (agenda (plan ?plan-id) (class-selection ?ordering-class) (state ACTIVE))
+  ?plan <- (pddl-plan (id ?plan-id) (instance ?instance))
+  (pddl-instance (name ?instance))
+  (not (pddl-action (id ?action-id) (plan ?plan-id) 
+            (plan-order-class ?ordering-class-o&:(> ?ordering-class-o ?ordering-class))))
+  (not (agenda-action-item (plan ?plan-id) (execution-state ~COMPLETED)))
+  =>
+  (printout green "Agenda for plan" ?plan-id "has been completed" crlf)
+  (retract ?agenda)
+  (do-for-all-facts ((?action pddl-action)) (eq pddl-action:plan ?plan-id)
+    (retract ?action)
+  )
+  (retract ?plan)
+) 

@@ -89,7 +89,7 @@
         (bind ?value (ros-msgs-get-field ?fun "value"))
         (if (not (do-for-fact ((?pf pddl-numeric-fluent)) (and (eq ?name ?pf:name) (eq ?pf:params ?arg-syms))
           (assert (pending-pddl-numeric-fluent (name ?name) (params ?arg-syms)
-            (value (pddl-apply-op ?op ?value ?pf:value)) (state PENDING) (instance ?instance)))
+            (value (pddl-apply-op ?op ?pf:value ?value)) (state PENDING) (instance ?instance)))
         )) then
           (printout error "pddl-numeric-fluent from action effect unknown, init to 0" crlf)
           (assert (pddl-numeric-fluent (instance ?instance) (name ?name) (params ?arg-syms) (value 0.0)))

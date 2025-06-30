@@ -102,6 +102,7 @@
   Negative goal conditions are currently not supported.
 "
   (slot instance (type SYMBOL))
+  (slot goal (type SYMBOL))
   (slot name (type SYMBOL))
   (multislot params (type SYMBOL) (default (create$)))
 )
@@ -114,6 +115,7 @@
   conditions and can therefore only represent a subset of valid conditions.
 "
   (slot instance (type SYMBOL))
+  (slot goal (type SYMBOL))
   (slot name (type SYMBOL))
   (multislot params (type SYMBOL) (default (create$)))
   (slot value (type FLOAT))
@@ -427,7 +429,7 @@
 (deftemplate agenda
   (slot plan (type SYMBOL))
   (slot class-selection (type INTEGER) (default 0))
-  (slot class-relaxation (type INTEGER) (default 2))
+  (slot class-relaxation (type INTEGER) (default 0))
   (slot state (type SYMBOL) (allowed-values ACTIVE INACTIVE) (default INACTIVE))
 )
 

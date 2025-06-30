@@ -22,7 +22,7 @@
 
 (defrule pddl-clear-goals-response-received
 " Get response, read it and delete."
-  ?clear-goals-f <- (pddl-clear-goals (instance ?instance) (state PENDING))
+  ?clear-goals-f <- (pddl-clear-goals (instance ?instance) (goal ?goal) (state PENDING))
   (pddl-manager (node ?node))
   ?pi-f <- (pddl-instance (name ?instance) (busy-with CLEAR-GOALS))
   (ros-msgs-client (service ?s&:(eq ?s (str-cat ?node "/clear_goals"))) (type ?type))
