@@ -42,12 +42,13 @@
 )
 
 (defrule executor-failed
-  (executor (id ?ex-id) (state ABORTED) (pddl-action-id ?action-id))
+  ?ex <- (executor (id ?ex-id) (state ABORTED) (pddl-action-id ?action-id))
+  ?m <- (executor-monitor (executor-id ?ex-id))
   (pddl-action (id ?action-id) (params $?action-params))
   ?aa <- (agenda-action-item (action ?action-id) (execution-state EXECUTING))
   =>
   ;TODO set appropriate error message
-  (modify ?aa (execution-state ERROR))
+  (modify ?m (feedback-code ?*EXECUTOR-FAILED*))
 )
 
 (defrule executor-succeed-agent-worker

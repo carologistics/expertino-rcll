@@ -138,9 +138,30 @@
   (assert (pddl-action-apply-effect (action ?action-id) (effect-type START)))
 )
 
+;--------------- FAILED ACTIONS ------------------------
 
 (defrule executor-failed
   ?ex <- (executor (id ?ex-id) (pddl-action-id ?action-id) (state ABORTED))
+  (pddl-action (id ?action-id) (params $?action-params))
+  ?aa <- (agenda-action-item (action ?action-id) (execution-state EXECUTING))
+  ?mon <- (executor-monitor (executor-id ?ex-id) (feedback-code EXECUTOR-FAILED))
   =>
   (printout t "Executor Monitor: Executor " ?ex-id " FAILED. " crlf)
+
+)
+
+(defrule executor-monitor-refbox-action-direct-failed
+  ?m <- (executor-monitor (executor-id ?ex-id) 
+                          (feedback-code REFBOX-ACTION-DIRECT-FAILED)
+        )
+  ?ex <- (executor (id ?ex-id) 
+                    (pddl-action-id ?action-id) 
+                    (worker REFBOX) 
+          )
+  (pddl-action (id ?action-id) (name ?action-name))
+  =>
+  (printout t "Executor Monitor: REFBOX Action " ?action-id " (" ?action-name ") confirmed FAILED by direct signal. Resetting monitor." crlf)
+  ;---- TODO: Apply failed effects ------ (assert (pddl-action-apply-effect (action ?action-id) (effect-type END)))
+  (modify ?ex (state ABORTED))
+  (modify ?m (feedback-code NONE)) 
 )
