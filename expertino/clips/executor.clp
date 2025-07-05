@@ -49,6 +49,7 @@
   =>
   ;TODO set appropriate error message
   (modify ?m (feedback-code ?*EXECUTOR-FAILED*))
+  (modify ?aa (execution-state ERROR))
 )
 
 (defrule executor-succeed-agent-worker
@@ -57,6 +58,7 @@
   ?aa <- (agenda-action-item (action ?action-id) (execution-state SELECTED))
   =>
   (printout t "Executor: Signaling success for AGENT action " ?action-id " to monitor." crlf)
+  (modify ?ex (state SUCCEEDED))
   (modify ?mon (feedback-code ?*AGENT-ACTION-SUCCESS*))
   (modify ?aa (execution-state EXECUTING))
   

@@ -141,6 +141,7 @@
   =>
   (if (eq ?outcome SUCCEEDED)
    then
+   (modify ?ex (state SUCCEEDED))
      (if (eq ?action-name carrier-to-input)
       then
         (modify ?exm (feedback-code CARRIER-TO-INPUT-SUCCESS))
@@ -148,6 +149,7 @@
         (modify ?exm (feedback-code ACTION-GENERIC-SUCCESS))
      )
    else
+   (modify ?ex (state ABORTED))
    (if (eq ?action-name carrier-to-input)
       then
      (modify ?exm (feedback-code CARRIER-TO-INPUT-FAILED))

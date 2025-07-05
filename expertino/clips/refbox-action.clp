@@ -82,6 +82,7 @@
   )
   (if (eq ?o-mps ?mps)
    then
+   (modify ?ex (state SUCCEEDED))
     (printout t "Refbox Action: " ?action-id " (" ?action-name ") SUCCEEDED. MPS " ?mps " is READY-AT-OUTPUT." crlf)
     (modify ?mon (feedback-code ?*REFBOX-ACTION-DIRECT-SUCCESS*))
     else
@@ -101,6 +102,7 @@
   )
   =>
   (printout t "Refbox Action: " ?action-id " (finalize) SUCCEEDED. MPS " ?mps " is PROCESSED." crlf)
+  (modify ?ex (state SUCCEEDED))
   (modify ?mon (feedback-code ?*REFBOX-ACTION-DIRECT-SUCCESS*))
 )
   
