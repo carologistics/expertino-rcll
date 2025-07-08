@@ -30,6 +30,7 @@
 	(assert (rl-predefined-observable (name on-table) (params block1)))
 	(assert (rl-predefined-observable (name on-table) (params block2)))
 	(assert (rl-predefined-observable (name on-table) (params block3)))
+  (assert (rl-predefined-observable (name on-table) (params block4)))
 )
 
 (deffunction add-robot ()

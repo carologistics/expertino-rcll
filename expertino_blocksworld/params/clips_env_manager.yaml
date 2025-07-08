@@ -112,6 +112,7 @@ clips_manager:
         "clips/rl_plugin/action-selection-action.clp",
         "clips/rl_plugin/reset-cx-action.clp",
         "clips/expertino_blocksworld/init.clp",
+        "clips/expertino_blocksworld/reset.clp",
         "clips/expertino_blocksworld/action-executability.clp",
         "clips/expertino_blocksworld/action-execution.clp"
         ]
