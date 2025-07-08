@@ -6,6 +6,7 @@ import rclpy
 class BlocksworldEnv(CXRLGym):
     def __init__(self, node: Node, mode: str, number_robots: int):
         self.reward_in_episode = 0
+        self.episode_number = 0
         super().__init__(node, mode, number_robots)
 
     def step(self, action):
@@ -18,6 +19,8 @@ class BlocksworldEnv(CXRLGym):
     def reset(self, seed: int = None, options: dict[str, any] = None):
         with open("cxrl-bw-log-episode-reward.txt", 'a+') as f:
             f.write(f"{self.reward_in_episode} \n")
+        self.node.get_logger().info(f"Episode {self.episode_number}.")
+        self.episode_number += 1
         self.reward_in_episode = 0
         return super().reset(seed=seed)
     

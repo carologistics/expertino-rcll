@@ -8,7 +8,7 @@ cxrl_node/blocksworld_rl_node:
 
     training:
       retraining: false
-      max_episodes: 100
+      max_episodes: 500
       timesteps: 100000000
 
     env:
