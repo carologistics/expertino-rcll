@@ -323,6 +323,7 @@
   (slot delete (type SYMBOL) (allowed-values FALSE TRUE) (default FALSE))
   (slot request-id (type INTEGER))
   (slot state (type SYMBOL) (allowed-values PENDING WAITING ERROR ON-HOLD) (default PENDING))
+  (slot error (type STRING))
 )
 
 (deftemplate pending-pddl-numeric-fluent
