@@ -752,28 +752,26 @@ class PddlManagerLifecycleNode(LifecycleNode):
         try:
             # Ground action
             grounded_action = self.ground_action(action)
-            
+            function_effects = []
+            fluent_effects = []
             if hasattr(grounded_action, "preconditions"):
-                fluent_effects = []
-                for val in value:
+                for eff in grounded_action.effects:
                     args = []
-                    for arg in val.fluent.args:
+                    for arg in eff.fluent.args:
                         args.append(f"{arg}")
                     fluent = FluentMsg(
                         pddl_instance=action.pddl_instance,
-                        name=val.fluent.fluent().name,
+                        name=eff.fluent.fluent().name,
                         args=args,
                     )
                     fluent_effects.append(
                         FluentEffect(
                             fluent=fluent,
                             time_point="START",
-                            value=val.value.bool_constant_value(),
+                            value=eff.value.bool_constant_value(),
                         )
                     )
-            else:
-                function_effects = []
-                fluent_effects = []
+            else:    
                 for cond, value in grounded_action.effects.items():
                     time_point = ""
                     if cond == self.start_timing:
