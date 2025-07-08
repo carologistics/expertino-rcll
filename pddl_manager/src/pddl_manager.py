@@ -824,12 +824,6 @@ class PddlManagerLifecycleNode(LifecycleNode):
         response.actions = result
       else:
         self.get_logger().info(f"could not plan on problem {request.pddl_instance} with goal {request.goal_instance}")
-        problem_managed_goal = self.managed_problems[request.pddl_instance].goals[request.goal_instance]
-        filtered_problem = problem_managed_goal.problem.filter_problem(
-                            problem_managed_goal.action_filters, 
-                            problem_managed_goal.object_filters, 
-                            problem_managed_goal.fluent_filters)
-        PDDLWriter(filtered_problem).write_problem("plan_not_found_problem.pddl")
         response.success = False
       goal_handle.succeed()
       return response

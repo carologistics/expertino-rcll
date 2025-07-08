@@ -429,7 +429,7 @@
 (deftemplate agenda
   (slot plan (type SYMBOL))
   (slot class-selection (type INTEGER) (default 0))
-  (slot class-relaxation (type INTEGER) (default 0))
+  (slot class-relaxation (type INTEGER) (default 1))
   (slot state (type SYMBOL) (allowed-values ACTIVE INACTIVE) (default INACTIVE))
 )
 

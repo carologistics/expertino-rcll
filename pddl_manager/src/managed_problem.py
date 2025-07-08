@@ -150,6 +150,8 @@ class ManagedGoal():
         writer = PDDLWriter(goal_problem)
         dom = writer.get_domain()
         prob = writer.get_problem()
+        writer.write_domain("planning_domain.pddl")
+        writer.write_problem("planning_problem.pddl")
 
         future = self.problem.executor.submit(run_planner_process, self.problem.env, dom, prob)
         result = future.result()
@@ -206,22 +208,23 @@ class ManagedProblem():
         # add the objects based on the object filters
         objects = self.get_object_list()
         for object in objects:
-            if object_filter is None or object.name in object_filter:
+            if object_filter is None or object in object_filter:
                 target_problem.add_object(object)
-                print(f"filtered object {object.name}")
 
         # add the liftd fluents based on the fluent filters
+        init_value = False
         for fluent in self.base_problem.fluents:
             if fluent_filter is None or fluent.name in fluent_filter:
-                target_problem.add_fluent(fluent)
+                if fluent.type.is_real_type() or fluent.type.is_int_type():
+                    init_value = 0
+                target_problem.add_fluent(fluent, default_initial_value=init_value)
 
         # set the initial values based on the fluent filters
         for f, val in self.base_problem.initial_values.items():
             args = [f"{arg}" for arg in f.args]
 
-            if fluent_filter is None or (f.fluent().name in fluent_filter):
-                if object_filter is None or (len([obj for obj in args if obj not in object_filter]) == 0):
-                    target_problem.set_initial_value(f, val)
+            if not object_filter or not any(arg not in (o.name for o in object_filter) for arg in args):
+                target_problem.set_initial_value(f, val)
 
         # apply the actions based on the action filters
         for action in self.base_problem.actions:
@@ -238,11 +241,11 @@ class ManagedProblem():
 
     def remove_object(self, name):
         object_list = self.get_object_list()
-        object_filter = []
         for obj in object_list:
-            if obj.name != name:
-                object_filter.append(obj.name)
-        self.base_problem = self.filter_problem(None, object_filter, None)
+            if obj.name == name:
+                object_list.remove(obj)
+                break
+        self.base_problem = self.filter_problem(None, object_list, None)
 
     def get_fluent_list(self):
         return self.base_problem.fluents

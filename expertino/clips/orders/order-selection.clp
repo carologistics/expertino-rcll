@@ -116,9 +116,9 @@
   )
 )
 
-;(defrule remove-delivered-product-objects
-;  (confval (path "/pddl/problem_instance") (value ?instance-str))
-;  (pddl-fluent (instance ?instance&:(eq ?instance (sym-cat ?instance-str))) (name step) (params ?wp done))
-;  =>
-;  (assert (pending-pddl-object (instance ?instance) (name ?wp) (type product) (delete TRUE)))
-;)
+(defrule remove-delivered-product-objects
+  (confval (path "/pddl/problem_instance") (value ?instance-str))
+  (pddl-fluent (instance ?instance&:(eq ?instance (sym-cat ?instance-str))) (name step) (params ?wp done))
+  =>
+  (assert (pending-pddl-object (instance ?instance) (name ?wp) (type product) (delete TRUE)))
+)
