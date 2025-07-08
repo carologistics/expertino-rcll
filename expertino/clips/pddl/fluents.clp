@@ -75,7 +75,7 @@
    else
     (printout error "Failed to add fluents \"" ?instance "\":" ?error crlf)
     (delayed-do-for-all-facts ((?ppf pending-pddl-fluent)) (and (eq ?ppf:state WAITING) (eq ?ppf:instance ?instance) (not ?ppf:delete))
-      (modify ?ppf (state ERROR) (error ?error))
+      (modify ?ppf (state ERROR))
     )
   )
   (ros-msgs-destroy-message ?ptr)
@@ -87,7 +87,6 @@
 " Process a response to the /rm_fluents service by removing the respective pddl-fluent facts and clean up the associated pending facts afterwards.
 "
   (pddl-manager (node ?node))
-  (not (pending-pddl-object (instance ?instance) (state PENDING|WAITING)))
   (ros-msgs-client (service ?s&:(eq ?s (str-cat ?node "/rm_fluents"))))
   ?req-f <- (service-request-meta (service ?s) (meta ?instance) (request-id ?id))
   ?msg-f <- (ros-msgs-response (service ?s) (msg-ptr ?ptr) (request-id ?id))

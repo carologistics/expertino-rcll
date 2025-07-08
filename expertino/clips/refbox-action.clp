@@ -6,10 +6,10 @@
   (protobuf-peer (name refbox-private) (peer-id ?peer-id))
   (machine (name ?mps) (state IDLE))
   (test (or 
-    (and (eq ?action-name dispense-pay)
-         (eq ?mps (pddl-place-to-refbox-mps (nth$ 3 ?action-params) ?team-color))
+    (and (eq ?action-name bs-dispense)
+         (eq ?mps (pddl-place-to-refbox-mps (nth$ 5 ?action-params) ?team-color))
     )
-    (eq ?mps (pddl-place-to-refbox-mps (nth$ 2 ?action-params) ?team-color))
+    (eq ?mps (pddl-place-to-refbox-mps (nth$ 3 ?action-params) ?team-color))
   ) )
   => 
   (bind ?machine-instruction (pb-create "llsf_msgs.PrepareMachine"))
@@ -18,15 +18,15 @@
     (case bs-dispense
       then
         (bind ?bs-inst (pb-create "llsf_msgs.PrepareInstructionBS"))
-        (pb-set-field ?bs-inst "side" (pddl-place-to-mps-side (nth$ 3 ?action-params)))
-        (pb-set-field ?bs-inst "color" (pddl-task-to-base-color (nth$ 4 ?action-params)))
+        (pb-set-field ?bs-inst "side" (pddl-place-to-mps-side (nth$ 5 ?action-params)))
+        (pb-set-field ?bs-inst "color" (pddl-task-to-base-color (nth$ 2 ?action-params)))
         (pb-set-field ?machine-instruction "instruction_bs" ?bs-inst)
     )
-    (case dispense-pay
+    (case bs-dispense-pay
       then
         (bind ?color (nth$ (random 1 3) (create$ BASE_RED BASE_BLACK BASE_SILVER)))
         (bind ?bs-inst (pb-create "llsf_msgs.PrepareInstructionBS"))
-        (pb-set-field ?bs-inst "side" (pddl-place-to-mps-side (nth$ 4 ?action-params)))
+        (pb-set-field ?bs-inst "side" (pddl-place-to-mps-side (nth$ 3 ?action-params)))
         (pb-set-field ?bs-inst "color" ?color)
         (pb-set-field ?machine-instruction "instruction_bs" ?bs-inst)
     )
@@ -56,7 +56,7 @@
           (bind ?order-id ?w-f:order)
         )
         (bind ?ds-inst (pb-create "llsf_msgs.PrepareInstructionDS"))
-        (pb-set-field ?ds-inst "order_id" ?order-id)
+        (pb-set-field ?ds-inst "order_id" (order-to-int ?order-id))
         (pb-set-field ?machine-instruction "instruction_ds" ?ds-inst)
     )
   )
@@ -73,16 +73,16 @@
   ?pa <- (pddl-action (id ?action-id) (name ?action-name) (params $?action-params))
   (game-state (team-color ?team-color) (phase PRODUCTION))
   =>
-  (if (eq ?action-name dispense-pay)
+  (if (eq ?action-name bs-dispense)
    then
-    (bind ?o-mps (pddl-place-to-refbox-mps (nth$ 3 ?action-params) ?team-color))
+    (bind ?o-mps (pddl-place-to-refbox-mps (nth$ 5 ?action-params) ?team-color))
    else
-    (bind ?o-mps (pddl-place-to-refbox-mps (nth$ 2 ?action-params) ?team-color))
+    (bind ?o-mps (pddl-place-to-refbox-mps (nth$ 3 ?action-params) ?team-color))
   )
   (if (eq ?o-mps ?mps)
    then
     (modify ?ex (state SUCCEEDED))
-    (assert (pddl-action-apply-effect (action ?action-id) (effect-type END)))
+    (assert (pddl-action-get-effect (apply TRUE) (action ?action-id) (effect-type END)))
   ) 
 )
 
@@ -96,6 +96,20 @@
   )
   =>
   (modify ?ex (state SUCCEEDED))
-  (assert (pddl-action-apply-effect (action ?action-id) (effect-type END)))
+  (assert (pddl-action-get-effect (apply TRUE) (action ?action-id) (effect-type END)))
 )
   
+(defrule executor-machine-broken
+  (machine (name ?mps) (state BROKEN))
+  (game-state (team-color ?team-color) (phase PRODUCTION))
+  ?ex <- (executor (pddl-action-id ?action-id) (worker REFBOX) (state ACCEPTED))
+  ?pa <- (pddl-action (id ?action-id) (name finalize) (params $?action-params))
+  (test 
+    (or 
+      (eq (pddl-place-to-refbox-mps (nth$ 2 ?action-params) ?team-color) ?mps)
+      (eq (pddl-place-to-refbox-mps (nth$ 3 ?action-params) ?team-color) ?mps)
+      (eq (pddl-place-to-refbox-mps (nth$ 5 ?action-params) ?team-color) ?mps)
+    )
+  )
+  =>
+  (modify ?ex (state ABORTED)))

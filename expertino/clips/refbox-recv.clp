@@ -31,7 +31,8 @@
   (bind ?time (pb-field-value ?p "game_time"))
   (bind ?sec (pb-field-value ?time "sec"))
   (bind ?nsec (pb-field-value ?time "nsec"))
-  (assert (game-time (+ ?sec (/  ?nsec 1000000))))
+  ;(assert (game-time (+ ?sec (/  ?nsec 1000000))))
+  (assert (game-time ?sec))
   (if (and (pb-has-field ?p "team_cyan")
            (eq (pb-field-value ?p "team_cyan") ?team))
     then 
@@ -153,8 +154,7 @@
   (game-state (team ?team) (team-color ?team-color))
   =>
   (foreach ?o (pb-field-list ?ptr "orders")
-    (bind ?id (pb-field-value ?o "id"))
-    (bind ?name (sym-cat O ?id))
+    (bind ?id (sym-cat O (pb-field-value ?o "id")))
     ;check if the order is new
     (bind ?complexity (pb-field-value ?o "complexity"))
     (bind ?competitive (pb-field-value ?o "competitive"))
@@ -177,7 +177,6 @@
     )
     (assert (order 
       (id ?id)
-      (name ?name)
       (complexity ?complexity)
       (competitive ?competitive)
       (quantity-requested ?quantity-requested)

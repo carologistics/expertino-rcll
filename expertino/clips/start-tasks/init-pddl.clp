@@ -25,7 +25,7 @@
 (deffacts pddl-task
   (start-task (name pddl)
     (wait-for)
-    (parts init-cfg init-clients init-problem init-planning-actions init-fluents init-planner)
+    (parts init-cfg init-clients init-problem init-planning-actions init-replanning-actions init-fluents init-planner)
   )
 )
 
@@ -51,7 +51,7 @@
     add_fluents AddFluents
     rm_fluents RemoveFluents
     add_objects AddObjects
-    rm_objects RemoveFluents
+    rm_objects RemoveObjects
     set_functions SetFunctions
     add_pddl_instance AddPddlInstance
     check_action_precondition CheckActionPrecondition
@@ -126,7 +126,40 @@
   ?pan-f <- (pddl-action-names (instance ?instance) (state DONE) (action-names $?an))
   ?st <- (start-task (name pddl) (state ACTIVE) (parts init-planning-actions $?rest-parts))
   =>
-  (assert (planning-filter (filter ?an) (instance (sym-cat ?problem-instance-str)) (goal base) (type ACTIONS)))
+  (assert (planning-filter (id (sym-cat ?instance-str)) (filter ?an) (instance (sym-cat ?problem-instance-str)) (goal ?*GOAL-INSTANCE-BASE*) (type ACTIONS)))
+  (retract ?pan-f)
+  (modify ?st (parts ?rest-parts))
+)
+
+(defrule pddl-request-load-re-planning-action-domain
+  (pddl-manager (node ?node))
+  (confval (path "/pddl/pddl_dir") (value ?dir))
+  (confval (path "/pddl/replanning_domain_file") (value ?domain))
+  (confval (path "/pddl/replanning_instance") (value ?instance))
+  (confval (path "/pddl/problem_instance") (value ?problem-instance-str))
+  (start-task (name pddl) (state ACTIVE) (parts init-replanning-actions $?rest-parts))
+  =>
+  (assert (pddl-instance (name (sym-cat ?instance)) (domain (str-cat ?domain)) (problem "") (directory ?dir) (state PENDING)))
+  (assert (pddl-create-goal-instance (instance (sym-cat ?problem-instance-str)) (goal ?*GOAL-INSTANCE-REPLANNING*)))
+)
+
+(defrule pddl-init-problem-request-re-planning-action-domain
+  (confval (path "/pddl/replanning_instance") (value ?instance-str))
+  (pddl-instance (state LOADED) (name ?instance&:(eq ?instance (sym-cat ?instance-str))))
+  (not (pddl-action-names (instance ?instance)))
+  (start-task (name pddl) (state ACTIVE) (parts init-replanning-actions $?rest-parts))
+  =>
+  (assert (pddl-action-names (instance ?instance)))
+)
+
+(defrule pddl-init-problem-finish-re-planning-action-domain
+  (confval (path "/pddl/replanning_instance") (value ?instance-str))
+  (confval (path "/pddl/problem_instance") (value ?problem-instance-str))
+  (pddl-instance (state LOADED) (name ?instance&:(eq ?instance (sym-cat ?instance-str))))
+  ?pan-f <- (pddl-action-names (instance ?instance) (state DONE) (action-names $?an))
+  ?st <- (start-task (name pddl) (state ACTIVE) (parts init-replanning-actions $?rest-parts))
+  =>
+  (assert (planning-filter (id (sym-cat ?instance-str)) (filter ?an) (instance (sym-cat ?problem-instance-str)) (goal ?*GOAL-INSTANCE-REPLANNING*) (type ACTIONS)))
   (retract ?pan-f)
   (modify ?st (parts ?rest-parts))
 )
@@ -161,125 +194,4 @@
   ?st <- (start-task (name pddl) (state ACTIVE) (parts init-planner $?rest-parts))
   =>
   (modify ?st (parts ?rest-parts))
-)
-
-
-(defrule pddl-set-action-filter
-  ?pf <- (planning-filter (type ACTIONS) (instance ?instance) (goal ?goal) (filter $?filter))
-  (pddl-manager (node ?node))
-  ?pi-f <- (pddl-instance (name ?instance) (state LOADED) (busy-with FALSE))
-  (ros-msgs-client (service ?s&:(eq ?s (str-cat ?node "/set_action_filter"))) (type ?type))
-  (not (service-request-meta (service ?s)))
-  (time ?any-time) ; used to continuously attempt to request the service until success
-  =>
-  (bind ?new-req (ros-msgs-create-request ?type))
-  (ros-msgs-set-field ?new-req "pddl_instance" ?instance)
-  (ros-msgs-set-field ?new-req "goal_instance" ?goal)
-  (ros-msgs-set-field ?new-req "actions" ?filter)
-  (bind ?id (ros-msgs-async-send-request ?new-req ?s))
-  (if ?id then
-    (assert (service-request-meta (service ?s) (request-id ?id) (meta ?instance)))
-    (modify ?pi-f (busy-with SET-ACTION-FILTER))
-   else
-    (printout error "Sending of request failed, is the service " ?s " running?" crlf)
-  )
-  (ros-msgs-destroy-message ?new-req)
-  (retract ?pf)
-)
-
-(defrule pddl-set-action-filter-response-received
-" Get response, read it and delete."
-  (pddl-manager (node ?node))
-  ?pi-f <- (pddl-instance (name ?instance) (busy-with SET-ACTION-FILTER))
-  (ros-msgs-client (service ?s&:(eq ?s (str-cat ?node "/set_action_filter"))) (type ?type))
-  ?msg-f <- (ros-msgs-response (service ?s) (msg-ptr ?ptr) (request-id ?id))
-  ?req-meta <- (service-request-meta (service ?s) (request-id ?id) (meta ?instance))
-=>
-  (modify ?pi-f (busy-with FALSE))
-  (bind ?success (ros-msgs-get-field ?ptr "success"))
-  (bind ?error (ros-msgs-get-field ?ptr "error"))
-  (printout green ?success " " ?error crlf)
-  (ros-msgs-destroy-message ?ptr)
-  (retract ?msg-f)
-  (retract ?req-meta)
-)
-
-(defrule pddl-set-fluent-filter
-  ?pf <- (planning-filter (type FLUENTS) (instance ?instance) (goal ?goal) (filter $?filter))
-  (pddl-manager (node ?node))
-  ?pi-f <- (pddl-instance (name ?instance) (state LOADED) (busy-with FALSE))
-  (ros-msgs-client (service ?s&:(eq ?s (str-cat ?node "/set_fluent_filter"))) (type ?type))
-  (not (service-request-meta (service ?s)))
-  (time ?any-time) ; used to continuously attempt to request the service until success
-  =>
-  (bind ?new-req (ros-msgs-create-request ?type))
-  (ros-msgs-set-field ?new-req "pddl_instance" ?instance)
-  (ros-msgs-set-field ?new-req "goal_instance" ?goal)
-  (ros-msgs-set-field ?new-req "fluents" ?filter)
-  (bind ?id (ros-msgs-async-send-request ?new-req ?s))
-  (if ?id then
-    (assert (service-request-meta (service ?s) (request-id ?id) (meta ?instance)))
-    (modify ?pi-f (busy-with SET-FLUENT-FILTER))
-   else
-    (printout error "Sending of request failed, is the service " ?s " running?" crlf)
-  )
-  (ros-msgs-destroy-message ?new-req)
-  (retract ?pf)
-)
-
-(defrule pddl-set-fluent-filter-response-received
-" Get response, read it and delete."
-  (pddl-manager (node ?node))
-  ?pi-f <- (pddl-instance (name ?instance) (busy-with SET-FLUENT-FILTER))
-  (ros-msgs-client (service ?s&:(eq ?s (str-cat ?node "/set_fluent_filter"))) (type ?type))
-  ?msg-f <- (ros-msgs-response (service ?s) (msg-ptr ?ptr) (request-id ?id))
-  ?req-meta <- (service-request-meta (service ?s) (request-id ?id) (meta ?instance))
-=>
-  (modify ?pi-f (busy-with FALSE))
-  (bind ?success (ros-msgs-get-field ?ptr "success"))
-  (bind ?error (ros-msgs-get-field ?ptr "error"))
-  (printout green ?success " " ?error crlf)
-  (ros-msgs-destroy-message ?ptr)
-  (retract ?msg-f)
-  (retract ?req-meta)
-)
-
-(defrule pddl-set-object-filter
-  ?pf <- (planning-filter (type OBJECTS) (instance ?instance) (goal ?goal) (filter $?filter))
-  (pddl-manager (node ?node))
-  ?pi-f <- (pddl-instance (name ?instance) (state LOADED) (busy-with FALSE))
-  (ros-msgs-client (service ?s&:(eq ?s (str-cat ?node "/set_object_filter"))) (type ?type))
-  (not (service-request-meta (service ?s)))
-  (time ?any-time) ; used to continuously attempt to request the service until success
-  =>
-  (bind ?new-req (ros-msgs-create-request ?type))
-  (ros-msgs-set-field ?new-req "pddl_instance" ?instance)
-  (ros-msgs-set-field ?new-req "goal_instance" ?goal)
-  (ros-msgs-set-field ?new-req "objects" ?filter)
-  (bind ?id (ros-msgs-async-send-request ?new-req ?s))
-  (if ?id then
-    (assert (service-request-meta (service ?s) (request-id ?id) (meta ?instance)))
-    (modify ?pi-f (busy-with SET-ACTION-FILTER))
-   else
-    (printout error "Sending of request failed, is the service " ?s " running?" crlf)
-  )
-  (ros-msgs-destroy-message ?new-req)
-  (retract ?pf)
-)
-
-(defrule pddl-set-object-filter-response-received
-" Get response, read it and delete."
-  (pddl-manager (node ?node))
-  ?pi-f <- (pddl-instance (name ?instance) (busy-with SET-OBJECT-FILTER))
-  (ros-msgs-client (service ?s&:(eq ?s (str-cat ?node "/set_object_filter"))) (type ?type))
-  ?msg-f <- (ros-msgs-response (service ?s) (msg-ptr ?ptr) (request-id ?id))
-  ?req-meta <- (service-request-meta (service ?s) (request-id ?id) (meta ?instance))
-=>
-  (modify ?pi-f (busy-with FALSE))
-  (bind ?success (ros-msgs-get-field ?ptr "success"))
-  (bind ?error (ros-msgs-get-field ?ptr "error"))
-  (printout green ?success " " ?error crlf)
-  (ros-msgs-destroy-message ?ptr)
-  (retract ?msg-f)
-  (retract ?req-meta)
 )

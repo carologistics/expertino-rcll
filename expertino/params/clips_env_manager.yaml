@@ -54,6 +54,10 @@ clips_manager:
         "clips/expertino/pddl/numeric-fluents.clp",
         "clips/expertino/pddl/plan.clp",
         "clips/expertino/pddl/action-effect-apply.clp",
+        "clips/expertino/pddl/create-goal-instance.clp",
+        "clips/expertino/pddl/set-action-filter.clp",
+        "clips/expertino/pddl/set-object-filter.clp",
+        "clips/expertino/pddl/set-fluent-filter.clp",
         "clips/expertino/refbox-comm-init.clp",
         "clips/expertino/refbox-recv.clp",
         "clips/expertino/refbox-action.clp",
@@ -65,6 +69,7 @@ clips_manager:
         "clips/expertino/executor.clp",
         "clips/expertino/action/action-selection.clp",
         "clips/expertino/workers/workers.clp",
+        "clips/expertino/production-strategy.clp",
         # Finalize
         "clips/expertino/shutdown/finalize-ros.clp",
         ]

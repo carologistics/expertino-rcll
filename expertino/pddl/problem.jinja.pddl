@@ -16,9 +16,9 @@
   (:domain workpiece-flow)
 
    (:objects
-     pay1 pay2 pay3 pay4 pay5 pay6 pay7 pay8 pay9 pay10 pay11 pay12 - payment
-     grey1 grey2 grey3 - carrier
-     black1 black2 black3 - carrier
+     pay-token - payment
+     grey-carrier - carrier
+     black-carrier - carrier
 {% block objects %}
 {% endblock %}
    )
@@ -65,63 +65,23 @@
      (= (price ring-yellow3) 0)
      (= (price ring-green3) 0)
      (= (price ring-orange3) 0)
-     (spawnable pay1)
+     (token-step grey-carrier cs1-input cap-grey)
+     (token-step grey-carrier cs1-output dispose)
+     (token-step black-carrier cs2-input cap-black)
+     (token-step black-carrier cs2-output dispose)
+     (token-step pay-token bs-output dispose)
+     (token-step pay-token bs-input dispose)
 
-     (next-payment pay1 pay2)
-     (next-payment pay2 pay3)
-     (next-payment pay3 pay4)
-     (next-payment pay4 pay5)
-     (next-payment pay5 pay6)
-     (next-payment pay6 pay7)
-     (next-payment pay7 pay8)
-     (next-payment pay8 pay9)
-     (next-payment pay9 pay10)
-     (next-payment pay10 pay11)
-     (next-payment pay11 pay12)
-
-     (step pay1 dispose)
-     (step pay2 dispose)
-     (step pay3 dispose)
-     (step pay4 dispose)
-     (step pay5 dispose)
-     (step pay6 dispose)
-     (step pay7 dispose)
-     (step pay8 dispose)
-     (step pay9 dispose)
-     (step pay10 dispose)
-     (step pay11 dispose)
-     (step pay12 dispose)
-
-     (step grey1 cap-grey)
-     (next-step grey1 cap-grey dispose)
-     (step grey2 cap-grey)
-     (next-step grey2 cap-grey dispose)
-     (step grey3 cap-grey)
-     (next-step grey3 cap-grey dispose)
-     (step black1 cap-black)
-     (next-step black1 cap-black dispose)
-     (step black2 cap-black)
-     (next-step black2 cap-black dispose)
-     (step black3 cap-black)
-     (next-step black3 cap-black dispose)
-     (usable grey1)
-     (usable grey2)
-     (usable grey3)
-     (usable black1)
-     (usable black2)
-     (usable black3)
-
-     (= (order) 0)
      (= (pay-count rs1) 0)
      (= (pay-count rs2) 0)
 
-    (on-shelf grey1 cs1)
-    (next-shelf grey1 grey2)
-    (next-shelf grey2 grey3)
+    (on-shelf grey-carrier cs1)
+    ;(next-shelf grey1 grey2)
+    ;(next-shelf grey2 grey3)
 
-    (on-shelf black1 cs2)
-    (next-shelf black1 black2)
-    (next-shelf black2 black3)
+    (on-shelf black-carrier cs2)
+    ;(next-shelf black1 black2)
+    ;(next-shelf black2 black3)
 
     (step-place dispose rs1-slide)
     (step-place dispose rs2-slide)

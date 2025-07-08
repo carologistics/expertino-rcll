@@ -31,12 +31,13 @@
 (defrule add-order-to-problem
   (startup-completed)
   (added-ring-specs)
-  ?o-f <- (order (name ?name) (id ?order-id) (workpiece nil) (base-color ?base-col) (ring-colors $?ring-cols) (cap-color ?cap-col) (state OPEN))
-  (not (added-one-order)) ;remove this eventually
+  ?o-f <- (order (id ?order-id) (workpiece nil) (base-color ?base-col) (ring-colors $?ring-cols) (cap-color ?cap-col))
+  (production-strategy-order-filter (name selected-orders) (orders $?orders&:(member$ ?order-id ?orders))) ;revise this later
+  (not (workpiece-for-order (order ?order-id)))
   (confval (path "/pddl/problem_instance") (value ?instance-str))
   =>
   (bind ?instance (sym-cat ?instance-str))
-  (bind ?wp (sym-cat (lowcase ?name) "-" (gensym*)))
+  (bind ?wp (sym-cat (lowcase ?order-id) "-" (gensym*)))
   (assert (workpiece-for-order (wp ?wp) (order ?order-id)))
   (assert (pending-pddl-object (instance ?instance) (name ?wp) (type product)))
   (assert (pending-pddl-fluent (instance ?instance) (name spawnable) (params ?wp)))
@@ -55,69 +56,69 @@
   (assert (pending-pddl-fluent (instance ?instance) (name next-step) (params ?wp ?curr-step ?next-step)))
   (assert (pending-pddl-fluent (instance ?instance) (name next-step) (params ?wp ?next-step deliver)))
   (assert (pending-pddl-fluent (instance ?instance) (name next-step) (params ?wp deliver done)))
-  (modify ?o-f (state ACTIVE))
+  (assert (pddl-clear-goals (instance ?instance) (goal ?*GOAL-INSTANCE-BASE*)))
   ; set the wp as a goal
-  (assert (pddl-goal-fluent (instance ?instance) (name step) (params ?wp done)))
-  ; also, clear all old goals
-  (assert (pddl-clear-goals (instance ?instance) (goal base)))
-  (assert (added-one-order))
+  (assert (pddl-goal-fluent (instance ?instance) (goal ?*GOAL-INSTANCE-BASE*) (name step) (params ?wp done)))
+)
+
+(defrule remove-achieved-goal
+  ?goal-f <- (pddl-goal-fluent (instance ?instance) (name ?f-name) (params $?f-params))
+  (pddl-fluent (instance ?instance) (name ?f-name) (params $?f-params))
+  =>
+  (retract ?goal-f)
 )
 
 (defrule set-goal-for-orders
   (startup-completed)
-  (pddl-goal-fluent (instance ?instance) (name step) (params ?wp1 $?))
-  ?clear-f <- (pddl-clear-goals (instance ?instance) (state DONE))
+  (pddl-goal-fluent (instance ?instance) (goal ?goal&:(eq ?goal ?*GOAL-INSTANCE-BASE*)) (name step) (params ?wp1 $?))
+  ?clear-f <- (pddl-clear-goals (instance ?instance) (state DONE) (goal ?goal&:(eq ?goal ?*GOAL-INSTANCE-BASE*)))
   =>
   ; notify to add the goal to the domain
-  (assert (pddl-set-goals (instance ?instance)))
+  (assert (pddl-set-goals (instance ?instance) (goal ?*GOAL-INSTANCE-BASE*)))
+  ;freeze the current agenda execution
+  (if (any-factp ((?agenda agenda) (?plan pddl-plan)) (and (eq ?agenda:plan ?plan:id) (eq ?plan:instance ?instance)))
+   then
+    (assert (freeze-agenda (instance ?instance)))
+  )
   (retract ?clear-f)
 )
 
-(defrule goal-updated-start-plan
+(defrule goal-updated-start-planning-for-orders
   (startup-completed)
-  ?set-f <- (pddl-set-goals (instance ?instance) (state DONE))
+  ?set-f <- (pddl-set-goals (instance ?instance) (state DONE) (goal ?goal&:(eq ?goal ?*GOAL-INSTANCE-BASE*)))
   (pddl-manager (node ?node))
   (pddl-instance (name ?instance) (busy-with FALSE) (state LOADED))
   (expertino-msgs-plan-temporal-client (server ?server&:(eq ?server (str-cat ?node "/temp_plan"))))
-  (not (planned-for-main))
+  ;(not (planned-for-main))
+  (not (and 
+        (agenda (plan ?plan-id) (state ACTIVE))
+        (pddl-plan (id ?plan-id) (instance ?instance))
+       )
+  )
+  (not (freeze-agenda (instance ?instance)))
   =>
   (printout green "Start planning" crlf)
   (bind ?goal (expertino-msgs-plan-temporal-goal-create))
   (assert (pddl-planner-call (context test-plan) (goal ?goal)))
   (expertino-msgs-plan-temporal-goal-set-field ?goal "pddl_instance" ?instance)
-  (expertino-msgs-plan-temporal-goal-set-field ?goal "goal_instance" "base")
+  (expertino-msgs-plan-temporal-goal-set-field ?goal "goal_instance" (str-cat ?*GOAL-INSTANCE-BASE*))
   (expertino-msgs-plan-temporal-send-goal ?goal ?server)
-  (assert (planned-for-main))
+  ;(assert (planned-for-main))
+  (retract ?set-f)
+  ;clear all old goals in pddl_manager                                           
+  (do-for-all-facts ((?goal-fluent pddl-goal-fluent))                            
+    (and (eq ?goal-fluent:instance ?instance) (eq ?goal-fluent ?goal))          
+    (retract ?goal-fluent)                                                       
+  )                                                                              
+  (do-for-all-facts ((?goal-fluent pddl-goal-numeric-fluent))                    
+    (and (eq ?goal-fluent:instance ?instance) (eq ?goal-fluent ?goal))          
+    (retract ?goal-fluent)                                                       
+  )
 )
 
-;(defrule action-apply-effect-test-main-action
-;" Showcase how to apply an action effect 'directly' (as in, the actual action
-;  of the plan is used).
-;  It applies all at-start and at-end effects of it are applied.
-;  Hence, WP o2-gen1 ends up being at a BS side in the worldmodel once this is
-;  processed.
-;"
-;  (pddl-action (instance rcll) (id ?action-id) (name bs-dispense) (params ?wp bs ?bs-side base-black ring-blue1))
-;  =>
-;  (assert (pddl-action-apply-effect (action ?action-id) (effect-type ALL)))
-;)
-;
-;(defrule action-apply-effect-test-sub-action
-;" Continuation of the example for applying effects, showcasing how to handle
-;  sub-actions and partial effect application.
-;  Once the action-apply-effect-test-main-action activation caused the
-;  bs-dispense action effects to be applied, this rule takes the subsequent
-;  transport action and applies some partial effects.
-;  In particular, it applies the at-start effects of the 'transport-step-1-drive-to'
-;  action by first creating a suitable grounded pddl-action for it and then
-;  requesting the application of the effects.
-;"
-;  (pddl-action (instance rcll) (id ?dispense-id) (name bs-dispense))
-;  ?apply-effect <- (pddl-action-apply-effect (action ?dispense-id) (state DONE))
-;  (pddl-action (instance rcll) (id ?transport) (name transport) (params ?wp ?bs-side rs2-input ring-blue1))
-;  =>
-;  (retract ?apply-effect)
-;  (bind ?id (gensym*))
-;  (assert (pddl-action (instance rcll) (id ?id) (name transport-step-1-drive-to) (params ?wp ?bs-side rs2-input ring-blue1)))
-;  (assert (pddl-action-apply-effect (action ?id) (effect-type START)))
-;)
+(defrule remove-delivered-product-objects
+  (confval (path "/pddl/problem_instance") (value ?instance-str))
+  (pddl-fluent (instance ?instance&:(eq ?instance (sym-cat ?instance-str))) (name step) (params ?wp done))
+  =>
+  (assert (pending-pddl-object (instance ?instance) (name ?wp) (type product) (delete TRUE)))
+)

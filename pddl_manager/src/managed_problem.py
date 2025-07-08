@@ -88,7 +88,7 @@ class ManagedGoal():
         self.fluent_filters = []
         self.action_filters = []
 
-    def set_goal_fluent(self, name, args):
+    def set_goal_fluent(self, name, args, value):
         grounded_args = []
 
         for arg in args:
@@ -97,8 +97,11 @@ class ManagedGoal():
         grounded_fluent = self.problem.fnode_manager.FluentExp(
             self.problem.base_problem.fluent(name), grounded_args
         )
-
-        self.goal_fluents.append(grounded_fluent)
+        if value:
+            grounded_goal_expr = self.problem.fnode_manager.Equals(grounded_fluent, value)
+            self.goal_fluents.append(grounded_goal_expr)
+        else:
+            self.goal_fluents.append(grounded_fluent)
 
     def remove_goal_fluent(self, name, args):
         raise NotImplementedError("remove_goal_fluent is not implemented")
@@ -137,7 +140,8 @@ class ManagedGoal():
         fluent_filters = self.fluent_filters
         if len(self.fluent_filters) == 0:
             fluent_filters = None
-        goal_problem = self.problem.filter_problem(action_filters, object_filters, fluent_filters).clone()
+        goal_problem = self.problem.filter_problem(action_filters, object_filters, fluent_filters)
+        goal_problem.clear_goals()
 
         # add the goal fluents
         for fluent in self.goal_fluents:
@@ -146,6 +150,8 @@ class ManagedGoal():
         writer = PDDLWriter(goal_problem)
         dom = writer.get_domain()
         prob = writer.get_problem()
+        writer.write_domain("planning_domain.pddl")
+        writer.write_problem("planning_problem.pddl")
 
         future = self.problem.executor.submit(run_planner_process, self.problem.env, dom, prob)
         result = future.result()
@@ -186,6 +192,7 @@ class ManagedProblem():
     def __init__(self, problem, env, name="base"):
         self.goals = {}
         self.base_problem = problem.clone()
+        self.base_problem.clear_goals()
         self.name = name
 
         self.goals["base"] = ManagedGoal(self)
@@ -201,19 +208,22 @@ class ManagedProblem():
         # add the objects based on the object filters
         objects = self.get_object_list()
         for object in objects:
-            if object_filter is None or object.name in object_filter:
+            if object_filter is None or object in object_filter:
                 target_problem.add_object(object)
 
         # add the liftd fluents based on the fluent filters
+        init_value = False
         for fluent in self.base_problem.fluents:
             if fluent_filter is None or fluent.name in fluent_filter:
-                target_problem.add_fluent(fluent)
+                if fluent.type.is_real_type() or fluent.type.is_int_type():
+                    init_value = 0
+                target_problem.add_fluent(fluent, default_initial_value=init_value)
 
         # set the initial values based on the fluent filters
         for f, val in self.base_problem.initial_values.items():
             args = [f"{arg}" for arg in f.args]
 
-            if fluent_filter is None or (f.fluent().name in fluent_filter and len([obj for obj in args if obj not in object_filter]) == 0):
+            if not object_filter or not any(arg not in (o.name for o in object_filter) for arg in args):
                 target_problem.set_initial_value(f, val)
 
         # apply the actions based on the action filters
@@ -235,7 +245,7 @@ class ManagedProblem():
             if obj.name == name:
                 object_list.remove(obj)
                 break
-        self.base_problem = self.filter_problem(self.get_action_list(), object_list, self.get_fluent_list())
+        self.base_problem = self.filter_problem(None, object_list, None)
 
     def get_fluent_list(self):
         return self.base_problem.fluents
@@ -263,14 +273,14 @@ class ManagedProblem():
                 break
         self.base_problem = self.filter_problem(actions, self.get_object_list(), self.get_fluent_list())
 
-    def add_goal(self, goal="base"):
+    def add_goal(self, goal):
         self.goals[goal] = ManagedGoal(self, goal)
 
-    def get_goal(self, goal="base"):
+    def get_goal(self, goal):
         return self.goals[goal]
 
-    def add_goal_fluent(self, name, args, goal="base"):
-        self.goals[goal].set_goal_fluent(name, args)
+    def add_goal_fluent(self, name, args, value, goal):
+        self.goals[goal].set_goal_fluent(name, args, value)
 
-    def remove_goal_fluent(self, name, args, goal="base"):
+    def remove_goal_fluent(self, name, args, goal):
         self.goals[goal].remove_goal_fluent(name, args)

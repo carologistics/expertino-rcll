@@ -43,7 +43,7 @@
 )
 
 (defrule plan-get-result
-  ?pc-f <- (pddl-planner-call (client-goal-handle ?cgh-ptr) (goal ?goal-ptr) (uuid ?goal-id))
+  ?pc-f <- (pddl-planner-call (client-goal-handle ?cgh-ptr) (goal ?goal-ptr) (uuid ?goal-id) (context ?context))
   ?wr-f <- (expertino-msgs-plan-temporal-wrapped-result (server "/pddl_manager/temp_plan") (goal-id ?goal-id) (code SUCCEEDED) (result-ptr ?res-ptr))
   =>
   (bind ?plan-found (expertino-msgs-plan-temporal-result-get-field ?res-ptr "success"))
@@ -63,17 +63,12 @@
       (bind ?equiv_class (expertino-msgs-timed-plan-action-get-field ?action "equiv_class"))
       (bind ?ps-time (expertino-msgs-timed-plan-action-get-field ?action "start_time"))
       (bind ?p-duration (expertino-msgs-timed-plan-action-get-field ?action "duration"))
-      (assert (pddl-action (id (gensym*)) (plan ?plan-id) (instance ?instance) (name ?name) (params ?arg-syms)
+      (assert (pddl-action (id (gensym*)) (plan ?plan-id) (instance ?instance) (name ?name) (params ?arg-syms) 
                    (plan-order-class ?equiv_class) (planned-start-time ?ps-time) (planned-duration ?p-duration)))
-      (assert (pddl-plan (id ?plan-id) (instance ?instance)))
+      (assert (pddl-plan (id ?plan-id) (instance ?instance) (context ?context)))
     )
    else
     (printout red "plan not found!" crlf)
-  )
-  ;de-freeze the agenda if frozen
-  (do-for-all-facts ((?agenda agenda))
-    (eq ?agenda:state INACTIVE)
-    (modify ?agenda (state ACTIVE))
   )
   (expertino-msgs-plan-temporal-result-destroy ?res-ptr)
   (expertino-msgs-plan-temporal-goal-destroy ?goal-ptr)
@@ -103,4 +98,11 @@
   (assert (pddl-instance-update (instance (sym-cat ?recv)) (last-updated (now))))
   (ros-msgs-destroy-message ?inc-msg)
   (retract ?msg-f)
+)
+
+(defrule plan-select
+  "Select a plan for execution based on its feasibility"
+  ?p <- (pddl-plan (state PENDING))
+  =>
+  (modify ?p (state SELECTED))
 )

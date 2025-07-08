@@ -1,6 +1,6 @@
 (defrule pddl-request-set-goals
   (declare (salience ?*PRIORITY-PDDL-SET-GOALS*))
-  (pddl-set-goals (instance ?instance) (state PENDING))
+  (pddl-set-goals (instance ?instance) (goal ?goal) (state PENDING))
   (pddl-manager (node ?node))
   ?pi-f <- (pddl-instance (name ?instance) (state LOADED) (busy-with FALSE))
   (ros-msgs-client (service ?s&:(eq ?s (str-cat ?node "/set_goals"))) (type ?type))
@@ -10,14 +10,14 @@
   (bind ?new-req (ros-msgs-create-request ?type))
   (bind ?fluent-goal-msgs (create$))
   (bind ?numeric-fluent-goal-msgs (create$))
-  (do-for-all-facts ((?ppf pddl-goal-fluent)) (eq ?ppf:instance ?instance)
+  (do-for-all-facts ((?ppf pddl-goal-fluent)) (and (eq ?ppf:goal ?goal) (eq ?ppf:instance ?instance))
     (bind ?fluent-msg (ros-msgs-create-message "expertino_msgs/msg/Fluent"))
     (ros-msgs-set-field ?fluent-msg "pddl_instance" ?ppf:instance)
     (ros-msgs-set-field ?fluent-msg "name" ?ppf:name)
     (ros-msgs-set-field ?fluent-msg "args" ?ppf:params)
     (bind ?fluent-goal-msgs (create$ ?fluent-goal-msgs ?fluent-msg))
   )
-  (do-for-all-facts ((?ppf pddl-goal-numeric-fluent)) (eq ?ppf:instance ?instance)
+  (do-for-all-facts ((?ppf pddl-goal-numeric-fluent)) (and (eq ?ppf:goal ?goal) (eq ?ppf:instance ?instance))
     (bind ?function-msg (ros-msgs-create-message "expertino_msgs/msg/Function"))
     (ros-msgs-set-field ?function-msg "pddl_instance" ?ppf:instance)
     (ros-msgs-set-field ?function-msg "name" ?ppf:name)
@@ -28,6 +28,7 @@
 
   (ros-msgs-set-field ?new-req "fluents" ?fluent-goal-msgs)
   (ros-msgs-set-field ?new-req "functions" ?numeric-fluent-goal-msgs)
+  (ros-msgs-set-field ?new-req "goal_instance" ?goal)
   (bind ?id (ros-msgs-async-send-request ?new-req ?s))
   (if ?id then
     (modify ?pi-f (busy-with SET-GOALS))
