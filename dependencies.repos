@@ -1,0 +1,5 @@
+repositories:
+  clips_executive:
+    type: git
+    url: https://github.com/carologistics/clips_executive
+    version: master
