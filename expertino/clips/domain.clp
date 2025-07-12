@@ -57,7 +57,3 @@
   (slot when (type SYMBOL) (allowed-values START END) (default END))
 )
 
-(deftemplate action-feedback
-  (slot id (type SYMBOL))
-  (slot sub-action (type SYMBOL))
-)

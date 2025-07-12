@@ -51,8 +51,6 @@
 
 
 (deffunction order-to-int (?order)
-  (printout yellow (sub-string 2 (str-length ?order) ?order) crlf)
-  (printout yellow (string-to-field (sub-string 2 (str-length ?order) ?order)) crlf)
   (return (integer (string-to-field (sub-string 2 (str-length ?order) ?order))))
 )
 
@@ -134,4 +132,104 @@
     (pb-destroy ?task-info)
     (pb-destroy ?task-msg)
   )
+)
+
+(deffunction pddl-place-to-refbox-mps (?place ?team-color)
+  "formats place type from pddl into a refbox machine
+  @param ?place  e.g. rs1-slide, bs-input, rs1, bs, cs
+  @param ?team-color CYAN or MAGENTA
+  @return e.g. M-RS1 or C-BS
+  "
+  (if (eq ?team-color MAGENTA)
+   then
+    (bind ?col M)
+   else
+    (bind ?col C)
+  )
+  (bind ?loc (str-index "-" ?place))
+  (if ?loc 
+   then
+    (return
+      (sym-cat ?col - (upcase (sub-string 1 (- ?loc 1) ?place)))
+    )
+   else
+    (return
+     (sym-cat ?col - (upcase ?place)) 
+    )
+  )
+)
+
+(deffunction refbox-mps-to-type (?mps)
+  "formats refbox machine to its type
+  @param ?mps e.g. M-RS1 or C-BS
+  @return e.g. RS or BS"
+  (bind ?loc (+ 1 (str-index "-" ?mps)))
+  (return (string-to-field (upcase (sub-string ?loc (+ 1 ?loc) ?mps))))
+)
+
+(deffunction pddl-place-to-mps-side (?place)
+  "extracts machine side from place type in pddl
+  @param ?place e.g. rs1-slide, bs-input
+  @return e.g. SLIDE, INPUT, OUTPUT
+  "
+  (if (str-index "input" ?place)
+   then
+    (return INPUT)
+   else (if (str-index "output" ?place)
+         then
+          (return OUTPUT)
+         else (if (str-index "slide" ?place)
+               then
+                (return SLIDE)))
+  )
+)
+
+(deffunction get-param-by-name (?param-name ?param-names ?param-values $?default)
+	(foreach ?p ?param-names
+		(if (eq ?param-name ?p) then (return (nth$ ?p-index ?param-values)))
+	)
+	(if (> (length$ ?default) 0) then (return (nth$ 1 ?default)))
+	(return FALSE)
+)
+
+(deffunction pddl-task-to-base-color (?task)
+  (return (sym-cat BASE _ (upcase (sub-string (+ (str-index "-" ?task) 1) (str-length ?task) ?task))))
+)
+
+(deffunction pddl-task-to-ring-color (?task)
+  (if (str-index "blue" ?task)
+   then
+    (return RING_BLUE)
+   else (if (str-index "green" ?task)
+         then
+          (return RING_GREEN)
+         else (if (str-index "orange" ?task)
+               then
+                (return RING_ORANGE)
+               else (if (str-index "yellow" ?task)
+                     then
+                      (return RING_YELLOW))))
+  )
+)
+
+(deffunction ring-color-to-pddl (?ring ?num)
+  (if (str-index "BLUE" ?ring)
+   then
+    (return (sym-cat ring-blue ?num))
+   else (if (str-index "GREEN" ?ring)
+         then
+          (return (sym-cat ring-green ?num))
+         else (if (str-index "ORANGE" ?ring)
+               then
+    (           return (sym-cat ring-orange ?num))
+               else (if (str-index "YELLOW" ?ring)
+                     then
+                      (return (sym-cat ring-yellow ?num))
+                      )))
+  )
+)
+
+
+(deffunction pddl-task-to-cap-color (?task)
+  (return (sym-cat CAP _ (upcase (sub-string (+ (str-index "-" ?task) 1) (str-length ?task) ?task))))
 )

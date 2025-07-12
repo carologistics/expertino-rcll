@@ -1,13 +1,20 @@
 (deftemplate start-task
   " Establish start routines with defined order of execution.
     @slot name: unique name of the task. Set manually. No modification needed.
-    @slot wait-for: list of other start-task names that need to complete before the current one is started. Set manually, modified automatically.
-    @slot parts: list of things this task consists of. This list describes the things the task will do once it is active. Hence, user-code is needed to subsequently delete each member of the list in order to achieve the task.
-	Set and modified manually.
-	@slot state: Set and modified automatically.
-	 - WAITING: Initial state of each task, is switched to ACTIVE once all dependent tasks (defined by wait-for) are DONE.
-	 - ACTIVE: task is started, user-code needs to fulfill the parts (and subsequently delete each part from the list of parts).
-	 - DONE: Once an ACTIVE task has no more parts, it is automatically switched to DONE.
+    @slot wait-for: list of other start-task names that need to complete before
+          the current one is started. Set manually, modified automatically.
+    @slot parts: list of things this task consists of. This list describes the
+          things the task will do once it is active.
+          Hence, user-code is needed to subsequently delete each member of the
+          list in order to achieve the task.
+          Set and modified manually.
+    @slot state: Set and modified automatically.
+     - WAITING: Initial state of each task, is switched to ACTIVE once all
+       dependent tasks (defined by wait-for) are DONE.
+     - ACTIVE: task is started, user-code needs to fulfill the parts (and
+       subsequently delete each part from the list of parts).
+     - DONE: Once an ACTIVE task has no more parts, it is automatically
+       switched to DONE.
   "
   (slot name (type SYMBOL))
   (multislot wait-for (type SYMBOL) (default (create$)))
@@ -35,4 +42,10 @@
   ?st <- (start-task (state ACTIVE) (parts))
   =>
   (modify ?st (state DONE))
+)
+(defrule start-task-startup-completed
+  " All start-tasks are done, mark startup as completed."
+  (not (start-task (state ~DONE)))
+  =>
+  (assert (startup-completed))
 )
