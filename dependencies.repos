@@ -3,8 +3,11 @@ repositories:
     type: git
     url: https://github.com/carologistics/clips_executive
     version: master
-repositories:
   clips_vendor:
     type: git
     url: https://github.com/carologistics/clips_vendor
+    version: main
+  rcll_protobuf:
+    type: git
+    url: https://github.com/carologistics/rcll-protobuf
     version: main
