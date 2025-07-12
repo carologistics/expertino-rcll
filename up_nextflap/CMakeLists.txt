@@ -52,10 +52,8 @@ set(SOURCES
 
 pybind11_add_module(nextflap ${SOURCES})
 # Include directories
-target_include_directories(nextflap PUBLIC nextflap/ ${Python3_INCLUDE_DIRS}
-                                           ${Z3_INCLUDE_DIRS})
-# set_target_properties(nextflap PROPERTIES INTERPROCEDURAL_OPTIMIZATION ON
-# CXX_VISIBILITY_PRESET default)
+target_include_directories(nextflap PUBLIC nextflap/ ${Python3_INCLUDE_DIRS} ${Z3_INCLUDE_DIRS})
+# set_target_properties(nextflap PROPERTIES INTERPROCEDURAL_OPTIMIZATION ON CXX_VISIBILITY_PRESET default)
 #
 # Link libraries
 target_link_libraries(nextflap PUBLIC z3_vendor::z3)

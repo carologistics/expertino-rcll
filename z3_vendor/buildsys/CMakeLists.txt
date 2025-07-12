@@ -8,31 +8,22 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -O3 -Wextra -pedantic -fPIC")
 # Check for pybind11
 find_package(pybind11 CONFIG REQUIRED)
 if(NOT pybind11_FOUND)
-  message(
-    FATAL_ERROR "pybind11 not found. Install it using 'pip install pybind11'.")
+  message(FATAL_ERROR "pybind11 not found. Install it using 'pip install pybind11'.")
 endif()
 
 # Prompt user for Z3 library path
-prompt_user(
-  Z3_DIR
-  "Please specify the path to Z3 (e.g., the directory containing include/ and lib/):"
-)
+prompt_user(Z3_DIR "Please specify the path to Z3 (e.g., the directory containing include/ and lib/):")
 set(Z3_INCLUDE_DIR "${Z3_DIR}/include")
 set(Z3_LIB_DIR "${Z3_DIR}/lib")
 
 if(NOT EXISTS "${Z3_INCLUDE_DIR}/z3++.h")
-  message(
-    FATAL_ERROR
-      "z3++.h not found in ${Z3_INCLUDE_DIR}. Check your Z3 installation.")
+  message(FATAL_ERROR "z3++.h not found in ${Z3_INCLUDE_DIR}. Check your Z3 installation.")
 endif()
 
 # Detect Python include and library directories
 find_package(Python3 REQUIRED COMPONENTS Development)
 if(NOT Python3_FOUND)
-  message(
-    FATAL_ERROR
-      "Python3 development package not found. Make sure Python headers and libraries are installed."
-  )
+  message(FATAL_ERROR "Python3 development package not found. Make sure Python headers and libraries are installed.")
 endif()
 
 # Source files
@@ -74,8 +65,7 @@ set(FILES
 pybind11_add_module(nextflap MODULE ${FILES})
 
 # Include directories
-include_directories(${Z3_INCLUDE_DIR} ${Python3_INCLUDE_DIRS}
-                    ${pybind11_INCLUDE_DIRS})
+include_directories(${Z3_INCLUDE_DIR} ${Python3_INCLUDE_DIRS} ${pybind11_INCLUDE_DIRS})
 
 # Link directories and libraries
 target_link_directories(nextflap PRIVATE ${Z3_LIB_DIR})
