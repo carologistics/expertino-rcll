@@ -11,3 +11,7 @@ repositories:
     type: git
     url: https://github.com/carologistics/rcll-protobuf
     version: main
+  protobuf_comm:
+    type: git
+    url: https://github.com/fawkesrobotics/protobuf_comm
+    version: main
