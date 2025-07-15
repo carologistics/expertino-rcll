@@ -101,7 +101,11 @@
    (waypoint ?zone) (executor-id ?ex-id)
   ))
   (modify ?at-list (current-task-id ?seq))
-)    
+)
+
+(defrule agent-task-collect-feedback
+  
+)
 
 (defrule agent-task-list-delete-active
   ?at-list <- (agent-task-list (executor-id ?id) (tasks ?cur-task $?rest) (current-task-id ?seq))
