@@ -491,6 +491,15 @@
   (slot state (type SYMBOL) (allowed-values INIT REQUESTED ACCEPTED ABORTED CANCELLED SUCCEEDED))
 )
 
+(deftemplate feedback
+  " Interface to monitor the execution layer. "
+  (slot id (type SYMBOL))
+  (slot executor-id (type SYMBOL))
+  (slot feedback-code (type SYMBOL) (default NONE))
+  (slot recieved-at (type FLOAT))
+)
+
+
 (deftemplate rcll-agent-task
   (slot task-id (type INTEGER))
   (slot task-name (type SYMBOL))
