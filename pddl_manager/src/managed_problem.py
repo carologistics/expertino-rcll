@@ -192,7 +192,6 @@ class ManagedProblem():
     def __init__(self, problem, env, name="base"):
         self.goals = {}
         self.base_problem = problem.clone()
-        self.base_problem.clear_goals()
         self.name = name
 
         self.goals["base"] = ManagedGoal(self)

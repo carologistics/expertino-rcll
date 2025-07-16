@@ -104,7 +104,51 @@
 )
 
 (defrule agent-task-collect-feedback
-  
+  ;TODO add feedback mechanism for the cancelled AgentTask case
+  ?at-list <- (agent-task-list (executor-id ?id) (tasks ?cur-task $?rest) (current-task-id ?seq))
+  (executor (id ?ex-id) (state ACCEPTED) (pddl-action-id ?action-id) (worker ?robot))
+  ?at <- (rcll-agent-task (task-id ?seq) (task-name ?cur-task) (outcome ?outcome&~UNKNOWN) (robot ?robot))
+  ?cur-task-seq <- (current-rcll-agent-task-id (task-id ?seq) (robot ?robot))
+  (pddl-action (id ?action-id) (name ?action) (instance ?instance) (params $?params))
+  =>
+  (switch ?outcome
+    (case FAILED then
+      (switch ?cur-task
+        (case Move-src then
+          (bind ?feedback-code ?*SUBTASK-DRIVE-TO-SRC-FAILED*)
+        )
+        (case Retrieve then
+          (bind ?feedback-code ?*SUBTASK-PICK-UP-FAILED*)
+        )
+        (case Move-dest then
+          (bind ?feedback-code ?*SUBTASK-DRIVE-TO-DEST-FAILED*)
+        )
+        (case Deliver then 
+          (bind ?feedback-code ?*SUBTASK-PLACE-DOWN-FAILED*)
+        )
+      )
+    )
+    (case SUCCEEDED then
+      (switch ?cur-task
+        (case Move-src then
+          (bind ?feedback-code ?*SUBTASK-DRIVE-TO-SRC-SUCCESS*)
+        )
+        (case Retrieve then
+          (bind ?feedback-code ?*SUBTASK-PICK-UP-SUCCESS*)
+        )
+        (case Move-dest then
+          (bind ?feedback-code ?*SUBTASK-DRIVE-TO-DEST-SUCCESS*)
+        )
+        (case Deliver then 
+          (bind ?feedback-code ?*SUBTASK-PLACE-DOWN-SUCCESS*)
+        )
+      )
+    )
+    (case CANCELLED then
+       (printout debug "The task " ?seq  " has been cancelled!" crlf) 
+    )
+  )
+  (assert (feedback (id (sym-cat FEEDBACK- gensym*)) (executor-id ?ex-id) (feedback-code ?feedback-code) (recieved-at (now)))) 
 )
 
 (defrule agent-task-list-delete-active
@@ -116,27 +160,6 @@
   =>
   (modify ?at-list (tasks $?rest))
   (modify ?cur-task-seq (task-id (+ 1 ?seq)))
-  (if (not (eq ?action carrier-to-input))
-   then
-     (bind ?sub-action nil)
-     (switch ?cur-task
-       (case Move-src then
-         (bind ?sub-action (sym-cat ?action -step-1-drive-to))
-       )
-       (case Retrieve then
-         (bind ?sub-action (sym-cat ?action -step-2-pick-up))
-       )
-       (case Deliver then 
-         (bind ?sub-action (sym-cat ?action -step-4-place-down))
-       )
-     )
-     (if (neq ?sub-action nil)
-      then
-        (bind ?sub-action-id (gensym*)) 
-        (assert (pddl-action (id ?sub-action-id) (name ?sub-action) (instance ?instance) (params ?params)))
-        (assert (pddl-action-get-effect (action ?sub-action-id) (effect-type ALL) (apply TRUE)))
-     )
-  ) 
 )
 
 (defrule agent-task-list-mark-done
@@ -148,10 +171,6 @@
   (if (eq ?outcome SUCCEEDED)
    then
      (modify ?ex (state SUCCEEDED))
-     (if (eq ?action-name carrier-to-input)
-      then
-        (assert (pddl-action-get-effect (action ?action-id) (effect-type END) (apply TRUE))) 
-     )
    else
      (modify ?ex (state ABORTED))
   )
