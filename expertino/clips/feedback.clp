@@ -1,7 +1,10 @@
 (defrule feedback-subtask-success
-  (executor (id ?ex-id) (pddl-action-id ?action) (state ACCEPTED))
-  (pddl-action (id ?action) (name ?action-name) (params $?params) (instance ?instance))
-  (feedback (executor-id ?ex-id) (feedback-code ?feedback-code) (received-at ?time))
+  ?at-list <- (agent-task-list (executor-id ?id) (tasks ?cur-task $?rest) (current-task-id ?seq))
+  (executor (id ?ex-id) (state ACCEPTED) (pddl-action-id ?action-id) (worker ?robot))
+  ?at <- (rcll-agent-task (task-id ?seq) (task-name ?cur-task) (outcome ?outcome&~UNKNOWN) (robot ?robot))
+  ?cur-task-seq <- (current-rcll-agent-task-id (task-id ?seq) (robot ?robot))
+  (pddl-action (id ?action-id) (name ?action&~carrier-to-input) (instance ?instance) (params $?params))
+  (feedback (executor-id ?ex-id) (feedback-code ?feedback-code) (recieved-at ?time))
   (test (or
           (eq ?feedback-code ?*SUBTASK-DRIVE-TO-SRC-SUCCESS*)
           (eq ?feedback-code ?*SUBTASK-DRIVE-TO-DEST-SUCCESS*)
@@ -23,15 +26,29 @@
   )                                                                         
   (if (neq ?sub-action nil)                                                 
    then                   
-     (if (and (eq ?action carrier-to-input) (eq ?cur-task Deliver)) then
-         (assert (pddl-action-get-effect (action ?action) (effect-type END) (apply TRUE))) 
-       else
-         (bind ?sub-action-id (gensym*))                                        
-         (assert (pddl-action (id ?sub-action-id) (name ?sub-action) (instance ?instance) (params ?params)))
-         (assert (pddl-action-get-effect (action ?sub-action-id) (effect-type ALL) (apply TRUE)))
-     )
+    (bind ?sub-action-id (gensym*))                                        
+    (assert (pddl-action (id ?sub-action-id) (name ?sub-action) (instance ?instance) (params ?params)))
+    (assert (pddl-action-get-effect (action ?sub-action-id) (effect-type ALL) (apply TRUE)))
+    
   )                                                                         
 )
 
 
-
+(defrule feedback-subtask-success-carrier-to-input
+  ?at-list <- (agent-task-list (executor-id ?id) (tasks ?cur-task $?rest) (current-task-id ?seq))
+  (executor (id ?ex-id) (state ACCEPTED) (pddl-action-id ?action-id) (worker ?robot))
+  ?at <- (rcll-agent-task (task-id ?seq) (task-name ?cur-task) (outcome ?outcome&~UNKNOWN) (robot ?robot))
+  ?cur-task-seq <- (current-rcll-agent-task-id (task-id ?seq) (robot ?robot))
+  (pddl-action (id ?action-id) (name carrier-to-input) (instance ?instance) (params $?params))
+  (feedback (executor-id ?ex-id) (feedback-code ?feedback-code) (recieved-at ?time))
+  (test (or
+          (eq ?feedback-code ?*SUBTASK-DRIVE-TO-SRC-SUCCESS*)
+          (eq ?feedback-code ?*SUBTASK-DRIVE-TO-DEST-SUCCESS*)
+          (eq ?feedback-code ?*SUBTASK-PICK-UP-SUCCESS*)
+          (eq ?feedback-code ?*SUBTASK-PLACE-DOWN-SUCCESS*)
+  ))
+  =>
+  (if (eq ?cur-task Deliver) then
+    (assert (pddl-action-get-effect (action ?action-id) (effect-type END) (apply TRUE))) 
+  )
+)
