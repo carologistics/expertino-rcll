@@ -126,6 +126,9 @@
         (case Deliver then 
           (bind ?feedback-code ?*SUBTASK-PLACE-DOWN-FAILED*)
         )
+        (default 
+        (bind ?feedback-code ?*DEFAULT-FAILURE*)
+        )
       )
     )
     (case SUCCEEDED then
@@ -142,13 +145,16 @@
         (case Deliver then 
           (bind ?feedback-code ?*SUBTASK-PLACE-DOWN-SUCCESS*)
         )
+        (default 
+        (bind ?feedback-code ?*DEFAULT-SUCCESS*)
+        )
       )
     )
     (case CANCELLED then
        (printout debug "The task " ?seq  " has been cancelled!" crlf) 
     )
   )
-  (assert (feedback (id (sym-cat FEEDBACK- gensym*)) (executor-id ?ex-id) (feedback-code ?feedback-code) (recieved-at (now)))) 
+  (assert (feedback (id (sym-cat FEEDBACK-(gensym*))) (executor-id ?ex-id) (feedback-code ?feedback-code) (recieved-at (now)))) 
 )
 
 (defrule agent-task-list-delete-active
