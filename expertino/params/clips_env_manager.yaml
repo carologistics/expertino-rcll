@@ -67,6 +67,7 @@ clips_manager:
         "clips/expertino/action/action-precond-check.clp",
         "clips/expertino/sim-agent-task.clp",
         "clips/expertino/executor.clp",
+        "clips/expertino/feedback.clp",
         "clips/expertino/action/action-selection.clp",
         "clips/expertino/workers/workers.clp",
         "clips/expertino/production-strategy.clp",
