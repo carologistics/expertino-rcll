@@ -159,10 +159,10 @@
   ?at-list <- (agent-task-list (executor-id ?ex-id) (current-task-id ?seq))
   ?ex <- (executor (id ?ex-id) (state ACCEPTED) (pddl-action-id ?action-id) (worker ?robot))
   ?cur-task-seq <- (current-rcll-agent-task-id (task-id ?seq) (robot ?robot))
-  ?at <- (rcll-agent-task (task-id ?seq) (outcome FAILED) (retry-count ?count))
+  ?at <- (rcll-agent-task (executor-id ?ex-id) (task-id ?seq) (outcome FAILED) (retry-count ?count))
   =>
   (if (< ?count 3) then 
-    (modify ?at (retry-count (+ 1 ?count)) (task-id (+ 1 ?seq)) (outcome UNKNOWN))
+    (modify ?at (retry-count (+ 1 ?count)) (task-id (+ 1 ?seq)) (outcome UNKNOWN) (sent FALSE))
     (modify ?cur-task-seq (task-id (+ 1 ?seq)))
     else
     (modify ?ex (state ABORTED))
