@@ -141,6 +141,7 @@
   (rcll-agent-task (task-id ?seq) (outcome ?outcome&~UNKNOWN))
   (pddl-action (id ?action-id) (name ?action-name) (params $?params))
   =>
+  ;TODO think about state CANCELLED for agent-task
   (if (eq ?outcome SUCCEEDED)
    then
      (modify ?ex (state SUCCEEDED))
@@ -148,7 +149,23 @@
       then
         (assert (pddl-action-get-effect (action ?action-id) (effect-type END) (apply TRUE))) 
      )
-   else
-     (modify ?ex (state ABORTED))
+   ;else
+     ;(modify ?ex (state ABORTED))
+  )
+)
+
+(defrule agent-task-outcome-failed
+  ?at-list <- (agent-task-list (tasks) (executor-id ?ex-id) (current-task-id ?seq))
+  ?ex <- (executor (id ?ex-id) (state ACCEPTED) (pddl-action-id ?action-id))
+  ?cur-task-seq <- (current-rcll-agent-task-id (task-id ?seq) (robot ?robot))
+  ?at <- (rcll-agent-task (task-id ?seq) (outcome FAILED) (retry-count ?count))
+  =>
+  (if (< ?count 3) then 
+    (modify ?at (retry-count (+ 1 ?count)) (task-id (+ 1 ?seq)) (outcome UNKNOWN))
+    (modify ?cur-task-seq (task-id (+ 1 ?seq)))
+    else
+    (modify ?ex (state ABORTED))
+    ;revert start effects
+    ;trigger re-planning
   )
 )
