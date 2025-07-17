@@ -84,12 +84,13 @@
     (if (pb-has-field ?task-msg "successful") then
       (bind ?successful (pb-field-value ?task-msg "successful"))
       (if ?successful then
-        (bind ?task-outcome SUCCEEDED)
+        ;(bind ?task-outcome SUCCEEDED)
+        (bind ?task-outcome FAILED)
        else
         (bind ?error-code (pb-field-value ?task-msg "error_code"))
         (bind ?task-outcome FAILED)
-        (modify ?ex (state ABORTED))
-        (printout warn "Executor with id " ?ex-id " got aborted with error code " ?error-code crlf)
+        ;(modify ?ex (state ABORTED))
+        (printout warn "agent-task failed with id " ?task " got aborted with error code " ?error-code crlf)
       )
     )
     (if (neq ?task-outcome UNKNOWN) then
