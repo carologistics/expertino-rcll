@@ -26,9 +26,11 @@
     (printout error "Expected number or recv ports to be equal to send ports for simulator robots (" (length$ ?recv-ports) " != "(length$ ?send-ports) ")" crlf)
    else
     (loop-for-count (?i (length$ ?recv-ports)) do
+      (bind ?robot (sym-cat "ROBOT" ?i))
       (bind ?peer-id (pb-peer-create-local ?peer-address (string-to-field (nth$ ?i ?send-ports)) (string-to-field (nth$ ?i ?recv-ports))))
-      (assert (protobuf-peer (name (sym-cat "ROBOT" ?i)) (peer-id ?peer-id)))
-	  (assert (current-rcll-agent-task-id (robot (sym-cat "ROBOT" ?i)) (task-id 0)))
+      (assert (protobuf-peer (name ?robot) (peer-id ?peer-id)))
+      (assert (current-rcll-agent-task-id (robot ?robot) (task-id 1)))
+      (assert (worker (id ?robot) (state IDLE) (type ROBOT)))
     )
   )
 )
@@ -37,7 +39,7 @@
  " Create an AgentTask protobuf message and send it to the simulator peer.
  "
    (current-rcll-agent-task-id (robot ?robot) (task-id ?task-seq))
-   ?at <- (rcll-agent-task (task-id ?task-seq) (robot ?robot) (executor-id ?ex-id) (outcome UNKNOWN))
+   ?at <- (rcll-agent-task (task-id ?task-seq) (robot ?robot) (executor-id ?ex-id) (outcome UNKNOWN) (sent FALSE))
    ?ex <- (executor (id ?ex-id) (worker ?robot) (state ?state))
    (protobuf-peer (name ?robot) (peer-id ?peer-id))
    (game-state (state RUNNING) (phase EXPLORATION|PRODUCTION) (team-color ?team-color&~NOT-SET))
@@ -47,6 +49,7 @@
     then
      (pb-send ?peer-id ?task-msg)
      (pb-destroy ?task-msg)
+     (modify ?at (sent TRUE))
      (printout yellow "task message sent" crlf)
      (if (eq ?state REQUESTED)
       then (modify ?ex (state ACCEPTED))
@@ -85,8 +88,7 @@
     (if (pb-has-field ?task-msg "successful") then
       (bind ?successful (pb-field-value ?task-msg "successful"))
       (if ?successful then
-        ;(bind ?task-outcome SUCCEEDED)
-        (bind ?task-outcome FAILED)
+        (bind ?task-outcome SUCCEEDED)
        else
         (bind ?error-code (pb-field-value ?task-msg "error_code"))
         (bind ?task-outcome FAILED)
