@@ -522,6 +522,7 @@
   (multislot workpiece-colors (type SYMBOL) (default (create$)))
   (slot outcome (type SYMBOL) (allowed-values UNKNOWN FAILED CANCELLED SUCCEEDED))
   (slot executor-id (type SYMBOL))
+  (slot num-retries (type INTEGER) (default 1))
 )
 
 (deftemplate agent-task-list

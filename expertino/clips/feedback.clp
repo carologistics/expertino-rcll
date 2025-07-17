@@ -56,7 +56,7 @@
 (defrule feedback-subtask-failed
   ?at-list <- (agent-task-list (executor-id ?id) (tasks ?cur-task $?rest) (current-task-id ?seq))
   (executor (id ?ex-id) (state ACCEPTED) (pddl-action-id ?action-id) (worker ?robot))
-  ?at <- (rcll-agent-task (task-id ?seq) (task-name ?cur-task) (outcome ?outcome&~UNKNOWN) (robot ?robot))
+  ?at <- (rcll-agent-task (task-id ?seq) (task-name ?cur-task) (outcome ?outcome&~UNKNOWN) (robot ?robot)(num-retries ?retries))
   ?cur-task-seq <- (current-rcll-agent-task-id (task-id ?seq) (robot ?robot))
   (pddl-action (id ?action-id) (name ?action&~carrier-to-input) (instance ?instance) (params $?params))
   (feedback (executor-id ?ex-id) (feedback-code ?feedback-code) (recieved-at ?time))
@@ -69,19 +69,39 @@
   =>
   (bind ?sub-action nil)                                                    
   (switch ?cur-task                                                         
-    (case Move-src then                                                     
-      (bind ?sub-action (sym-cat ?action -step-1-drive-to))                 
-    )                                                                       
+    (case Move-src then   
+      (if (< ?retries 3) then
+      (bind ?new-seq (+ ?seq 1))
+      (bind ?new-retries (+ ?retries 1))
+      (retract ?at)
+      (retract ?cur-task-seq)
+      (assert (rcll-agent-task (task-id ?new-seq) (executor-id ?ex-id) (task-name ?cur-task) (outcome UNKNOWN) (robot ?robot)(num-retries ?new-retries)))
+      (assert (current-rcll-agent-task-id (task-id ?new-seq) (robot ?robot)))
+      (printout t "Retry: " ?retries " for " ?cur-task " task-id: " ?new-seq crlf)
+      )
+      
+    )
+    (case Move-dest then
+      (if (< ?retries 3) then
+      (bind ?new-seq (+ ?seq 1))
+      (bind ?new-retries (+ ?retries 1))
+      (retract ?at)
+      (retract ?cur-task-seq)
+      (assert (rcll-agent-task (task-id ?new-seq) (executor-id ?ex-id) (task-name ?cur-task) (outcome UNKNOWN) (robot ?robot)(num-retries ?new-retries)))
+      (assert (current-rcll-agent-task-id (task-id ?new-seq) (robot ?robot)))
+      (printout t "Retry: " ?retries " for " ?cur-task " task-id: " ?new-seq crlf)
+      )
+    )
     (case Retrieve then                                                     
-      (bind ?sub-action (sym-cat ?action -step-2-pick-up))                  
+      (printout "Retrieve FAILED task-id: " ?seq " action-id: " ?action-id crlf)
     )                                                                       
     (case Deliver then                                                      
-      (bind ?sub-action (sym-cat ?action -step-4-place-down))               
-    )                                                                       
-  )                                                                         
+      (printout "Deliver FAILED task-id: " ?seq " action-id: " ?action-id crlf)             
+    )
+  )
   (if (neq ?sub-action nil)                                                 
    then                   
     (printout t "Action Failed: " ?sub-action crlf)
     
-  )                                                                         
+  )
 )
