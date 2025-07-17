@@ -31,7 +31,7 @@
     )
   )
   (assert (agent-task-list (id (sym-cat TASK-LIST-(gensym*))) (executor-id ?ex-id) (pddl-action-id ?action-id)
-               (tasks Move-src Retrieve Move-dest Deliver Move-away) 
+               (tasks Move-src Retrieve Move-dest Deliver) 
                (params ?wp ?from-mps ?from-side ?to-mps ?to-side)))
   (modify ?ex (state REQUESTED))
 )
@@ -96,7 +96,7 @@
   (current-rcll-agent-task-id (robot ?robot) (task-id ?seq)) 
   (not (rcll-agent-task (robot ?robot) (task-id ?seq)))
   =>
-  (bind ?zone M_Z71)
+  (bind ?zone WAIT)
   (assert (rcll-agent-task (task-id ?seq) (task-name ?task) (robot ?robot) (task-type Move)
    (waypoint ?zone) (executor-id ?ex-id)
   ))
@@ -141,6 +141,7 @@
   (rcll-agent-task (task-id ?seq) (outcome ?outcome&~UNKNOWN))
   (pddl-action (id ?action-id) (name ?action-name) (params $?params))
   =>
+  ;TODO think about state CANCELLED for agent-task
   (if (eq ?outcome SUCCEEDED)
    then
      (modify ?ex (state SUCCEEDED))
@@ -148,7 +149,31 @@
       then
         (assert (pddl-action-get-effect (action ?action-id) (effect-type END) (apply TRUE))) 
      )
+   ;else
+     ;(modify ?ex (state ABORTED))
+  )
+)
+
+(defrule agent-task-outcome-failed
+  (declare (salience 1000))
+  ?at-list <- (agent-task-list (executor-id ?ex-id) (current-task-id ?seq))
+  ?ex <- (executor (id ?ex-id) (state ACCEPTED) (pddl-action-id ?action-id) (worker ?robot))
+  ?cur-task-seq <- (current-rcll-agent-task-id (task-id ?seq) (robot ?robot))
+  ?at <- (rcll-agent-task (executor-id ?ex-id) (task-id ?seq) (outcome FAILED) (retry-count ?count) (task-type ?task-type))
+  =>
+  (if (eq Move ?task-type) then
+    (bind ?max-count 7)
    else
-     (modify ?ex (state ABORTED))
+    (bind ?max-count 5)
+  )
+  (if (< ?count ?max-count) then 
+    (bind ?next-seq (+ 1 ?seq))
+    (modify ?at (retry-count (+ 1 ?count)) (task-id (+ 1 ?seq)) (outcome UNKNOWN))
+    (modify ?cur-task-seq (task-id ?next-seq))
+    (modify ?at-list (current-task-id ?next-seq))
+    else
+    (modify ?ex (state ABORTED))
+    ;revert start effects
+    ;trigger re-planning
   )
 )

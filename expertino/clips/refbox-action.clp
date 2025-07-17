@@ -1,7 +1,7 @@
 (defrule refbox-action-mps-prepare-send-signal
   ;(time $?now)
   (game-state (team-color ?team-color) (phase PRODUCTION))
-  ?ex <- (executor (worker REFBOX) (state INIT) (pddl-action-id ?action-id)) 
+  ?ex <- (executor (worker REFBOX) (state INIT|ACCEPTED) (pddl-action-id ?action-id)) 
   (pddl-action (id ?action-id) (name ?action-name) (params $?action-params))
   (protobuf-peer (name refbox-private) (peer-id ?peer-id))
   (machine (name ?mps) (state IDLE))
