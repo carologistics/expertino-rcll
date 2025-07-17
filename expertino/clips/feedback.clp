@@ -92,11 +92,13 @@
       (printout t "Retry: " ?retries " for " ?cur-task " task-id: " ?new-seq crlf)
       )
     )
-    (case Retrieve then                                                     
-      (printout "Retrieve FAILED task-id: " ?seq " action-id: " ?action-id crlf)
+    (case Retrieve then     
+      ;TODO: Implement what if Retrieve fails                                                 
+      (printout t "Retrieve FAILED task-id: " ?seq " action-id: " ?action-id crlf)
     )                                                                       
-    (case Deliver then                                                      
-      (printout "Deliver FAILED task-id: " ?seq " action-id: " ?action-id crlf)             
+    (case Deliver then                      
+    ;TODO: Implement what if Deliver fails                                
+      (printout t "Deliver FAILED task-id: " ?seq " action-id: " ?action-id crlf)             
     )
   )
   (if (neq ?sub-action nil)                                                 
@@ -105,3 +107,11 @@
     
   )
 )
+
+;(defrule failed-task-Retrieve
+;  (declare (salience 1000))
+;  ?at <- (rcll-agent-task (task-id ?seq) (task-name Move-dest) (task-type Move) (outcome UNKNOWN) (robot ?robot)(num-retries ?retries))
+;  =>
+;  (printout t "MODIFY outcome to FAILED" crlf)
+;  (modify ?at (outcome FAILED))
+;)
