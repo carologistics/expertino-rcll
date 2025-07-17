@@ -47,6 +47,7 @@
     then
      (pb-send ?peer-id ?task-msg)
      (pb-destroy ?task-msg)
+     (printout yellow "task message sent" crlf)
      (if (eq ?state REQUESTED)
       then (modify ?ex (state ACCEPTED))
      )
