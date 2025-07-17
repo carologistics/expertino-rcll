@@ -155,8 +155,9 @@
 )
 
 (defrule agent-task-outcome-failed
-  ?at-list <- (agent-task-list (tasks) (executor-id ?ex-id) (current-task-id ?seq))
-  ?ex <- (executor (id ?ex-id) (state ACCEPTED) (pddl-action-id ?action-id))
+  (declare (salience 1000))
+  ?at-list <- (agent-task-list (executor-id ?ex-id) (current-task-id ?seq))
+  ?ex <- (executor (id ?ex-id) (state ACCEPTED) (pddl-action-id ?action-id) (worker ?robot))
   ?cur-task-seq <- (current-rcll-agent-task-id (task-id ?seq) (robot ?robot))
   ?at <- (rcll-agent-task (task-id ?seq) (outcome FAILED) (retry-count ?count))
   =>
