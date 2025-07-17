@@ -13,9 +13,9 @@ from launch_ros.actions import Node
 
 def launch_with_context(context, *args, **kwargs):
     expertino_dir = get_package_share_directory('expertino')
+    cx_bringup_dir = get_package_share_directory('cx_bringup')
     manager_config = LaunchConfiguration("manager_config")
     log_level = LaunchConfiguration('log_level')
-    manager_config_file = os.path.join(expertino_dir, "params", manager_config.perform(context))
     declare_model_file_cmd = DeclareLaunchArgument(
         'model_file',
         default_value=os.path.join(expertino_dir + "/clips/domain.pddl"),
@@ -24,20 +24,19 @@ def launch_with_context(context, *args, **kwargs):
     # also launch the pddl_manager
     pddl_manager_dir = get_package_share_directory('pddl_manager')
     launch_pddl_manager = os.path.join(pddl_manager_dir, 'launch', 'pddl_manager.launch.py')
+    launch_cx = os.path.join(cx_bringup_dir, 'launch', 'cx_launch.py')
 
-    cx_node = Node(
-        package='cx_bringup',
-        executable='cx_node',
-        output='screen',
-        emulate_tty=True,
-        parameters=[
-            manager_config_file,
-        ],
-        arguments=['--ros-args', '--log-level', log_level]
-    )
-    return [cx_node, IncludeLaunchDescription(
+    return [IncludeLaunchDescription(
             PythonLaunchDescriptionSource(launch_pddl_manager)
-        ),]
+        ), IncludeLaunchDescription(
+            PythonLaunchDescriptionSource(launch_cx),
+            launch_arguments={
+                "package": "expertino",
+                "manager_config": manager_config.perform(context),
+                "log_level": log_level
+            }.items(),
+
+        )]
 
 def generate_launch_description():
 
