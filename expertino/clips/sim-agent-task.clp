@@ -163,7 +163,7 @@
   =>
   (if (< ?count 5) then 
     (bind ?next-seq (+ 1 ?seq))
-    (modify ?at (retry-count ?next-seq) (task-id (+ 1 ?seq)) (outcome UNKNOWN))
+    (modify ?at (retry-count (+ 1 ?count)) (task-id (+ 1 ?seq)) (outcome UNKNOWN))
     (modify ?cur-task-seq (task-id ?next-seq))
     (modify ?at-list (current-task-id ?next-seq))
     else
