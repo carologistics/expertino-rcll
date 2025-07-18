@@ -162,8 +162,10 @@
   ?at <- (rcll-agent-task (executor-id ?ex-id) (task-id ?seq) (outcome FAILED) (retry-count ?count))
   =>
   (if (< ?count 3) then 
-    (modify ?at (retry-count (+ 1 ?count)) (task-id (+ 1 ?seq)) (outcome UNKNOWN))
-    (modify ?cur-task-seq (task-id (+ 1 ?seq)))
+    (bind ?next-seq (+ 1 ?seq))
+    (modify ?at (retry-count ?next-seq) (task-id (+ 1 ?seq)) (outcome UNKNOWN))
+    (modify ?cur-task-seq (task-id ?next-seq))
+    (modify ?at-list (current-task-id ?next-seq))
     else
     (modify ?ex (state ABORTED))
     ;revert start effects
