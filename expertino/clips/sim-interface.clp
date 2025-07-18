@@ -49,14 +49,14 @@
    (protobuf-peer (name ?robot) (peer-id ?peer-id))
    (game-state (state RUNNING) (phase EXPLORATION|PRODUCTION) (team-color ?team-color&~NOT-SET))
    (game-time ?gt)
-   (>= (- ?gt ?time) 2.0)
+   (test (>= (- ?gt ?time) 2))
    =>
    (bind ?task-msg (create-task-msg ?at ?team-color))
    (if ?task-msg
     then
      (pb-send ?peer-id ?task-msg)
      (pb-destroy ?task-msg)
-     (modify ?at (sent (now)))
+     (modify ?at (sent ?gt))
      (printout yellow "task message sent" crlf)
      (if (eq ?state REQUESTED)
       then (modify ?ex (state ACCEPTED))
