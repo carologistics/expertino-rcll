@@ -48,7 +48,8 @@
    ?ex <- (executor (id ?ex-id) (worker ?robot) (state ?state))
    (protobuf-peer (name ?robot) (peer-id ?peer-id))
    (game-state (state RUNNING) (phase EXPLORATION|PRODUCTION) (team-color ?team-color&~NOT-SET))
-   (test (>= (- (now) ?time) 2.0))
+   (game-time ?gt)
+   (>= (- ?gt ?time) 2.0)
    =>
    (bind ?task-msg (create-task-msg ?at ?team-color))
    (if ?task-msg
