@@ -98,9 +98,11 @@
         (bind ?task-outcome SUCCEEDED)
        else
         (bind ?error-code (pb-field-value ?task-msg "error_code"))
-        (bind ?task-outcome FAILED)
+        (if (neq error-code 0)
+          (bind ?task-outcome FAILED)
+          (printout warn "agent-task failed with id " ?task " got aborted with error code " ?error-code crlf)
+        )
         ;(modify ?ex (state ABORTED))
-        (printout warn "agent-task failed with id " ?task " got aborted with error code " ?error-code crlf)
       )
     )
     (if (neq ?task-outcome UNKNOWN) then
