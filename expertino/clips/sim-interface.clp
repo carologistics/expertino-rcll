@@ -18,15 +18,20 @@
   (confval (path "/rcll-simulator/host") (value ?peer-address))
   (confval (path "/rcll-simulator/robot-recv-ports") (is-list TRUE) (list-value $?recv-ports))
   (confval (path "/rcll-simulator/robot-send-ports") (is-list TRUE) (list-value $?send-ports))
-  (not (protobuf-peer (name ROBOT1)))
+  (confval (path "/rcll-simulator/robot-ids") (is-list TRUE) (list-value $?robot-ids))
+  (not (and
+         (protobuf-peer (name ROBOT1))
+         (protobuf-peer (name ROBOT2))
+         (protobuf-peer (name ROBOT3))
+  ))
   (not (executive-finalize))
   =>
   (printout info "Enabling robot simulation peers" crlf)
-  (if (<> (length$ ?recv-ports) (length$ ?send-ports)) then
+  (if (<> (length$ ?recv-ports) (length$ ?send-ports) (length$ ?robot-ids)) then
     (printout error "Expected number or recv ports to be equal to send ports for simulator robots (" (length$ ?recv-ports) " != "(length$ ?send-ports) ")" crlf)
    else
     (loop-for-count (?i (length$ ?recv-ports)) do
-      (bind ?robot (sym-cat "ROBOT" ?i))
+      (bind ?robot (sym-cat "ROBOT" (nth$ ?i ?robot-ids)))
       (bind ?peer-id (pb-peer-create-local ?peer-address (string-to-field (nth$ ?i ?send-ports)) (string-to-field (nth$ ?i ?recv-ports))))
       (assert (protobuf-peer (name ?robot) (peer-id ?peer-id)))
       (assert (current-rcll-agent-task-id (robot ?robot) (task-id 1)))
