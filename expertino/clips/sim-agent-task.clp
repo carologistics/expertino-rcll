@@ -162,7 +162,7 @@
   ?at <- (rcll-agent-task (executor-id ?ex-id) (task-id ?seq) (outcome FAILED) (retry-count ?count))
   =>
   (if (< ?count 3) then 
-    (modify ?at (retry-count (+ 1 ?count)) (task-id (+ 1 ?seq)) (outcome UNKNOWN) (sent FALSE))
+    (modify ?at (retry-count (+ 1 ?count)) (task-id (+ 1 ?seq)) (outcome UNKNOWN))
     (modify ?cur-task-seq (task-id (+ 1 ?seq)))
     else
     (modify ?ex (state ABORTED))
