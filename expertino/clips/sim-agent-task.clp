@@ -161,7 +161,7 @@
   ?cur-task-seq <- (current-rcll-agent-task-id (task-id ?seq) (robot ?robot))
   ?at <- (rcll-agent-task (executor-id ?ex-id) (task-id ?seq) (outcome FAILED) (retry-count ?count))
   =>
-  (if (< ?count 3) then 
+  (if (< ?count 5) then 
     (bind ?next-seq (+ 1 ?seq))
     (modify ?at (retry-count ?next-seq) (task-id (+ 1 ?seq)) (outcome UNKNOWN))
     (modify ?cur-task-seq (task-id ?next-seq))
