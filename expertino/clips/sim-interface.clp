@@ -57,7 +57,6 @@
      (pb-send ?peer-id ?task-msg)
      (pb-destroy ?task-msg)
      (modify ?at (sent ?gt))
-     (printout yellow "task message sent" crlf)
      (if (eq ?state REQUESTED)
       then (modify ?ex (state ACCEPTED))
      )
@@ -100,7 +99,7 @@
         (bind ?error-code (pb-field-value ?task-msg "error_code"))
         (if (neq ?error-code 0) then
           (bind ?task-outcome FAILED)
-          (printout warn "agent-task failed with id " ?task " got aborted with error code " ?error-code crlf)
+          (printout warn "agent-task" ?task-name "for robot" ?robot "failed with id " ?task " got aborted with error code " ?error-code crlf)
         )
         ;(modify ?ex (state ABORTED))
       )
