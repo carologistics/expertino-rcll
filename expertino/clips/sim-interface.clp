@@ -70,7 +70,7 @@
 (defrule agent-task-recv-AgentTask-for-running-action
   ?pf <- (protobuf-msg (type "llsf_msgs.AgentTask") (ptr ?task-msg))
   ?at <- (rcll-agent-task (task-id ?task-seq) (robot ?robot)
-    (outcome UNKNOWN) (task-name ?task-name) (executor-id ?ex-id)
+    (outcome UNKNOWN) (task-name ?task-name) (executor-id ?ex-id) (sent ?sent-time)
   )
   ?ex <- (executor (id ?ex-id))
   (not (rcll-agent-task (robot ?robot)
@@ -79,6 +79,7 @@
   (test (eq (string-to-field (sub-string (str-length ?robot) (str-length ?robot) ?robot))
     (pb-field-value ?task-msg "robot_id")))  
   ?curr-task-id <- (current-rcll-agent-task-id (robot ?robot) (task-id ?task-seq))
+  (game-time ?gt)
   =>
   (bind ?task (pb-field-value ?task-msg "task_id"))
   (if (eq ?task ?task-seq) then
@@ -114,6 +115,9 @@
       (printout warn "Received feedback for future task!" crlf)
       (printout warn ?task-seq " " ?robot crlf)
       (printout warn  ?task " " ?robot-num " " ?team-col crlf)
+    )
+    (if (> (- ?gt ?sent-time) 10) then
+       (printout warn "haven't received a feedback for task " ?task "for " ?robot " in 10 seconds") 
     )
     ; old msg is periodically sent, so just ignore it
   )
