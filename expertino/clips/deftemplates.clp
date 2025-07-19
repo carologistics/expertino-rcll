@@ -514,7 +514,8 @@
   (slot outcome (type SYMBOL) (allowed-values UNKNOWN FAILED CANCELLED SUCCEEDED))
   (slot executor-id (type SYMBOL))
   (slot retry-count (type INTEGER) (default 0))
-  (slot sent (type FLOAT))
+  (slot sent (type INTEGER) (default 0))
+  (slot ack (type INTEGER) (default 0))
 )
 
 (deftemplate agent-task-list

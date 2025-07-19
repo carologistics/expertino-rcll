@@ -31,7 +31,7 @@
     )
   )
   (assert (agent-task-list (id (sym-cat TASK-LIST-(gensym*))) (executor-id ?ex-id) (pddl-action-id ?action-id)
-               (tasks Move-src Retrieve Move-dest Deliver) 
+               (tasks Move-src Retrieve Move-dest Deliver Move-away) 
                (params ?wp ?from-mps ?from-side ?to-mps ?to-side)))
   (modify ?ex (state REQUESTED))
 )
@@ -97,6 +97,7 @@
   (not (rcll-agent-task (robot ?robot) (task-id ?seq)))
   =>
   (bind ?zone WAIT)
+  (bind ?zone M_Z71)
   (assert (rcll-agent-task (task-id ?seq) (task-name ?task) (robot ?robot) (task-type Move)
    (waypoint ?zone) (executor-id ?ex-id)
   ))
