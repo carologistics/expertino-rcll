@@ -515,6 +515,7 @@
   (slot executor-id (type SYMBOL))
   (slot retry-count (type INTEGER) (default 0))
   (slot sent (type FLOAT))
+  (slot error-code (type INTEGER) (default 0))
 )
 
 (deftemplate agent-task-list

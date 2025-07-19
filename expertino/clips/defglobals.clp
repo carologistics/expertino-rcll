@@ -12,3 +12,9 @@
   ?*GOAL-INSTANCE-BASE* = base
   ?*GOAL-INSTANCE-REPLANNING* = replan
 )
+
+
+(defglobal
+  ?*NO-WORKPIECE-FOUND* = 202
+  ?*NO-WORKPIECE-IN-GRIPPER* = 208
+)
