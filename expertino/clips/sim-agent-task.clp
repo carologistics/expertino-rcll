@@ -95,11 +95,24 @@
 (defrule agent-task-create-move-away
   ?at-list <- (agent-task-list (id ?id) (executor-id ?ex-id) (tasks ?task&Move-away $?rest)
                           (params $?params))
-  ?ex <- (executor (id ?ex-id) (worker ?robot))
+  ?ex <- (executor (id ?ex-id) (worker ?robot) (pddl-action-id ?action-id))
+  (pddl-action (id ?action-id) (name ?action-name))
   (current-rcll-agent-task-id (robot ?robot) (task-id ?seq)) 
   (not (rcll-agent-task (robot ?robot) (task-id ?seq)))
+  (game-state (team-color ?team-color))
   =>
-  (bind ?zone WAIT)
+  (switch ?action-name
+    (case carrier-to-input then
+      (bind ?to-mps (nth$ 3 ?action-params))
+    )
+    (case pay-with-carrier then
+      (bind ?to-mps (nth$ 4 ?action-params))
+    )
+    (default
+      (bind ?to-mps (nth$ 3 ?action-params))
+    )
+  )
+  (bind ?zone (pddl-place-to-wait-point ?to-mps ?team-color))
   ;(bind ?zone M_Z71)
   (assert (rcll-agent-task (task-id ?seq) (task-name ?task) (robot ?robot) (task-type Move)
    (waypoint ?zone) (executor-id ?ex-id)

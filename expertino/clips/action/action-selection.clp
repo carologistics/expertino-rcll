@@ -80,7 +80,7 @@
       )
   )
   (pddl-action (id ?action-id) (name ?action-name) (params $?action-params))
-  (not (agenda-action-item (execution-state INITIAL))) ;all agenda items are precondition checked
+  ;(not (agenda-action-item (execution-state INITIAL))) ;all agenda items are precondition checked
   =>
   (bind ?worker AGENT)
   (modify ?action (execution-state SELECTED) (worker ?worker))

@@ -85,6 +85,9 @@
   =>
   (bind ?task (pb-field-value ?task-msg "task_id"))
   (if (eq ?task ?task-seq) then
+    (if (> (- ?gt ?sent-time) 10) then
+       (printout warn "haven't received a feedback for task " ?task "for " ?robot " in 10 seconds") 
+    )
     (bind ?robot-num (pb-field-value ?task-msg "robot_id"))
     (bind ?team-col (pb-field-value ?task-msg "team_color"))
     (bind ?task-outcome UNKNOWN)
@@ -117,9 +120,6 @@
       (printout warn "Received feedback for future task!" crlf)
       (printout warn ?task-seq " " ?robot crlf)
       (printout warn  ?task " " ?robot-num " " ?team-col crlf)
-    )
-    (if (> (- ?gt ?sent-time) 10) then
-       (printout warn "haven't received a feedback for task " ?task "for " ?robot " in 10 seconds") 
     )
     ; old msg is periodically sent, so just ignore it
   )

@@ -184,6 +184,14 @@
   )
 )
 
+(deffunction pddl-place-to-wait-point (?place ?team-color)
+  (bind ?mps (pddl-place-to-refbox-mps ?place ?team-color))
+  (bind ?wait WAIT)
+  (bind ?side (pddl-place-to-mps-side ?place ?team-color))
+  (if (eq ?side SLIDE) then (bind ?side INPUT))
+  (return (sym-cat ?wait - ?mps - ?side))
+)
+
 (deffunction get-param-by-name (?param-name ?param-names ?param-values $?default)
 	(foreach ?p ?param-names
 		(if (eq ?param-name ?p) then (return (nth$ ?p-index ?param-values)))
