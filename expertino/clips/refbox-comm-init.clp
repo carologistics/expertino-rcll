@@ -19,6 +19,7 @@
   (confval (path "/game/parameters/rcll/peer_send_port") (value ?peer-send-port))
   (confval (path "/game/parameters/rcll/peer_recv_port") (value ?peer-recv-port))
   (not (protobuf-peer (name refbox-public)))
+  (not (executive-finalize))
   =>
   (printout info "Enabling local peer (public) " ?peer-address " " ?peer-send-port " " ?peer-recv-port crlf)
   (bind ?peer-id (pb-peer-create-local ?peer-address ?peer-send-port ?peer-recv-port))
@@ -37,6 +38,7 @@
   (confval (path "/game/parameters/rcll/magenta_recv_port") (value ?magenta-recv-port))
   (confval (path "/game/parameters/rcll/magenta_send_port") (value ?magenta-send-port))
   (not (protobuf-peer (name refbox-private)))
+  (not (executive-finalize))
   =>
   (if (eq ?team-color CYAN)
     then
