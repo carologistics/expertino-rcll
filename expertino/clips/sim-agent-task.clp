@@ -96,7 +96,7 @@
   (current-rcll-agent-task-id (robot ?robot) (task-id ?seq)) 
   (not (rcll-agent-task (robot ?robot) (task-id ?seq)))
   =>
-  (bind ?zone M_Z75)
+  (bind ?zone WAIT)
   (assert (rcll-agent-task (task-id ?seq) (task-name ?task) (robot ?robot) (task-type Move)
    (waypoint ?zone) (executor-id ?ex-id)
   ))
