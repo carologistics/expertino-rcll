@@ -48,6 +48,7 @@
   (assert (rcll-agent-task (task-id ?seq) (task-name ?task) (robot ?robot) (task-type Retrieve)     
        ;TODO add workpiece information
                 (machine ?mps) (side ?mps-side) (executor-id ?ex-id)))
+  (printout green "agent-task id " ?seq " for " ?robot " of type Retrieve created " ?mps)
   (modify ?at-list (current-task-id ?seq))
 )    
 
@@ -64,6 +65,7 @@
    ;TODO add workpiece information
    (machine ?mps) (side ?mps-side) (executor-id ?ex-id)                                                              
   ))
+  (printout green "agent-task id " ?seq " for " ?robot " of type Deliver created " ?mps)
   (modify ?at-list (current-task-id ?seq))
 )    
 
@@ -86,6 +88,7 @@
   (assert (rcll-agent-task (task-id ?seq) (task-name ?task) (robot ?robot) (task-type Move)
    (machine ?mps) (side ?mps-side) (executor-id ?ex-id)
   ))
+  (printout green "agent-task id " ?seq " for " ?robot " of type Move created " ?mps)
   (modify ?at-list (current-task-id ?seq))
 )    
 
@@ -97,7 +100,7 @@
   (not (rcll-agent-task (robot ?robot) (task-id ?seq)))
   =>
   (bind ?zone WAIT)
-  (bind ?zone M_Z71)
+  ;(bind ?zone M_Z71)
   (assert (rcll-agent-task (task-id ?seq) (task-name ?task) (robot ?robot) (task-type Move)
    (waypoint ?zone) (executor-id ?ex-id)
   ))
