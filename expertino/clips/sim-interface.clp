@@ -99,7 +99,7 @@
         (bind ?error-code (pb-field-value ?task-msg "error_code"))
         (if (neq ?error-code 0) then
           (bind ?task-outcome FAILED)
-          (printout warn "agent-task" ?task-name "for robot" ?robot "failed with id " ?task " got aborted with error code " ?error-code crlf)
+          (printout warn "agent-task " ?task-name " with id " ?task " for " ?robot " got aborted with error code " ?error-code crlf)
         )
         ;(modify ?ex (state ABORTED))
       )
