@@ -72,7 +72,7 @@
   ?pf <- (protobuf-msg (type "llsf_msgs.AgentTask") (ptr ?task-msg))
   ?at <- (rcll-agent-task (task-id ?task-seq) (robot ?robot)
     (outcome UNKNOWN) (task-name ?task-name) (executor-id ?ex-id) (sent ?sent-time)
-    (ack ?ack-time)
+    (ack ?ack-time) (waypoint ?waypoint)
   )
   ?ex <- (executor (id ?ex-id))
   (not (rcll-agent-task (robot ?robot)
@@ -105,7 +105,9 @@
         (bind ?task-outcome FAILED)
         (bind ?error-code (pb-field-value ?task-msg "error_code"))
         (printout warn "agent-task " ?task-name " with id " ?task " for " ?robot " got aborted with error code " ?error-code crlf)
-        ;(modify ?ex (state ABORTED))
+        (if (str-index WAIT ?waypoint) then
+          (bind ?task-outcome SUCCEEDED)
+        )
       )
     )
     (if (neq ?task-outcome UNKNOWN) then
