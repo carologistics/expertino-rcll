@@ -189,7 +189,7 @@
   (bind ?wait WAIT)
   (bind ?side (pddl-place-to-mps-side ?place))
   (if (eq ?side SLIDE) then (bind ?side INPUT))
-  (return (sym-cat ?wait - ?mps - ?side))
+  (return (sym-cat ?wait - ?mps - INPUT))
 )
 
 (deffunction get-param-by-name (?param-name ?param-names ?param-values $?default)
