@@ -179,9 +179,9 @@
   ?at <- (rcll-agent-task (executor-id ?ex-id) (task-id ?seq) (outcome FAILED) (retry-count ?count) (task-type ?task-type))
   =>
   (if (eq Move ?task-type) then
-    (bind ?max-count 7)
+    (bind ?max-count 1000)
    else
-    (bind ?max-count 5)
+    (bind ?max-count 5000)
   )
   (if (< ?count ?max-count) then 
     (bind ?next-seq (+ 1 ?seq))
