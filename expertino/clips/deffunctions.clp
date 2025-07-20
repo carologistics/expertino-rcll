@@ -187,7 +187,7 @@
 (deffunction pddl-place-to-wait-point (?place ?team-color)
   (bind ?mps (pddl-place-to-refbox-mps ?place ?team-color))
   (bind ?wait WAIT)
-  (bind ?side (pddl-place-to-mps-side ?place ?team-color))
+  (bind ?side (pddl-place-to-mps-side ?place))
   (if (eq ?side SLIDE) then (bind ?side INPUT))
   (return (sym-cat ?wait - ?mps - ?side))
 )
