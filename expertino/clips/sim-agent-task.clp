@@ -96,7 +96,7 @@
   ?at-list <- (agent-task-list (id ?id) (executor-id ?ex-id) (tasks ?task&Move-away $?rest)
                           (params $?params))
   ?ex <- (executor (id ?ex-id) (worker ?robot) (pddl-action-id ?action-id))
-  (pddl-action (id ?action-id) (name ?action-name))
+  (pddl-action (id ?action-id) (name ?action-name) (params $?action-params))
   (current-rcll-agent-task-id (robot ?robot) (task-id ?seq)) 
   (not (rcll-agent-task (robot ?robot) (task-id ?seq)))
   (game-state (team-color ?team-color))
