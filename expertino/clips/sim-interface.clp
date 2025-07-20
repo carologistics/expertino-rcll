@@ -50,7 +50,7 @@
    (game-state (state RUNNING) (phase EXPLORATION|PRODUCTION) (team-color ?team-color&~NOT-SET))
    (game-time ?gt)
    (test (>= (- ?gt ?time) 2))
-   (test (>= ?ack-time ?time))
+   ;(test (>= ?ack-time ?time))
    =>
    (bind ?task-msg (create-task-msg ?at ?team-color))
    (if ?task-msg
