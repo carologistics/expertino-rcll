@@ -18,11 +18,24 @@
 	)
 )
 
-(deffunction observe-all-objects ()
-	(do-for-all-facts ((?o pddl-object))
+(deffunction get-objects-for-all-types (?instance)
+  (bind ?found-types (create$))
+	(do-for-all-facts ((?p pddl-predicate))
 		TRUE
-	(assert (rl-observable-object	(name ?o:name) 
-									(type ?o:type)))
+	  (foreach ?type ?p:param-types
+      (if (not (member$ ?type ?found-types)) then
+        (assert (pddl-get-type-objects (instance ?instance) (type ?type)))
+        (bind ?found-types (insert$ ?found-types 1 ?type))
+      ) 
+	  )
+  )
+)
+
+(deffunction observe-all-types ()
+  (do-for-all-facts ((?to pddl-type-objects))
+    TRUE
+	  (assert (rl-observable-type (type ?to:type) 
+										            (objects ?to:objects)))
 	)
 )
 
@@ -64,27 +77,34 @@
   (assert (pddl-action  (instance ?instance) (id (sym-cat stack- (gensym*))) (plan NONE) (name stack) (params robot1 block4 block3)))
 )
 
-(defrule init-load-domain-facts
+(defrule init-load-domain-predicates
   (domain-loaded)
   (not (domain-facts-loaded))
   (startup-completed)
   (confval (path "/pddl/problem_instance") (value ?instance-str))
   =>
   (assert (pddl-get-predicates (instance (sym-cat ?instance-str))))
-  (assert (pddl-get-objects (instance (sym-cat ?instance-str))))
+)
+
+(defrule init-load-domain-objects
+  (not (domain-facts-loaded))
+  (pddl-get-predicates (instance ?instance) (state DONE))
+  (confval (path "/pddl/problem_instance") (value ?instance-str&:(eq ?instance (sym-cat ?instance-str))))
+  =>
+  (get-objects-for-all-types ?instance)
 )
 
 (defrule init-load-domain-facts-done
   (not (domain-facts-loaded))
-  (pddl-get-predicates (instance ?instance) (state DONE))
-  (pddl-get-objects (instance ?instance) (state DONE))
-  (confval (path "/pddl/problem_instance") (value ?instance-str&:(eq ?instance (sym-cat ?instance-str))))
+  (confval (path "/pddl/problem_instance") (value ?instance-str))
+  (pddl-get-type-objects (state DONE))
+  (not (pddl-get-type-objects (state ?state&~DONE)))
   =>
   (predefine-observables)
   (observe-predicates-except-on-table)
-  (observe-all-objects)
+  (observe-all-types)
   (add-robot)
-  (generate-pddl-actions ?instance)
+  (generate-pddl-actions (sym-cat ?instance-str))
   (assert (domain-facts-loaded))
 )
 

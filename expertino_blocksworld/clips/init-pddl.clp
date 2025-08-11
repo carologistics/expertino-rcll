@@ -61,7 +61,7 @@
     get_fluents GetFluents
     get_functions GetFunctions
     get_predicates GetPredicates
-    get_objects GetObjects
+    get_type_objects GetTypeObjects
     set_goals SetGoals
     clear_goals ClearGoals
     set_action_filter SetActionFilter

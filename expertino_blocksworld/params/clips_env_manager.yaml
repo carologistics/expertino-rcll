@@ -91,10 +91,10 @@ clips_manager:
         "clips/expertino_blocksworld/pddl/instances.clp",
         "clips/expertino/pddl/get-action-names.clp",
         "clips/expertino/pddl/get-fluents.clp",
-        "clips/expertino/pddl/get-objects.clp",
+        "clips/expertino/pddl/get-type-objects.clp",
         "clips/expertino/pddl/get-predicates.clp",
         "clips/expertino/pddl/numeric-fluents.clp",
-        "clips/expertino/pddl/action-effect-apply.clp",
+        #"clips/expertino/pddl/action-effect-apply.clp",
         "clips/expertino/action/action-precond-check.clp",
         "clips/expertino_blocksworld/point-mapping.clp",
         "clips/rl_plugin/reinforcementlearning.clp",
@@ -114,7 +114,7 @@ clips_manager:
         "clips/expertino_blocksworld/init.clp",
         "clips/expertino_blocksworld/reset.clp",
         "clips/expertino_blocksworld/action-executability.clp",
-        "clips/expertino_blocksworld/action-execution.clp"
+        #"clips/expertino_blocksworld/action-execution.clp"
         ]
     ros_msgs:
       plugin: "cx::RosMsgsPlugin"
