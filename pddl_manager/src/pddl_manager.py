@@ -31,9 +31,9 @@ from expertino_msgs.srv import (
     SetFluentFilter,
     CreateGoalInstance,
     GetPredicates,
-    GetObjects
+    GetTypeObjects
 )
-from expertino_msgs.msg import Fluent as FluentMsg, FluentEffect, FunctionEffect, Function, TimedPlanAction, Action as ActionMsg, Predicate as PredicateMsg, Object as ObjectMsg
+from expertino_msgs.msg import Fluent as FluentMsg, FluentEffect, FunctionEffect, Function, TimedPlanAction, Action as ActionMsg, Predicate as PredicateMsg
 from expertino_msgs.action import PlanTemporal
 from std_msgs.msg import String
 
@@ -258,9 +258,9 @@ class PddlManagerLifecycleNode(LifecycleNode):
             callback_group=self.srv_cb_group,
         )
         self.get_objects_srv = self.create_service(
-            GetObjects,
-            f"{self.get_name()}/get_objects",
-            self.handle_get_objects,
+            GetTypeObjects,
+            f"{self.get_name()}/get_type_objects",
+            self.handle_get_type_objects,
             callback_group=self.srv_cb_group,
         )
         self.plan_action_server = ActionServer(
@@ -643,7 +643,7 @@ class PddlManagerLifecycleNode(LifecycleNode):
         response.success = True
         return response
     
-    def handle_get_objects(self, request, response):
+    def handle_get_type_objects(self, request, response):
         if request.pddl_instance not in self.managed_problems.keys():
             response.success = False
             response.error = "Unknown pddl instance"
@@ -651,13 +651,15 @@ class PddlManagerLifecycleNode(LifecycleNode):
         instance = self.managed_problems[request.pddl_instance].base_problem
         response.objects = []
         
-        for obj in instance.all_objects:
-            object = ObjectMsg(
-                pddl_instance=request.pddl_instance,
-                name=obj.name,
-                type=obj.type.name
-            )
-            response.objects.append(object)
+        type = request.type
+        
+        if not instance.has_type(type):
+            request.success = False
+            response.error = "Type not in instance"
+            return response
+        
+        for obj in instance.objects(instance.user_type(type)):
+            response.objects.append(obj.name)
         response.success = True
         return response
 
