@@ -36,7 +36,7 @@ set(SERVICES
     "srv/CreateGoalInstance.srv"
     "srv/AddFluents.srv"
     "srv/GetPredicates.srv"
-    "srv/GetObjects.srv")
+    "srv/GetTypeObjects.srv")
 set(ACTIONS "action/PlanTemporal.action")
 
 # set(ACTIONS
