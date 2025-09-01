@@ -44,12 +44,15 @@
  " Create an AgentTask protobuf message and send it to the simulator peer.
  "
    (current-rcll-agent-task-id (robot ?robot) (task-id ?task-seq))
-   ?at <- (rcll-agent-task (task-id ?task-seq) (robot ?robot) (executor-id ?ex-id) (outcome UNKNOWN) (sent ?time))
+   ?at <- (rcll-agent-task (task-id ?task-seq) (robot ?robot) (executor-id ?ex-id) (outcome UNKNOWN) (sent ?time) (ack ?ack))
    ?ex <- (executor (id ?ex-id) (worker ?robot) (state ?state))
    (protobuf-peer (name ?robot) (peer-id ?peer-id))
    (game-state (state RUNNING) (phase EXPLORATION|PRODUCTION) (team-color ?team-color&~NOT-SET))
    (game-time ?gt)
-   (test (>= (- ?gt ?time) 2))
+   (test (and
+           (neq ?ack TRUE)
+           (>= (- ?gt ?time) 2)
+   ))
    =>
    (bind ?task-msg (create-task-msg ?at ?team-color))
    (if ?task-msg
@@ -81,6 +84,7 @@
   ?curr-task-id <- (current-rcll-agent-task-id (robot ?robot) (task-id ?task-seq))
   (game-time ?gt)
   =>
+  (modify ?at (ack TRUE))
   (bind ?task (pb-field-value ?task-msg "task_id"))
   (if (eq ?task ?task-seq) then
     (bind ?robot-num (pb-field-value ?task-msg "robot_id"))
