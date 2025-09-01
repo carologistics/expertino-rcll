@@ -1,0 +1,16 @@
+# Configuration for the integration of the external pddl manager.
+pddl:
+  # Name of the externally started pddl manager.
+  manager_node: "/pddl_manager"
+  # Directory relative to expertino share dir
+  # used to lookup all files specified below.
+  pddl_dir: "pddl"
+  # Name of the main pddl instance.
+  problem_instance: "blocksworld"
+  # Initial pddl model split in domain and problem file.
+  init_domain_file: "domain.pddl"
+  init_problem_file: "problem.pddl"
+  # For planning, a subset of actions is used, only actions from the provided domain file are used.
+  planning_instance: "planning"
+  planning_domain_file: "domain.pddl"
+    

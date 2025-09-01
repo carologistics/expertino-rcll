@@ -1,0 +1,15 @@
+(defrule reset-reload-problem-instance
+  (declare (salience ?*SALIENCE-RL-FIRST*))
+  (reset-game-finished)
+  (not (reset-instance))
+  (pddl-manager (node ?node))
+  (confval (path "/pddl/problem_instance") (value ?instance))
+  (confval (path "/pddl/pddl_dir") (value ?dir))
+  (confval (path "/pddl/init_domain_file") (value ?domain))
+  (confval (path "/pddl/init_problem_file") (value ?problem))
+  ?ins <- (pddl-instance)
+  =>
+  (retract ?ins)
+  (assert (pddl-instance (name (sym-cat ?instance)) (domain ?domain) (problem ?problem) (directory ?dir) (state PENDING)))
+  (assert (reset-instance))
+)

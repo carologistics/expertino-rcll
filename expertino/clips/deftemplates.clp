@@ -243,6 +243,48 @@
   (slot error (type STRING))
 )
 
+(deftemplate pddl-get-predicates
+" Interface for get-predicates.clp
+  Assert a fact of this type in order to fetch all predicates
+  of a given pddl instance with the external pddl manager.
+  This results in the automatic assertion of all predicates
+  (pddl-predicate template facts) currently present in the given pddl
+  instance.
+  @slot instance: pddl instance from which the predicates are fetched.
+  Slots set automatically:
+  @slot state:
+   - PENDING: The predicates were not fetched yet.
+   - DONE: The predicates were successfully retrieved
+   - ERROR: The predicates were not fetched due to an error.
+  @slot error: provide information on encountered errors.
+"
+  (slot instance (type SYMBOL))
+  (slot state (type SYMBOL) (allowed-values PENDING DONE ERROR) (default PENDING))
+  (slot error (type STRING))
+)
+
+(deftemplate pddl-get-type-objects
+" Interface for get-type-objects.clp
+  Assert a fact of this type in order to fetch all objects of a certain type
+  of a given pddl instance with thewith external pddl manager.
+  This results in the automatic assertion of all objects of that type
+  (pddl-type-objects template facts) currently present in the given pddl
+  instance.
+  @slot instance: pddl instance from which the objects are fetched.
+  Slots set automatically:
+  @slot type: type of objects to retrieve
+  @slot state:
+   - PENDING: The objects were not fetched yet.
+   - DONE: The objects were successfully retrieved
+   - ERROR: The objects were not fetched due to an error.
+  @slot error: provide information on encountered errors.
+"
+  (slot instance (type SYMBOL))
+  (slot type (type SYMBOL))
+  (slot state (type SYMBOL) (allowed-values PENDING DONE ERROR) (default PENDING))
+  (slot error (type STRING))
+)
+
 (deftemplate pddl-instance
 " Interface for instances.clp
   Assert a fact of this type to initialize a pddl instance with the external pddl manager.
@@ -262,7 +304,7 @@
   (slot problem (type STRING))
   (slot directory (type STRING))
   (slot state (type SYMBOL) (allowed-values PENDING LOADED ERROR) (default PENDING))
-  (slot busy-with (type SYMBOL) (allowed-values FALSE OBJECTS FLUENTS NUMERIC-FLUENTS ACTION-EFFECTS CREATE-GOAL-INSTANCE CLEAR-GOALS SET-GOALS CHECK-CONDITIONS GET-FLUENTS GET-NUMERIC-FLUENTS GET-ACTION-NAMES SET-ACTION-FILTER SET-OBJECT-FILTER SET-FLUENT-FILTER CREATE-GOAL-INSTANCE) (default FALSE))
+  (slot busy-with (type SYMBOL) (allowed-values FALSE OBJECTS FLUENTS NUMERIC-FLUENTS ACTION-EFFECTS CREATE-GOAL-INSTANCE CLEAR-GOALS SET-GOALS CHECK-CONDITIONS GET-FLUENTS GET-NUMERIC-FLUENTS GET-PREDICATES GET-TYPE-OBJECTS GET-ACTION-NAMES SET-ACTION-FILTER SET-OBJECT-FILTER SET-FLUENT-FILTER CREATE-GOAL-INSTANCE) (default FALSE))
   (slot error (type STRING))
 )
 
@@ -317,6 +359,7 @@
   (slot delete (type SYMBOL) (allowed-values FALSE TRUE) (default FALSE))
   (slot request-id (type INTEGER))
   (slot state (type SYMBOL) (allowed-values PENDING WAITING ERROR ON-HOLD) (default PENDING))
+  (slot error (type STRING))
 )
 
 (deftemplate pending-pddl-numeric-fluent
@@ -376,6 +419,29 @@
   (slot name (type SYMBOL))
   (multislot params (type SYMBOL) (default (create$)))
   (slot value (type FLOAT))
+)
+
+(deftemplate pddl-predicate
+" Represents a predicate in a pddl instance.
+  @slot instance: pddl instance to the predicate is part of.
+  @slot name: name of the predicate.
+  @slot param-types: parameter types of the predicate.
+"
+  (slot instance (type SYMBOL))
+  (slot name (type SYMBOL))
+  (multislot param-types (type SYMBOL) (default (create$)))
+  (multislot param-names (type SYMBOL) (default (create$)))
+)
+
+(deftemplate pddl-type-objects
+" Lists all objects of a certain type in a pddl instance.
+  @slot instance: pddl instance to the object is part of.
+  @slot type: type of the object.
+  @slot objects: list of the object names.
+"
+  (slot instance (type SYMBOL))  
+  (slot type (type SYMBOL))
+  (multislot objects (type STRING) (default (create$)))
 )
 
 (deftemplate pddl-plan
