@@ -13,10 +13,11 @@ from launch_ros.actions import Node
 
 def launch_with_context(context, *args, **kwargs):
     blocksworld_dir = get_package_share_directory('expertino_blocksworld')
+    cx_bringup_dir = get_package_share_directory('cx_bringup')
     manager_config = LaunchConfiguration("manager_config")
     rl_config = os.path.join(blocksworld_dir, 'params', 'training-config.yaml')
     log_level = LaunchConfiguration('log_level')
-    manager_config_file = os.path.join(blocksworld_dir, "params", manager_config.perform(context))
+    manager_config = LaunchConfiguration("manager_config")
     declare_model_file_cmd = DeclareLaunchArgument(
         'model_file',
         default_value=os.path.join(blocksworld_dir + "/domain.pddl"),
@@ -25,18 +26,7 @@ def launch_with_context(context, *args, **kwargs):
     # also launch the pddl_manager
     pddl_manager_dir = get_package_share_directory('pddl_manager')
     launch_pddl_manager = os.path.join(pddl_manager_dir, 'launch', 'pddl_manager.launch.py')
-
-
-    cx_node = Node(
-        package='cx_bringup',
-        executable='cx_node',
-        output='screen',
-        emulate_tty=True,
-        parameters=[
-            manager_config_file,
-        ],
-        arguments=['--ros-args', '--log-level', log_level]
-    )
+    launch_cx = os.path.join(cx_bringup_dir, 'launch', 'cx_launch.py')
 
     cxrl_node = Node(
         package='cxrl_mrmppo',
@@ -48,8 +38,17 @@ def launch_with_context(context, *args, **kwargs):
         parameters= [rl_config]
     )
 
-    return [cx_node, cxrl_node, IncludeLaunchDescription(
-            PythonLaunchDescriptionSource(launch_pddl_manager))]
+    return [cxrl_node, IncludeLaunchDescription(
+            PythonLaunchDescriptionSource(launch_pddl_manager)
+        ), IncludeLaunchDescription(
+            PythonLaunchDescriptionSource(launch_cx),
+            launch_arguments={
+                "package": "expertino_blocksworld",
+                "manager_config": manager_config.perform(context),
+                "log_level": log_level
+            }.items(),
+
+        )]
 
 def generate_launch_description():
     

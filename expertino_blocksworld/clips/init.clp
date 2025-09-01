@@ -116,4 +116,11 @@
     (pddl-fluent (name on) (params block4 block3))
     =>
     (assert (rl-episode-end (success TRUE)))
-)   
+)
+
+(defrule domain-start-execution
+  (rl-mode (mode EXECUTION))
+  (not (rl-executability-check))
+  =>
+  (assert (rl-executability-check (state CHECKING)))
+)
