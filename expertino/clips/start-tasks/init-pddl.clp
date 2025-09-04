@@ -73,7 +73,7 @@
      (bind ?service-type (nth$ (+ ?index 1) ?services))
      (ros-msgs-create-client
        (str-cat ?node "/" ?service-name)
-       (str-cat "pddl_msgs/srv/" ?service-type)
+       (str-cat "cx_pddl_msgs/srv/" ?service-type)
      )
      (bind ?index (+ ?index 2))
   )
@@ -126,7 +126,7 @@
   ?pan-f <- (pddl-action-names (instance ?instance) (state DONE) (action-names $?an))
   ?st <- (start-task (name pddl) (state ACTIVE) (parts init-planning-actions $?rest-parts))
   =>
-  (assert (planning-filter (id (sym-cat ?instance-str)) (filter ?an) (instance (sym-cat ?problem-instance-str)) (goal ?*GOAL-INSTANCE-BASE*) (type ACTIONS)))
+  (assert (pddl-planning-filter (id (sym-cat ?instance-str)) (filter ?an) (instance (sym-cat ?problem-instance-str)) (goal ?*GOAL-INSTANCE-BASE*) (type ACTIONS)))
   (retract ?pan-f)
   (modify ?st (parts ?rest-parts))
 )
@@ -159,7 +159,7 @@
   ?pan-f <- (pddl-action-names (instance ?instance) (state DONE) (action-names $?an))
   ?st <- (start-task (name pddl) (state ACTIVE) (parts init-replanning-actions $?rest-parts))
   =>
-  (assert (planning-filter (id (sym-cat ?instance-str)) (filter ?an) (instance (sym-cat ?problem-instance-str)) (goal ?*GOAL-INSTANCE-REPLANNING*) (type ACTIONS)))
+  (assert (pddl-planning-filter (id (sym-cat ?instance-str)) (filter ?an) (instance (sym-cat ?problem-instance-str)) (goal ?*GOAL-INSTANCE-REPLANNING*) (type ACTIONS)))
   (retract ?pan-f)
   (modify ?st (parts ?rest-parts))
 )
@@ -185,12 +185,12 @@
   (confval (path "/pddl/manager_node") (value ?node))
   (start-task (name pddl) (state ACTIVE) (parts init-planner $?rest-parts))
   =>
-  (pddl-msgs-plan-temporal-create-client (str-cat ?node "/temp_plan"))
+  (cx-pddl-msgs-plan-temporal-create-client (str-cat ?node "/temp_plan"))
 )
 
 (defrule pddl-init-plan-client-successful
   (confval (path "/pddl/manager_node") (value ?node))
-  (pddl-msgs-plan-temporal-client (server ?s&:(eq ?s (str-cat ?node "/temp_plan"))))
+  (cx-pddl-msgs-plan-temporal-client (server ?s&:(eq ?s (str-cat ?node "/temp_plan"))))
   ?st <- (start-task (name pddl) (state ACTIVE) (parts init-planner $?rest-parts))
   =>
   (modify ?st (parts ?rest-parts))

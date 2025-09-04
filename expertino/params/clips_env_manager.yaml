@@ -10,6 +10,7 @@ clips_manager:
                 "ros_msgs",
                 "plan_temporal_action",
                 "timed_plan_action_msg",
+                "pddl_files",
                 "files"]
       log_clips_to_file: true
       redirect_stdout_to_debug: true
@@ -29,9 +30,15 @@ clips_manager:
       publish_on_refresh: false
       assert_time: true
       refresh_rate: 10
+    pddl_files:
+      plugin: "cx::FileLoadPlugin"
+      pkg_share_dirs: ["cx_pddl_clips"]
+      batch: [
+        "clips/pddl.clp"
+        ]
     files:
       plugin: "cx::FileLoadPlugin"
-      pkg_share_dirs: ["expertino", "cx_goal_reasoning"]
+      pkg_share_dirs: ["expertino"]
       load: [
         # Specific isolated concepts
         "clips/expertino/unwatch.clp",
@@ -41,31 +48,16 @@ clips_manager:
         "clips/expertino/deftemplates.clp",
         "clips/expertino/deffunctions.clp",
         # Startup
-        "clips/expertino/pddl/saliences.clp",
         "clips/expertino/start-tasks/init-pddl.clp",
         # Actual Reasoning
         "clips/expertino/init.clp",
-        "clips/expertino/pddl/set-goals.clp",
-        "clips/expertino/pddl/clear-goals.clp",
-        "clips/expertino/pddl/objects.clp",
-        "clips/expertino/pddl/fluents.clp",
-        "clips/expertino/pddl/instances.clp",
-        "clips/expertino/pddl/get-action-names.clp",
-        "clips/expertino/pddl/get-fluents.clp",
-        "clips/expertino/pddl/numeric-fluents.clp",
         "clips/expertino/pddl/plan.clp",
-        "clips/expertino/pddl/action-effect-apply.clp",
-        "clips/expertino/pddl/create-goal-instance.clp",
-        "clips/expertino/pddl/set-action-filter.clp",
-        "clips/expertino/pddl/set-object-filter.clp",
-        "clips/expertino/pddl/set-fluent-filter.clp",
         "clips/expertino/refbox-comm-init.clp",
         "clips/expertino/refbox-recv.clp",
         "clips/expertino/refbox-action.clp",
         "clips/expertino/sim-interface.clp",
         "clips/expertino/orders/order-selection.clp",
         "clips/expertino/action/action-agenda.clp",
-        "clips/expertino/action/action-precond-check.clp",
         "clips/expertino/sim-agent-task.clp",
         "clips/expertino/executor.clp",
         "clips/expertino/action/action-selection.clp",
@@ -77,6 +69,6 @@ clips_manager:
     ros_msgs:
       plugin: "cx::RosMsgsPlugin"
     plan_temporal_action:
-      plugin: "cx::CXPddlMsgsPlanTemporalPlugin"
+      plugin: "cx::CXCxPddlMsgsPlanTemporalPlugin"
     timed_plan_action_msg:
-      plugin: "cx::CXPddlMsgsTimedPlanActionPlugin"
+      plugin: "cx::CXCxPddlMsgsTimedPlanActionPlugin"

@@ -7,17 +7,17 @@
 (defrule agenda-action-sat-check-start
   (agenda-action-item (plan ?plan-id) (action ?action-id) (execution-state INITIAL) (worker-type ?worker-type))
   (agenda (plan ?plan-id) (state ACTIVE))
-  (not (pddl-action-precondition (plan ?plan-id) (id ?action-id) (context AGENDA-SELECTION)))
+  (not (pddl-action-condition (plan ?plan-id) (id ?action-id) (context AGENDA-SELECTION)))
   (worker (id ?worker) (state IDLE) (type ?worker-type))
   (pddl-plan (id ?plan-id) (instance ?instance))
   (pddl-instance-update (instance ?instance) (last-updated ?last-update-time))
   =>
-  (assert (pddl-action-precondition (plan ?plan-id) (instance ?instance) (id ?action-id) (state PENDING) (context AGENDA-SELECTION) (instance-update ?last-update-time)))
+  (assert (pddl-action-condition (plan ?plan-id) (instance ?instance) (id ?action-id) (state PENDING) (context AGENDA-SELECTION) (instance-update ?last-update-time)))
 )
 
 (defrule agenda-action-sat-check-reset
   ?action <- (agenda-action-item (plan ?plan-id) (action ?action-id) (execution-state PENDING|UNSAT) (worker-type ?worker-type))
-  ?precon <- (pddl-action-precondition (plan ?plan-id) (id ?action-id) (state PRECONDITION-UNSAT|PRECONDITION-SAT|PENDING) (context AGENDA-SELECTION) (instance-update ?update-time))
+  ?precon <- (pddl-action-condition (plan ?plan-id) (id ?action-id) (state CONDITION-UNSAT|CONDITION-SAT|PENDING) (context AGENDA-SELECTION) (instance-update ?update-time))
   (worker (id ?worker) (state IDLE) (type ?worker-type))
   (pddl-plan (id ?plan-id) (instance ?instance))
   (pddl-instance-update (instance ?instance) (last-updated ?last-update-time&:(> ?last-update-time ?update-time)))
@@ -28,9 +28,9 @@
 
 (defrule agenda-action-sat-check-apply-results
   ?action <- (agenda-action-item (action ?action-id) (execution-state INITIAL))
-  (pddl-action-precondition (plan ?plan-id) (id ?action-id) (state ?state&PRECONDITION-UNSAT|PRECONDITION-SAT) (context AGENDA-SELECTION))
+  (pddl-action-condition (plan ?plan-id) (id ?action-id) (state ?state&CONDITION-UNSAT|CONDITION-SAT) (context AGENDA-SELECTION))
   =>
-  (if (eq ?state PRECONDITION-SAT)
+  (if (eq ?state CONDITION-SAT)
     then
       (modify ?action (execution-state PENDING))
       (printout green "Action " ?action-id " set to PENDING" crlf)

@@ -22,7 +22,7 @@ def launch_with_context(context, *args, **kwargs):
         description='PDDL Model file')
 
     # also launch the pddl_manager
-    pddl_manager_dir = get_package_share_directory('pddl_manager')
+    pddl_manager_dir = get_package_share_directory('cx_pddl_manager')
     launch_pddl_manager = os.path.join(pddl_manager_dir, 'launch', 'pddl_manager.launch.py')
     launch_cx = os.path.join(cx_bringup_dir, 'launch', 'cx_launch.py')
 

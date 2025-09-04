@@ -1,4 +1,4 @@
-from cxrl_gym.cxrl_gym import CXRLGym
+from cx_rl_gym.cx_rl_gym import CXRLGym
 from rclpy.node import Node
 import rclpy
 

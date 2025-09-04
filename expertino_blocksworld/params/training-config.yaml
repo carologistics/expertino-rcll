@@ -1,4 +1,4 @@
-cxrl_node/blocksworld_rl_node:
+cx_rl_node/blocksworld_rl_node:
   ros__parameters:
     package_dir: "expertino_ws/src/expertino-rcll/expertino_blocksworld/expertino_blocksworld/"
 

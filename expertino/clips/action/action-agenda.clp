@@ -55,7 +55,7 @@
 (defrule agenda-add-action-relaxed
   (agenda (plan ?plan-id) (class-selection ?ordering-class-selected) (class-relaxation ?relaxation) (state ACTIVE))
   (pddl-action (id ?action-id) (name ?action-name) (plan ?plan-id) (plan-order-class ?plan-order-class&:(>= ?ordering-class-selected  (- ?plan-order-class ?relaxation))))
-  ?precon <- (pddl-action-precondition (plan ?plan-id) (id ?action-id) (state PRECONDITION-SAT) (context AGENDA-LOOKAHEAD))
+  ?precon <- (pddl-action-condition (plan ?plan-id) (id ?action-id) (state CONDITION-SAT) (context AGENDA-LOOKAHEAD))
   (not (agenda-action-item (plan ?plan-id) (action ?action-id)))
   (confval (path "/pddl/actions/robot") (list-value $?robot-actions))
   (confval (path "/pddl/actions/refbox") (list-value $?refbox-actions))
@@ -75,19 +75,19 @@
 (defrule agenda-add-action-relaxed-check
     (agenda (plan ?plan-id) (class-selection ?ordering-class-selected) (class-relaxation ?relaxation) (state ACTIVE))
     (pddl-action (id ?action-id) (plan ?plan-id) (plan-order-class ?plan-order-class&:(>= ?ordering-class-selected  (- ?plan-order-class ?relaxation))))
-    (not (pddl-action-precondition (plan ?plan-id) (id ?action-id) (context AGENDA-LOOKAHEAD)))
+    (not (pddl-action-condition (plan ?plan-id) (id ?action-id) (context AGENDA-LOOKAHEAD)))
     (not (agenda-action-item (plan ?plan-id) (action ?action-id)))
     (pddl-plan (id ?plan-id) (instance ?instance))
     (pddl-instance-update (instance ?instance) (last-updated ?last-update-time))
     =>
-    (assert (pddl-action-precondition (instance ?instance) (plan ?plan-id) (id ?action-id) (state PENDING) (context AGENDA-LOOKAHEAD) (instance-update ?last-update-time)))
+    (assert (pddl-action-condition (instance ?instance) (plan ?plan-id) (id ?action-id) (state PENDING) (context AGENDA-LOOKAHEAD) (instance-update ?last-update-time)))
     (printout yellow "Checking action " ?action-id "(ordering " ?plan-order-class ") for preconditions, relaxed agenda candidate" crlf)
 )
 
 (defrule agenda-add-action-relaxed-reset
   (agenda (plan ?plan-id) (class-selection ?ordering-class-selected) (class-relaxation ?relaxation) (state ACTIVE))
   (pddl-action (id ?action-id) (plan ?plan-id) (plan-order-class ?plan-order-class&:(>= ?ordering-class-selected  (- ?plan-order-class ?relaxation))))
-  ?precon <- (pddl-action-precondition (plan ?plan-id) (id ?action-id) (context AGENDA-LOOKAHEAD) (state PRECONDITION-UNSAT|PRECONDITION-SAT|PENDING) (instance-update ?update-time))
+  ?precon <- (pddl-action-condition (plan ?plan-id) (id ?action-id) (context AGENDA-LOOKAHEAD) (state CONDITION-UNSAT|CONDITION-SAT|PENDING) (instance-update ?update-time))
   (pddl-instance-update (instance ?instance) (last-updated ?last-update-time&:(> ?last-update-time ?update-time)))
   =>
   (retract ?precon)
@@ -102,7 +102,7 @@
   (printout debug "Freezing agenda.." crlf)
   (modify ?agenda (state INACTIVE))
   ;retract all pending precondition-check facts
-  (do-for-all-facts ((?precon pddl-action-precondition)) (and (eq ?precon:plan ?plan-id) (eq ?precon:state PENDING))
+  (do-for-all-facts ((?precon pddl-action-condition)) (and (eq ?precon:plan ?plan-id) (eq ?precon:state PENDING))
     (retract ?precon)
   )
   ;retract all the executors for the agenda that are in state INIT
@@ -121,9 +121,9 @@
          (or
            (agenda (plan ?plan-id) (state ACTIVE))
            (agenda-action-item (plan ?plan-id) (execution-state EXECUTING))
-           (pending-pddl-fluent (instance ?instance))
-           (pending-pddl-numeric-fluent (instance ?instance))
-           (pending-pddl-object (instance ?instance))
+           (pddl-fluent-change (instance ?instance))
+           (pddl-numeric-fluent-change (instance ?instance))
+           (pddl-object-change (instance ?instance))
            (pddl-action-get-effect (state ~DONE))
          )
        )

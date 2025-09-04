@@ -41,8 +41,8 @@
 (defrule finalize-ros-destroy-plan-temporal-client
 " Delete each client on executive finalize. "
   (executive-finalize)
-  (pddl-msgs-plan-temporal-client (server ?server))
+  (cx-pddl-msgs-plan-temporal-client (server ?server))
 =>
   (printout debug "Destroying plan-temporal client" crlf)
-  (pddl-msgs-plan-temporal-destroy-client ?server)
+  (cx-pddl-msgs-plan-temporal-destroy-client ?server)
 )

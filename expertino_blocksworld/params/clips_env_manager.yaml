@@ -69,11 +69,11 @@ clips_manager:
       plugin: "cx::CXCxRlInterfacesResetCXPlugin"
 
     plan_temporal_action:
-      plugin: "cx::CXPddlMsgsPlanTemporalPlugin"
+      plugin: "cx::CXCxPddlMsgsPlanTemporalPlugin"
 
     files:
       plugin: "cx::FileLoadPlugin"
-      pkg_share_dirs: ["expertino", "cx_reinforcement_learning_plugin", "expertino_blocksworld"]
+      pkg_share_dirs: ["expertino", "cx_rl_clips", "expertino_blocksworld"]
       load: [
         # Specific isolated concepts
         "clips/expertino/start-tasks/start-tasks.clp",
@@ -97,20 +97,20 @@ clips_manager:
         "clips/expertino/pddl/action-effect-apply.clp",
         "clips/expertino/action/action-precond-check.clp",
         "clips/expertino_blocksworld/point-mapping.clp",
-        "clips/rl_plugin/reinforcementlearning.clp",
-        "clips/rl_plugin/reset-game.clp",
-        "clips/rl_plugin/rl-utils.clp",
-        "clips/rl_plugin/create-rl-env-state-srv.clp",
-        "clips/rl_plugin/exec-action-selection-client.clp",
-        "clips/rl_plugin/get-observable-objects-srv.clp",
-        "clips/rl_plugin/get-observable-predicates-srv.clp",
-        "clips/rl_plugin/get-predefined-observables-srv.clp",
-        "clips/rl_plugin/get-action-list-srv.clp",
-        "clips/rl_plugin/get-action-list-robot-srv.clp",
-        "clips/rl_plugin/set-rl-mode-srv.clp",
-        "clips/rl_plugin/get-free-robot-action.clp",
-        "clips/rl_plugin/action-selection-action.clp",
-        "clips/rl_plugin/reset-cx-action.clp",
+        "clips/cx_rl_clips/reinforcementlearning.clp",
+        "clips/cx_rl_clips/reset-game.clp",
+        "clips/cx_rl_clips/rl-utils.clp",
+        "clips/cx_rl_clips/create-rl-env-state-srv.clp",
+        "clips/cx_rl_clips/exec-action-selection-client.clp",
+        "clips/cx_rl_clips/get-observable-objects-srv.clp",
+        "clips/cx_rl_clips/get-observable-predicates-srv.clp",
+        "clips/cx_rl_clips/get-predefined-observables-srv.clp",
+        "clips/cx_rl_clips/get-action-list-srv.clp",
+        "clips/cx_rl_clips/get-action-list-robot-srv.clp",
+        "clips/cx_rl_clips/set-rl-mode-srv.clp",
+        "clips/cx_rl_clips/get-free-robot-action.clp",
+        "clips/cx_rl_clips/action-selection-action.clp",
+        "clips/cx_rl_clips/reset-cx-action.clp",
         "clips/expertino_blocksworld/init.clp",
         "clips/expertino_blocksworld/reset.clp",
         "clips/expertino_blocksworld/action-executability.clp",
