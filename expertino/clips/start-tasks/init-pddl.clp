@@ -54,7 +54,7 @@
     rm_objects RemoveObjects
     set_functions SetFunctions
     add_pddl_instance AddPddlInstance
-    check_action_precondition CheckActionPrecondition
+    check_action_condition CheckActionCondition
     get_action_effects GetActionEffects
     get_action_names GetActionNames
     get_fluents GetFluents
