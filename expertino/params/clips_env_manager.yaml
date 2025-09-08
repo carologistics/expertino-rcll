@@ -58,6 +58,8 @@ clips_manager:
         "clips/expertino/sim-interface.clp",
         "clips/expertino/orders/order-selection.clp",
         "clips/expertino/action/action-agenda.clp",
+        "clips/expertino/action/action-precond-check.clp",
+        "clips/expertino/action/action-selection.clp",
         "clips/expertino/sim-agent-task.clp",
         "clips/expertino/executor.clp",
         "clips/expertino/action/action-selection.clp",
