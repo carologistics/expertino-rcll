@@ -55,7 +55,7 @@
     rm_objects RemoveFluents
     set_functions SetFunctions
     add_pddl_instance AddPddlInstance
-    check_action_precondition CheckActionPrecondition
+    check_action_condition CheckActionCondition
     get_action_effects GetActionEffects
     get_action_names GetActionNames
     get_fluents GetFluents
@@ -91,7 +91,8 @@
   (confval (path "/pddl/init_problem_file") (value ?problem))
   (start-task (name pddl) (state ACTIVE) (parts init-problem $?rest-parts))
   =>
-  (assert (pddl-instance (name (sym-cat ?instance)) (domain ?domain) (problem ?problem) (directory ?dir) (state PENDING)))
+  (bind ?share-dir (ament-index-get-package-share-directory "expertino_blocksworld"))
+  (assert (pddl-instance (name (sym-cat ?instance)) (domain ?domain) (problem ?problem) (directory (str-cat ?share-dir "/" ?dir)) (state PENDING)))
 )
 
 (defrule pddl-init-problem-loading-successful
@@ -119,7 +120,7 @@
 )
 
 (defrule pddl-set-action-filter
-  ?pf <- (planning-filter (type ACTIONS) (instance ?instance) (goal ?goal) (filter $?filter))
+  ?pf <- (pddl-planning-filter (type ACTIONS) (instance ?instance) (goal ?goal) (filter $?filter))
   (pddl-manager (node ?node))
   ?pi-f <- (pddl-instance (name ?instance) (state LOADED) (busy-with FALSE))
   (ros-msgs-client (service ?s&:(eq ?s (str-cat ?node "/set_action_filter"))) (type ?type))
@@ -159,7 +160,7 @@
 )
 
 (defrule pddl-set-fluent-filter
-  ?pf <- (planning-filter (type FLUENTS) (instance ?instance) (goal ?goal) (filter $?filter))
+  ?pf <- (pddl-planning-filter (type FLUENTS) (instance ?instance) (goal ?goal) (filter $?filter))
   (pddl-manager (node ?node))
   ?pi-f <- (pddl-instance (name ?instance) (state LOADED) (busy-with FALSE))
   (ros-msgs-client (service ?s&:(eq ?s (str-cat ?node "/set_fluent_filter"))) (type ?type))
@@ -199,7 +200,7 @@
 )
 
 (defrule pddl-set-object-filter
-  ?pf <- (planning-filter (type OBJECTS) (instance ?instance) (goal ?goal) (filter $?filter))
+  ?pf <- (pddl-planning-filter (type OBJECTS) (instance ?instance) (goal ?goal) (filter $?filter))
   (pddl-manager (node ?node))
   ?pi-f <- (pddl-instance (name ?instance) (state LOADED) (busy-with FALSE))
   (ros-msgs-client (service ?s&:(eq ?s (str-cat ?node "/set_object_filter"))) (type ?type))

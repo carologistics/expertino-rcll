@@ -32,9 +32,11 @@ clips_manager:
       refresh_rate: 10
     pddl_files:
       plugin: "cx::FileLoadPlugin"
-      pkg_share_dirs: ["cx_pddl_clips"]
+      pkg_share_dirs: ["cx_pddl_clips", "expertino"]
       batch: [
-        "clips/pddl.clp"
+        "clips/deftemplates.clp",
+        "clips/expertino/pddl/deftemplates-overrides.clp",
+        "clips/pddl-no-deftemplates.clp"
         ]
     files:
       plugin: "cx::FileLoadPlugin"

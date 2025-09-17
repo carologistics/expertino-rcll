@@ -10,6 +10,7 @@
   ?ins <- (pddl-instance)
   =>
   (retract ?ins)
-  (assert (pddl-instance (name (sym-cat ?instance)) (domain ?domain) (problem ?problem) (directory ?dir) (state PENDING)))
+  (bind ?share-dir (ament-index-get-package-share-directory "expertino_blocksworld"))
+  (assert (pddl-instance (name (sym-cat ?instance)) (domain ?domain) (problem ?problem) (directory (str-cat ?share-dir "/" ?dir)) (state PENDING)))
   (assert (reset-instance))
 )

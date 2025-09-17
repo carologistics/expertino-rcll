@@ -18,6 +18,7 @@ clips_manager:
                   "action_selection",
                   "reset_cx",
                   "plan_temporal_action",
+                  "pddl_files",
                   "files"]
         log_clips_to_file: true
         watch: ["facts", "rules"]
@@ -70,6 +71,15 @@ clips_manager:
 
     plan_temporal_action:
       plugin: "cx::CXCxPddlMsgsPlanTemporalPlugin"
+    
+    pddl_files:
+      plugin: "cx::FileLoadPlugin"
+      pkg_share_dirs: ["cx_pddl_clips", "expertino"]
+      batch: [
+        "clips/deftemplates.clp",
+        "clips/expertino/pddl/deftemplates-overrides.clp",
+        "clips/pddl-no-deftemplates.clp"
+        ]
 
     files:
       plugin: "cx::FileLoadPlugin"
@@ -81,21 +91,9 @@ clips_manager:
         "clips/expertino/defglobals.clp",
         "clips/expertino/deftemplates.clp",
         # Startup
-        "clips/expertino/pddl/saliences.clp",
         "clips/expertino_blocksworld/init-pddl.clp",
         # PDDL
-        "clips/expertino/pddl/set-goals.clp",
-        "clips/expertino/pddl/clear-goals.clp",
-        "clips/expertino/pddl/objects.clp",
-        "clips/expertino/pddl/fluents.clp",
         "clips/expertino_blocksworld/pddl/instances.clp",
-        "clips/expertino/pddl/get-action-names.clp",
-        "clips/expertino/pddl/get-fluents.clp",
-        "clips/expertino/pddl/get-type-objects.clp",
-        "clips/expertino/pddl/get-predicates.clp",
-        "clips/expertino/pddl/numeric-fluents.clp",
-        "clips/expertino/pddl/action-effect-apply.clp",
-        "clips/expertino/action/action-precond-check.clp",
         "clips/expertino_blocksworld/point-mapping.clp",
         "clips/cx_rl_clips/reinforcementlearning.clp",
         "clips/cx_rl_clips/reset-game.clp",

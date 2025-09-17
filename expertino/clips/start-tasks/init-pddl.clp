@@ -88,7 +88,8 @@
   (confval (path "/pddl/init_problem_file") (value ?problem))
   (start-task (name pddl) (state ACTIVE) (parts init-problem $?rest-parts))
   =>
-  (assert (pddl-instance (name (sym-cat ?instance)) (domain ?domain) (problem ?problem) (directory ?dir) (state PENDING)))
+  (bind ?share-dir (ament-index-get-package-share-directory "expertino"))
+  (assert (pddl-instance (name (sym-cat ?instance)) (domain ?domain) (problem ?problem) (directory (str-cat ?share-dir "/" ?dir)) (state PENDING)))
 )
 
 (defrule pddl-init-problem-loading-successful
@@ -107,7 +108,8 @@
   (confval (path "/pddl/planning_instance") (value ?instance))
   (start-task (name pddl) (state ACTIVE) (parts init-planning-actions $?rest-parts))
   =>
-  (assert (pddl-instance (name (sym-cat ?instance)) (domain (str-cat ?domain)) (problem "") (directory ?dir) (state PENDING)))
+  (bind ?share-dir (ament-index-get-package-share-directory "expertino"))
+  (assert (pddl-instance (name (sym-cat ?instance)) (domain (str-cat ?domain)) (problem "") (directory (str-cat ?share-dir "/" ?dir)) (state PENDING)))
 )
 
 (defrule pddl-init-problem-request-planning-action-domain
@@ -139,7 +141,8 @@
   (confval (path "/pddl/problem_instance") (value ?problem-instance-str))
   (start-task (name pddl) (state ACTIVE) (parts init-replanning-actions $?rest-parts))
   =>
-  (assert (pddl-instance (name (sym-cat ?instance)) (domain (str-cat ?domain)) (problem "") (directory ?dir) (state PENDING)))
+  (bind ?share-dir (ament-index-get-package-share-directory "expertino"))
+  (assert (pddl-instance (name (sym-cat ?instance)) (domain (str-cat ?domain)) (problem "") (directory (str-cat ?share-dir "/" ?dir)) (state PENDING)))
   (assert (pddl-create-goal-instance (instance (sym-cat ?problem-instance-str)) (goal ?*GOAL-INSTANCE-REPLANNING*)))
 )
 
