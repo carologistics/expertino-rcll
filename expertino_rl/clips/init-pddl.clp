@@ -54,7 +54,7 @@
     rm_objects RemoveObjects
     set_functions SetFunctions
     add_pddl_instance AddPddlInstance
-    check_action_precondition CheckActionPrecondition
+    check_action_condition CheckActionCondition
     get_action_effects GetActionEffects
     get_action_names GetActionNames
     get_fluents GetFluents
@@ -76,7 +76,7 @@
      (bind ?service-type (nth$ (+ ?index 1) ?services))
      (ros-msgs-create-client
        (str-cat ?node "/" ?service-name)
-       (str-cat "expertino_msgs/srv/" ?service-type)
+       (str-cat "cx_pddl_msgs/srv/" ?service-type)
      )
      (bind ?index (+ ?index 2))
   )
@@ -91,7 +91,8 @@
   (confval (path "/pddl/init_problem_file") (value ?problem))
   (start-task (name pddl) (state ACTIVE) (parts init-problem $?rest-parts))
   =>
-  (assert (pddl-instance (name (sym-cat ?instance)) (domain ?domain) (problem ?problem) (directory ?dir) (state PENDING)))
+  (bind ?share-dir (ament-index-get-package-share-directory "expertino_rl"))
+  (assert (pddl-instance (name (sym-cat ?instance)) (domain ?domain) (problem ?problem) (directory (str-cat ?share-dir "/" ?dir)) (state PENDING)))
 )
 
 (defrule pddl-init-problem-loading-successful
@@ -110,7 +111,8 @@
   (confval (path "/pddl/planning_instance") (value ?instance))
   (start-task (name pddl) (state ACTIVE) (parts init-planning-actions $?rest-parts))
   =>
-  (assert (pddl-instance (name (sym-cat ?instance)) (domain (str-cat ?domain)) (problem "") (directory ?dir) (state PENDING)))
+  (bind ?share-dir (ament-index-get-package-share-directory "expertino_rl"))
+  (assert (pddl-instance (name (sym-cat ?instance)) (domain (str-cat ?domain)) (problem "") (directory (str-cat ?share-dir "/" ?dir)) (state PENDING)))
 )
 
 (defrule pddl-init-problem-request-planning-action-domain
@@ -129,7 +131,7 @@
   ?pan-f <- (pddl-action-names (instance ?instance) (state DONE) (action-names $?an))
   ?st <- (start-task (name pddl) (state ACTIVE) (parts init-planning-actions $?rest-parts))
   =>
-  (assert (planning-filter (id (sym-cat ?instance-str)) (filter ?an) (instance (sym-cat ?problem-instance-str)) (goal ?*GOAL-INSTANCE-BASE*) (type ACTIONS)))
+  (assert (pddl-planning-filter (id (sym-cat ?instance-str)) (filter ?an) (instance (sym-cat ?problem-instance-str)) (goal ?*GOAL-INSTANCE-BASE*) (type ACTIONS)))
   (retract ?pan-f)
   (modify ?st (parts ?rest-parts))
 )
@@ -142,7 +144,8 @@
   (confval (path "/pddl/problem_instance") (value ?problem-instance-str))
   (start-task (name pddl) (state ACTIVE) (parts init-replanning-actions $?rest-parts))
   =>
-  (assert (pddl-instance (name (sym-cat ?instance)) (domain (str-cat ?domain)) (problem "") (directory ?dir) (state PENDING)))
+  (bind ?share-dir (ament-index-get-package-share-directory "expertino_rl"))
+  (assert (pddl-instance (name (sym-cat ?instance)) (domain (str-cat ?domain)) (problem "") (directory (str-cat ?share-dir "/" ?dir)) (state PENDING)))
   (assert (pddl-create-goal-instance (instance (sym-cat ?problem-instance-str)) (goal ?*GOAL-INSTANCE-REPLANNING*)))
 )
 
@@ -162,7 +165,7 @@
   ?pan-f <- (pddl-action-names (instance ?instance) (state DONE) (action-names $?an))
   ?st <- (start-task (name pddl) (state ACTIVE) (parts init-replanning-actions $?rest-parts))
   =>
-  (assert (planning-filter (id (sym-cat ?instance-str)) (filter ?an) (instance (sym-cat ?problem-instance-str)) (goal ?*GOAL-INSTANCE-REPLANNING*) (type ACTIONS)))
+  (assert (pddl-planning-filter (id (sym-cat ?instance-str)) (filter ?an) (instance (sym-cat ?problem-instance-str)) (goal ?*GOAL-INSTANCE-REPLANNING*) (type ACTIONS)))
   (retract ?pan-f)
   (modify ?st (parts ?rest-parts))
 )
@@ -220,6 +223,9 @@
   (modify ?int (objects (create$ $?int-objects ?orders)))
   (modify ?wp (objects (create$ $?wp-objects ?orders)))
   (modify ?prod (objects (create$ $?prod-objects ?orders)))
+
+  (do-for-all-facts ((?t pddl-get-type-objects)) TRUE (retract ?t))
+
   (modify ?st (parts $?rest-parts))
 )
 
@@ -227,12 +233,12 @@
   (confval (path "/pddl/manager_node") (value ?node))
   (start-task (name pddl) (state ACTIVE) (parts init-planner $?rest-parts))
   =>
-  (expertino-msgs-plan-temporal-create-client (str-cat ?node "/temp_plan"))
+  (cx-pddl-msgs-plan-temporal-create-client (str-cat ?node "/temp_plan"))
 )
 
 (defrule pddl-init-plan-client-successful
   (confval (path "/pddl/manager_node") (value ?node))
-  (expertino-msgs-plan-temporal-client (server ?s&:(eq ?s (str-cat ?node "/temp_plan"))))
+  (cx-pddl-msgs-plan-temporal-client (server ?s&:(eq ?s (str-cat ?node "/temp_plan"))))
   ?st <- (start-task (name pddl) (state ACTIVE) (parts init-planner $?rest-parts))
   =>
   (modify ?st (parts ?rest-parts))
