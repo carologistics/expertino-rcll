@@ -15,6 +15,7 @@ def launch_with_context(context, *args, **kwargs):
     expertino_dir = get_package_share_directory('expertino_rl')
     cx_bringup_dir = get_package_share_directory('cx_bringup')
     manager_config = LaunchConfiguration("manager_config")
+    rl_config = os.path.join(expertino_dir, 'params', 'training-config.yaml')
     log_level = LaunchConfiguration('log_level')
     declare_model_file_cmd = DeclareLaunchArgument(
         'model_file',
@@ -25,8 +26,18 @@ def launch_with_context(context, *args, **kwargs):
     pddl_manager_dir = get_package_share_directory('cx_pddl_manager')
     launch_pddl_manager = os.path.join(pddl_manager_dir, 'launch', 'pddl_manager.launch.py')
     launch_cx = os.path.join(cx_bringup_dir, 'launch', 'cx_launch.py')
+    
+    cxrl_node = Node(
+        package='cx_rl_multi_robot_mppo',
+        executable='cx_rl_node',
+        namespace='cx_rl_node',
+        name='expertino_rl_node',
+        output='screen',
+        emulate_tty=True,
+        parameters= [rl_config]
+    )
 
-    return [IncludeLaunchDescription(
+    return [cxrl_node, IncludeLaunchDescription(
             PythonLaunchDescriptionSource(launch_pddl_manager)
         ), IncludeLaunchDescription(
             PythonLaunchDescriptionSource(launch_cx),
