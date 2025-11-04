@@ -16,15 +16,19 @@ find_package(ament_cmake_python REQUIRED)
 find_package(rcll_protobuf_msgs REQUIRED)
 find_package(cx_plugin REQUIRED)
 find_package(cx_ros_comm_gen REQUIRED)
+find_package(expertino_rl_interfaces REQUIRED)
 
 ament_python_install_package(${PROJECT_NAME})
+
+cx_generate_action_bindings("expertino_rl_interfaces" "StartRefbox")
+cx_generate_action_bindings("expertino_rl_interfaces" "StopRefbox")
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
   ament_lint_auto_find_test_dependencies()
 endif()
 
-install(DIRECTORY launch params pddl DESTINATION share/${PROJECT_NAME})
+install(DIRECTORY launch params pddl scripts DESTINATION share/${PROJECT_NAME})
 install(DIRECTORY clips/ DESTINATION share/${PROJECT_NAME}/clips/expertino_rl/)
 
 ament_export_dependencies(${dependencies})

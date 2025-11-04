@@ -18,17 +18,17 @@
   (do-for-fact ((?to pddl-type-objects))
     (eq ?to:type ring)
     (foreach ?ring ?to:objects
-      (assert (rl-predefined-observable (name price) (params ?ring (sym-cat 0))))
-      (assert (rl-predefined-observable (name price) (params ?ring (sym-cat 1))))
-      (assert (rl-predefined-observable (name price) (params ?ring (sym-cat 2))))
+      (assert (rl-predefined-observable (name price) (params ?ring ZERO)))
+      (assert (rl-predefined-observable (name price) (params ?ring ONE)))
+      (assert (rl-predefined-observable (name price) (params ?ring TWO)))
     )
   )
-  (assert (rl-predefined-observable (name pay-count) (params rs1 (sym-cat 0))))
-  (assert (rl-predefined-observable (name pay-count) (params rs1 (sym-cat 1))))
-  (assert (rl-predefined-observable (name pay-count) (params rs1 (sym-cat 2))))
-  (assert (rl-predefined-observable (name pay-count) (params rs2 (sym-cat 0))))
-  (assert (rl-predefined-observable (name pay-count) (params rs2 (sym-cat 1))))
-  (assert (rl-predefined-observable (name pay-count) (params rs2 (sym-cat 2))))
+  (assert (rl-predefined-observable (name pay-count) (params rs1 ZERO)))
+  (assert (rl-predefined-observable (name pay-count) (params rs1 ONE)))
+  (assert (rl-predefined-observable (name pay-count) (params rs1 TWO)))
+  (assert (rl-predefined-observable (name pay-count) (params rs2 ZERO)))
+  (assert (rl-predefined-observable (name pay-count) (params rs2 ONE)))
+  (assert (rl-predefined-observable (name pay-count) (params rs2 TWO)))
 )
 
 (deffunction rl-observe-types ()
@@ -48,8 +48,23 @@
   )
   (do-for-all-facts ((?pnf pddl-numeric-fluent))
     TRUE
+    (bind ?value UNDEFINED)
+    (switch (integer ?pnf:value)
+      (case 0 
+        then
+          (bind ?value ZERO)
+      )
+      (case 1
+        then
+          (bind ?value ONE)
+      )
+      (case 2
+        then
+          (bind ?value TWO)
+      )
+    )
     (assert (rl-observation (name ?pnf:name) 
-                            (param-values (create$ ?pnf:params (sym-cat (integer ?pnf:value))))))
+                            (param-values (create$ ?pnf:params ?value))))
   )
 )
 
@@ -67,7 +82,8 @@
   (bind ?share-dir (ament-index-get-package-share-directory "expertino_rl"))
   ; (parse-pddl-domain (str-cat ?share-dir "/clips/expertino/domain.pddl"))
   (config-load (str-cat ?share-dir "/params/agent_config.yaml") "/")
-
+  (expertino-rl-interfaces-start-refbox-create-client "cx_rl_node/start_refbox")
+  (expertino-rl-interfaces-stop-refbox-create-client "cx_rl_node/stop_refbox")
   (assert (domain-loaded))
 )
 

@@ -20,6 +20,8 @@ clips_manager:
                   "reset_cx",
                   "plan_temporal_action",
                   "timed_plan_action_msg",
+                  "start_refbox",
+                  "stop_refbox",
                   "pddl_files",
                   "files"]
         log_clips_to_file: true
@@ -81,6 +83,12 @@ clips_manager:
 
     timed_plan_action_msg:
       plugin: "cx::CXCxPddlMsgsTimedPlanActionPlugin"
+
+    start_refbox:
+      plugin: "cx::CXExpertinoRlInterfacesStartRefboxPlugin"
+
+    stop_refbox:
+      plugin: "cx::CXExpertinoRlInterfacesStopRefboxPlugin"
     
     pddl_files:
       plugin: "cx::FileLoadPlugin"
@@ -118,7 +126,7 @@ clips_manager:
         "clips/expertino/production-strategy.clp",
         "clips/expertino_rl/point-mapping.clp",
         "clips/cx_rl_clips/reinforcementlearning.clp",
-        "clips/cx_rl_clips/reset-game.clp",
+        "clips/cx_rl_clips/reset-cx.clp",
         "clips/cx_rl_clips/rl-utils.clp",
         "clips/cx_rl_clips/create-rl-env-state-srv.clp",
         "clips/cx_rl_clips/exec-action-selection-client.clp",
@@ -132,6 +140,7 @@ clips_manager:
         "clips/cx_rl_clips/action-selection-action.clp",
         "clips/cx_rl_clips/reset-cx-action.clp",
         "clips/expertino_rl/init.clp",
+        "clips/expertino_rl/reset.clp",
         "clips/expertino_rl/action-executability.clp",
         "clips/expertino_rl/action-selection.clp",
         "clips/expertino_rl/action-finalization.clp",

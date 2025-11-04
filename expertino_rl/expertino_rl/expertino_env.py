@@ -1,13 +1,29 @@
-from cxrl_gym.cxrl_gym import CXRLGym
+from cx_rl_gym.cx_rl_gym import CXRLGym
 from rclpy.node import Node
 import rclpy
+
+from expertino_rl_interfaces.action import StartRefbox, StopRefbox
+
+from rclpy.action import ActionServer
+
+import os
+import subprocess
+from ament_index_python.packages import get_package_share_directory
+
+
 
 
 class ExpertinoEnv(CXRLGym):
     def __init__(self, node: Node, mode: str, number_robots: int):
+        super().__init__(node, mode, number_robots)
+        
         self.reward_in_episode = 0
         self.episode_number = 0
-        super().__init__(node, mode, number_robots)
+        
+        self.expertino_dir = get_package_share_directory('expertino_rl')
+        self.start_refbox_server = ActionServer(self.node, StartRefbox, 'start_refbox', self.start_refbox_callback)
+        self.stop_refbox_server = ActionServer(self.node, StopRefbox, 'stop_refbox', self.stop_refbox_callback)
+        
 
     def step(self, action):
         with open("cxrl-rcll-log-episode-reward.txt", 'a+') as f:
@@ -22,7 +38,10 @@ class ExpertinoEnv(CXRLGym):
         self.node.get_logger().info(f"Episode {self.episode_number}.")
         self.episode_number += 1
         self.reward_in_episode = 0
-        return super().reset(seed=seed)
+        
+        state, info = super().reset(seed=seed)
+        
+        return (state,info)
     
     def generate_action_space(self):
         self.node.get_logger().info("Generating action space...")
@@ -75,3 +94,25 @@ class ExpertinoEnv(CXRLGym):
 
     def render(self):
         pass
+    
+    def start_refbox_callback(self, goal_handle):
+        self.node.get_logger().info("Starting refbox...")
+        
+        start_path = os.path.join(self.expertino_dir + "/scripts/start_refbox.sh")
+        subprocess.call(['sh', start_path])
+        
+        goal_handle.succeed()
+        result = StartRefbox.Result()
+        result.success = True
+        return result
+        
+    def stop_refbox_callback(self, goal_handle):
+        self.node.get_logger().info("stopping refbox...")
+        
+        stop_path = os.path.join(self.expertino_dir + "/scripts/stop_refbox.sh")
+        subprocess.call(['sh', stop_path])
+        
+        goal_handle.succeed()
+        result = StopRefbox.Result()
+        result.success = True
+        return result
