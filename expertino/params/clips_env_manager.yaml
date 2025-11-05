@@ -34,9 +34,9 @@ clips_manager:
       plugin: "cx::FileLoadPlugin"
       pkg_share_dirs: ["cx_pddl_clips", "expertino"]
       batch: [
-        "clips/deftemplates.clp",
+        "clips/cx_pddl_clips/deftemplates.clp",
         "clips/expertino/pddl/deftemplates-overrides.clp",
-        "clips/pddl-no-deftemplates.clp"
+        "clips/cx_pddl_clips/pddl-no-deftemplates.clp"
         ]
     files:
       plugin: "cx::FileLoadPlugin"

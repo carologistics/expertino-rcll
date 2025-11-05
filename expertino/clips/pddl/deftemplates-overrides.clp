@@ -1,7 +1,7 @@
 (deftemplate pddl-action-condition
   (slot instance (type SYMBOL))
   (slot plan (type SYMBOL))
-  (slot id (type SYMBOL))
+  (slot action (type SYMBOL))
   (slot context (type SYMBOL))
   (slot instance-update (type FLOAT))
   (slot condition-type (type SYMBOL) (allowed-values ALL START OVERALL END) (default START)) ; TODO: only supports START
