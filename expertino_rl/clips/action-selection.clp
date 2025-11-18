@@ -7,7 +7,7 @@
     (pddl-fluent (name step-place) (params ?next ?to))
     ?a <- (pddl-action (name spawn-and-transport) (id ?action-id) (params ?prod ?to ?step ?next))
     =>
-    (assert (agenda-action-item (action ?action-id) (plan (gensym*)) (priority 0 1) (worker-type AGENT)) (execution-state SELECTED))
+    (assert (agenda-action-item (action ?action-id) (plan (gensym*)) (priority 0 1) (worker-type AGENT) (execution-state SELECTED)))
 )
 
 (defrule rl-action-selected-transport
@@ -22,7 +22,7 @@
     (pddl-fluent (name step-place) (params ?step ?to))
     ?a <- (pddl-action (name transport) (id ?action-id) (params ?prod ?from ?to ?step))
     =>
-    (assert (agenda-action-item (action ?action-id) (plan (gensym*)) (priority 0 1) (worker-type ROBOT)) (execution-state SELECTED))
+    (assert (agenda-action-item (action ?action-id) (plan (gensym*)) (priority 0 1) (worker-type ROBOT) (execution-state SELECTED)))
 )
 
 (defrule rl-action-selected-base-transport
@@ -35,7 +35,7 @@
     (pddl-fluent (name step-place) (params ?next ?to))
     ?a <- (pddl-action (name base-transport) (id ?action-id) (params ?prod ?from ?to ?step ?next))
     =>
-    (assert (agenda-action-item (action ?action-id) (plan (gensym*)) (priority 0 1) (worker-type ROBOT)) (execution-state SELECTED))
+    (assert (agenda-action-item (action ?action-id) (plan (gensym*)) (priority 0 1) (worker-type ROBOT) (execution-state SELECTED)))
 )
 
 (defrule rl-action-selected-pay-with-carrier
@@ -45,9 +45,9 @@
     (test (str-index (str-cat ?m) (str-cat ?name)))
     (pddl-fluent (name at) (params ?carrier ?from))
     (test (str-index (str-cat ?carrier) (str-cat ?name)))
-    ?a <- (pddl-action (name transport) (id ?action-id) (params ?m ?carrier ?from ?to))
+    ?a <- (pddl-action (name pay-with-carrier) (id ?action-id) (params ?m ?carrier ?from ?to))
     =>
-    (assert (agenda-action-item (action ?action-id) (plan (gensym*)) (priority 0 1) (worker-type ROBOT)) (execution-state SELECTED))
+    (assert (agenda-action-item (action ?action-id) (plan (gensym*)) (priority 0 1) (worker-type ROBOT) (execution-state SELECTED)))
 )
 
 (defrule rl-action-selected-carrier-to-input
@@ -57,9 +57,9 @@
     (test (str-index (str-cat ?cs) (str-cat ?name)))
     (pddl-fluent (name token-step) (params ?carrier ?in ?step))
     (test (str-index (str-cat ?carrier) (str-cat ?name)))
-    ?a <- (pddl-action (name transport) (id ?action-id) (params ?carrier ?step ?cs ?in))
+    ?a <- (pddl-action (name carrier-to-input) (id ?action-id) (params ?carrier ?step ?cs ?in))
     =>
-    (assert (agenda-action-item (action ?action-id) (plan (gensym*)) (priority 0 1) (worker-type ROBOT)) (execution-state SELECTED))
+    (assert (agenda-action-item (action ?action-id) (plan (gensym*)) (priority 0 1) (worker-type ROBOT) (execution-state SELECTED)))
 )
 
 (defrule rl-action-selected-pay-from-bs
@@ -69,7 +69,7 @@
     (test (str-index (str-cat ?rs) (str-cat ?name)))
     ?a <- (pddl-action (name pay-from-bs) (id ?action-id) (params ?rs))
     =>
-    (assert (agenda-action-item (action ?action-id) (plan (gensym*)) (priority 0 1) (worker-type AGENT)) (execution-state SELECTED))
+    (assert (agenda-action-item (action ?action-id) (plan (gensym*)) (priority 0 1) (worker-type AGENT) (execution-state SELECTED)))
 )
 
 (defrule rl-action-selected-transport-to-slide

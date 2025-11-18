@@ -27,7 +27,6 @@
     (modify ?r (stage RESET))
     (expertino-rl-interfaces-stop-refbox-result-destroy ?res-ptr)
     (retract ?wr)
-    (bind ?g-id (expertino-rl-interfaces-stop-refbox-client-goal-handle-get-goal-id ?ghp))
     (expertino-rl-interfaces-stop-refbox-client-goal-handle-destroy ?ghp)
     (retract ?f)
     (expertino-rl-interfaces-stop-refbox-goal-destroy ?goal)

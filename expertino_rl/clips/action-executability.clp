@@ -42,7 +42,7 @@
     (pddl-action (id ?action-id) (name ?action))
     (not (pddl-action-condition (id ?action-id)))
     (not (rl-action (id ?action-id) (is-finished TRUE)))
-    (not (rl-action (name ?action) (is-selected TRUE)))
+    (not (rl-action (id ?action-id) (is-selected TRUE)))
     =>
     (assert (pddl-action-condition (id ?action-id)))
 )
@@ -51,7 +51,7 @@
     (declare (salience ?*SALIENCE-ACTION-EXECUTABLE-CHECK*))
     (rl-executability-check (state CHECKING))
     (pddl-action-condition (id ?action-id) (state CONDITION-SAT))
-    (pddl-action (id ?action-id) (name ?name) (params ?params))
+    (pddl-action (id ?action-id) (name ?name) (params $?params))
     (confval (path "/pddl/actions/robot") (list-value $?robot-actions))
     (confval (path "/pddl/actions/refbox") (list-value $?refbox-actions))
     (confval (path "/pddl/actions/agent") (list-value $?agent-actions))
@@ -64,7 +64,7 @@
                           else AGENT)))
     (if (or (eq ?worker-type ROBOT) (eq ?worker-type AGENT)) then
         (bind $?mapping (rl-action-map-params-and-points ?action-id ?name ?params))
-        (bind ?points (first$ $?mapping))
+        (bind ?points (nth$ 1 $?mapping))
         (bind ?action-params (rest$ $?mapping))
         
         (assert (rl-action (id ?action-id) (name (sym-cat ?name "#" (create-slot-value-string ?action-params))) (points ?points)))
@@ -79,6 +79,8 @@
     (not (pddl-action-condition (state PENDING|CHECK-CONDITION)))
     =>
     (modify ?ec (state CHECKED))
+    ;(retract ?ec)
+    ;(assert (rl-executability-check (state CHECKED)))
     (do-for-all-facts ((?ap pddl-action-condition))
         (retract ?ap)
     )

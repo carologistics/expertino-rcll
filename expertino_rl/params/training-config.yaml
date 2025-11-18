@@ -4,7 +4,7 @@ cx_rl_node/expertino_rl_node:
 
     agent_name: "ExpertinoAgent"
     rl_mode: "TRAINING"
-    number_of_robots: 1
+    number_of_robots: 3
 
     training:
       retraining: false
