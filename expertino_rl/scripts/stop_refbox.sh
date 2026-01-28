@@ -1,5 +1,5 @@
 #!/bin/sh
-source ~/rcll/refbox/src/rcll-get-started/setup.sh
+source ~/rcll/rcll-get-started/setup.sh
 echo ======================
 echo Stopping refbox...
 echo ======================

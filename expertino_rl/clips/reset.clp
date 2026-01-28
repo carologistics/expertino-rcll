@@ -3,6 +3,7 @@
 )
 
 (defrule reset-cx-stage-pre-reset
+    (declare (salience ?*SALIENCE-RESET-CX-HIGH*))
     (reset-cx (stage PRE-RESET))
     (expertino-rl-interfaces-stop-refbox-client (server ?server&:(eq ?server "cx_rl_node/stop_refbox")))
     (not (reset-goal (goal ?g)))
@@ -13,6 +14,7 @@
 )
 
 (defrule reset-cx-stage-pre-reset-finished
+    (declare (salience ?*SALIENCE-RESET-CX-HIGH*))
     ?r <- (reset-cx (stage PRE-RESET))
     ?rg <- (reset-goal (goal ?goal))
     ?f <- (expertino-rl-interfaces-stop-refbox-goal-response (server "cx_rl_node/stop_refbox") (client-goal-handle-ptr ?ghp))
@@ -34,6 +36,7 @@
 )
 
 (defrule reset-cx-stage-post-reset
+    (declare (salience ?*SALIENCE-RESET-CX-HIGH*))
     (reset-cx (stage POST-RESET))
     (expertino-rl-interfaces-start-refbox-client (server ?server&:(eq ?server "cx_rl_node/start_refbox")))
     (not (reset-goal (goal ?g)))
@@ -41,9 +44,13 @@
     (bind ?goal (expertino-rl-interfaces-start-refbox-goal-create))
     (assert (reset-goal (goal ?goal)))
     (expertino-rl-interfaces-start-refbox-send-goal ?goal ?server)
+    (do-for-all-facts ((?pi pddl-instance))
+        TRUE
+        (retract ?pi))
 )
 
 (defrule reset-cx-stage-post-reset-finished
+    (declare (salience ?*SALIENCE-RESET-CX-HIGH*))
     ?r <- (reset-cx (stage POST-RESET))
     ?rg <- (reset-goal (goal ?goal))
     ?f <- (expertino-rl-interfaces-start-refbox-goal-response (server "cx_rl_node/start_refbox") (client-goal-handle-ptr ?ghp))

@@ -110,4 +110,10 @@
    (assert (domain-facts-loaded))
  )
 
-
+(defrule episode-end
+  (game-state (phase POST_GAME))
+  ?a <- (rl-action (is-selected TRUE) (is-finished FALSE))
+  =>
+  (assert (rl-episode-end (success TRUE)))
+  (modify ?a (is-finished TRUE) (points 0))
+)
