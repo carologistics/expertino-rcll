@@ -70,8 +70,8 @@
 
 (deffunction rl-add-robots ()
   (assert (rl-robot (name robot1)))
-  (assert (rl-robot (name robot2)))
-  (assert (rl-robot (name robot3)))
+  ;(assert (rl-robot (name robot2)))
+  ;(assert (rl-robot (name robot3)))
 )
 
 (defrule init-load-domain
