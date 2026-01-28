@@ -7,8 +7,7 @@
        (at start (step ?prod ?step))
        (at start (next-step ?prod ?step ?next))
        (at start (usable ?m)) 
-       (at start (free bs-input))
-       (at start (free bs-output))
+       (at start (free ?p))
      )
      :effect (and
        (at start (not (spawnable ?prod)))

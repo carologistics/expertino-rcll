@@ -6,8 +6,7 @@
        (at start (not (token-usable ?token ?from)))
        (at start (token-step ?token ?from dispose))
        (at start (usable ?bs)) 
-       (at start (free bs-input))
-       (at start (free bs-output))
+       (at start (free ?from))
      )
      :effect (and
        (at start (not (usable ?bs)))

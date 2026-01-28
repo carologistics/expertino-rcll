@@ -32,6 +32,17 @@
   ;(assert (selected-order (order 2)))
 )
 
+(defrule executor-retract-sending
+  ?sending <- (sending ?action-name ?mps)
+  (or
+    (executor (pddl-action-id ?action-id) (state ?s&:(neq ?s ACCEPTED)))
+    (not (executor (pddl-action-id ?action-id)))
+  )
+  =>
+  (retract ?sending)
+  (assert (sent ?action-name))
+)
+
 (defrule executor-succeeded
   (executor (id ?ex-id) (state SUCCEEDED) (pddl-action-id ?action-id))
   (pddl-action (id ?action-id) (params $?action-params))

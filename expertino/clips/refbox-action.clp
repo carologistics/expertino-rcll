@@ -11,6 +11,8 @@
     )
     (eq ?mps (pddl-place-to-refbox-mps (nth$ 3 ?action-params) ?team-color))
   ) )
+  (not (sending ?other-action-id&:(neq ?other-action-id ?action-id) ?mps))
+  (not (sent ?action-id))
   => 
   (bind ?machine-instruction (pb-create "llsf_msgs.PrepareMachine"))
   (pb-set-field ?machine-instruction "team_color" ?team-color)
@@ -63,6 +65,7 @@
   (pb-set-field ?machine-instruction "machine" (str-cat ?mps))
   (pb-broadcast ?peer-id ?machine-instruction)
   (pb-destroy ?machine-instruction)
+  (assert (sending ?action-id ?mps))
   (printout t "Sent Prepare Msg for " ?mps " with " ?action-params crlf)
   (modify ?ex (state ACCEPTED))
 )
