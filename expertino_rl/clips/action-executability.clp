@@ -36,13 +36,30 @@
     
 )
 
+(defrule delay-executability-check
+    (declare (salience (+ ?*SALIENCE-ACTION-EXECUTABLE-CHECK* 1)))
+    (agenda-action-item (action ?action-id) (worker-type AGENT) (worker AGENT) (execution-state SELECTED))
+    (not (executor (id ?ex-id) (pddl-action-id ?action-id) (worker AGENT)))
+    =>
+    (assert (delay-executability-check))
+)
+
 (defrule check-action
     (declare (salience ?*SALIENCE-ACTION-EXECUTABLE-CHECK*))
     (rl-executability-check (state CHECKING))
-    (pddl-action (id ?action-id) (name ?action))
+    (pddl-action (id ?action-id) (name ?name))
     (not (pddl-action-condition (id ?action-id)))
-    (not (rl-action (id ?action-id) (is-finished TRUE)))
-    (not (rl-action (id ?action-id) (is-selected TRUE)))
+    (not (agenda-action-item (action ?action-id)))
+    (not (delay-executability-check))
+
+    (confval (path "/pddl/actions/robot") (list-value $?robot-actions))
+    (confval (path "/pddl/actions/refbox") (list-value $?refbox-actions))
+    (confval (path "/pddl/actions/agent") (list-value $?agent-actions))
+
+    (test (member$ (str-cat ?name) (create$ ?robot-actions ?refbox-actions ?agent-actions)))
+
+    ;(not (rl-action (id ?action-id) (is-finished TRUE)))
+    ;(not (rl-action (id ?action-id) (is-selected TRUE)))
     =>
     (assert (pddl-action-condition (id ?action-id)))
 )
@@ -51,7 +68,8 @@
     (declare (salience ?*SALIENCE-ACTION-EXECUTABLE-CHECK*))
     (rl-executability-check (state CHECKING))
     (pddl-action-condition (id ?action-id) (state CONDITION-SAT))
-    (pddl-action (id ?action-id) (name ?name) (params $?params))
+    (pddl-action (id ?action-id)  (plan ?plan-id) (name ?name) (params $?params))
+    
     (confval (path "/pddl/actions/robot") (list-value $?robot-actions))
     (confval (path "/pddl/actions/refbox") (list-value $?refbox-actions))
     (confval (path "/pddl/actions/agent") (list-value $?agent-actions))
@@ -69,7 +87,8 @@
         
         (assert (rl-action (id ?action-id) (name (sym-cat ?name "#" (create-slot-value-string ?action-params))) (points ?points)))
     else
-        (assert (agenda-action-item (action ?action-id) (plan (gensym*)) (priority 0 1) (worker-type ?worker-type)) (execution-state SELECTED))
+        (assert (agenda-action-item (action ?action-id) (plan ?plan-id) (priority 0 1) (worker-type ?worker-type) (worker REFBOX) (execution-state SELECTED)))
+        (printout green "Executing REFBOX action " ?name ?params crlf)
     )
 )
 
@@ -77,6 +96,7 @@
     (declare (salience (- ?*SALIENCE-ACTION-EXECUTABLE-CHECK* 1)))
     ?ec <- (rl-executability-check (state CHECKING))
     (not (pddl-action-condition (state PENDING|CHECK-CONDITION)))
+    (not (delay-executability-check))
     =>
     (modify ?ec (state CHECKED))
     ;(retract ?ec)
