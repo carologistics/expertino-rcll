@@ -11,6 +11,7 @@
     (bind ?goal (expertino-rl-interfaces-stop-refbox-goal-create))
     (assert (reset-goal (goal ?goal)))
     (expertino-rl-interfaces-stop-refbox-send-goal ?goal ?server)
+    (save-facts reset-protobuf-peers local protobuf-peer)
 )
 
 (defrule reset-cx-stage-pre-reset-finished
@@ -47,6 +48,13 @@
     (do-for-all-facts ((?pi pddl-instance))
         TRUE
         (retract ?pi))
+    (do-for-all-facts ((?pf pddl-fluent))
+        TRUE
+        (retract ?pf))
+    (do-for-all-facts ((?pnf pddl-numeric-fluent))
+        TRUE
+        (retract ?pnf))
+    (load-facts reset-protobuf-peers)
 )
 
 (defrule reset-cx-stage-post-reset-finished

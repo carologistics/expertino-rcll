@@ -76,6 +76,7 @@
 
 (defrule init-load-domain
   (not (domain-loaded))
+  (not (saved-facts))
 =>
   (unwatch facts time)
   (unwatch rules time-retract)
@@ -90,6 +91,7 @@
 (defrule init-load-initial-facts
  " Load all initial facts on startup of the game "
    (domain-loaded)
+   (not (saved-facts))
    (not (domain-facts-loaded))
    (startup-completed)
    (confval (path "/game/parameters/rcll/team_name") (value ?team-name))
@@ -116,4 +118,24 @@
   =>
   (assert (rl-episode-end (success TRUE)))
   (modify ?a (is-finished TRUE) (points 0))
+)
+
+(defrule all-services-actions-created
+    (declare (salience ?*SALIENCE-RL-SAVE-FACTS*))
+    (not (saved-facts))
+    (cx-rl-interfaces-set-rl-mode-service)
+    (cx-rl-interfaces-create-rl-env-state-service)
+    (cx-rl-interfaces-exec-action-selection-client)
+    (cx-rl-interfaces-get-observable-objects-service)
+    (cx-rl-interfaces-get-observable-predicates-service)
+    (cx-rl-interfaces-get-predefined-observables-service)
+    (cx-rl-interfaces-get-action-list-robot-service)
+    (cx-rl-interfaces-get-action-list-service)
+    (cx-rl-interfaces-get-free-robot-server)
+    (cx-rl-interfaces-action-selection-server)
+    (cx-rl-interfaces-reset-cx-server)
+    (not (pddl-instance (busy-with ~FALSE)))
+=>
+    (assert (saved-facts))
+    (save-facts reset-save)
 )
