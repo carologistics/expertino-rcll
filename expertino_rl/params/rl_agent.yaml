@@ -1,10 +1,7 @@
-cx_rl_node/expertino_rl_node:
+/**:
   ros__parameters:
-    package_dir: "expertino_ws/src/expertino-rcll/expertino_rl/expertino_rl/"
 
-    agent_name: "ExpertinoAgent"
-    rl_mode: "TRAINING"
-    number_of_robots: 1
+    model_name: "ExpertinoAgent"
 
     training:
       retraining: false

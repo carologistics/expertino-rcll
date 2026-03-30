@@ -1,7 +1,7 @@
 clips_manager:
   ros__parameters:
-    environments: ["main"]
-    main:
+    environments: ["expertino_rl"]
+    expertino_rl:
         plugins: ["executive",
                   "ament_index",
                   "config",
@@ -23,6 +23,7 @@ clips_manager:
                   "start_refbox",
                   "stop_refbox",
                   "pddl_files",
+                  "rl_files",
                   "files"]
         log_clips_to_file: true
         watch: ["facts", "rules"]
@@ -75,7 +76,7 @@ clips_manager:
     action_selection:
       plugin: "cx::CXCxRlInterfacesActionSelectionPlugin"
 
-    reset_cx:
+    reset_env:
       plugin: "cx::CXCxRlInterfacesResetCXPlugin"
 
     plan_temporal_action:

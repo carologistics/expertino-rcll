@@ -4,7 +4,7 @@
 
 (defrule reset-cx-stage-pre-reset
     (declare (salience ?*SALIENCE-RESET-CX-HIGH*))
-    (reset-cx (stage PRE-RESET))
+    (rl-reset-env (state USER-CLEANUP))
     (expertino-rl-interfaces-stop-refbox-client (server ?server&:(eq ?server "cx_rl_node/stop_refbox")))
     (not (reset-goal (goal ?g)))
     =>
@@ -16,7 +16,7 @@
 
 (defrule reset-cx-stage-pre-reset-finished
     (declare (salience ?*SALIENCE-RESET-CX-HIGH*))
-    ?r <- (reset-cx (stage PRE-RESET))
+    ?r <- (rl-reset-env (state USER-CLEANUP))
     ?rg <- (reset-goal (goal ?goal))
     ?f <- (expertino-rl-interfaces-stop-refbox-goal-response (server "cx_rl_node/stop_refbox") (client-goal-handle-ptr ?ghp))
     ?wr <- (expertino-rl-interfaces-stop-refbox-wrapped-result (server "cx_rl_node/stop_refbox") (goal-id ?uuid) (code SUCCEEDED) (result-ptr ?res-ptr))
@@ -27,7 +27,7 @@
     else
         (printout error "stopping unsuccessful" crlf)
     )
-    (modify ?r (stage RESET))
+    (modify ?r (state LOAD-FACTS))
     (expertino-rl-interfaces-stop-refbox-result-destroy ?res-ptr)
     (retract ?wr)
     (expertino-rl-interfaces-stop-refbox-client-goal-handle-destroy ?ghp)
@@ -38,7 +38,7 @@
 
 (defrule reset-cx-stage-post-reset
     (declare (salience ?*SALIENCE-RESET-CX-HIGH*))
-    (reset-cx (stage POST-RESET))
+    (rl-reset-env (state USER-INIT))
     (expertino-rl-interfaces-start-refbox-client (server ?server&:(eq ?server "cx_rl_node/start_refbox")))
     (not (reset-goal (goal ?g)))
     =>
@@ -59,7 +59,7 @@
 
 (defrule reset-cx-stage-post-reset-finished
     (declare (salience ?*SALIENCE-RESET-CX-HIGH*))
-    ?r <- (reset-cx (stage POST-RESET))
+    ?r <- (rl-reset-env (state USER-INIT))
     ?rg <- (reset-goal (goal ?goal))
     ?f <- (expertino-rl-interfaces-start-refbox-goal-response (server "cx_rl_node/start_refbox") (client-goal-handle-ptr ?ghp))
     ?wr <- (expertino-rl-interfaces-start-refbox-wrapped-result (server "cx_rl_node/start_refbox") (goal-id ?uuid) (code SUCCEEDED) (result-ptr ?res-ptr))
@@ -70,7 +70,7 @@
     else
         (printout error "starting refbox unsuccessful" crlf)
     )
-    (modify ?r (stage FINALIZE))
+    (modify ?r (state DONE))
     (expertino-rl-interfaces-start-refbox-result-destroy ?res-ptr)
     (retract ?wr)
     (bind ?g-id (expertino-rl-interfaces-start-refbox-client-goal-handle-get-goal-id ?ghp))

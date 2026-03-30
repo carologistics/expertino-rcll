@@ -42,7 +42,7 @@ class ExpertinoEnv(CXRLGym):
         state, info = super().reset(seed=seed)
         
         return (state,info)
-    
+    """
     def generate_action_space(self):
         self.node.get_logger().info("Generating action space...")
         action_space =  ["spawn-and-transport#o1",
@@ -91,6 +91,7 @@ class ExpertinoEnv(CXRLGym):
                          "pay-from-bs#rs2"
                         ]       
         return action_space
+    """
 
     def render(self):
         pass

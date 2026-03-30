@@ -39,39 +39,20 @@
 	)
 )
 
-(deffunction rl-generate-observations ()
-  (do-for-all-facts ((?pf pddl-fluent))
-    (member$ ?pf:name (create$ at free spawnable usable                                 
-                               token-usable on-shelf buffered 
-                               can-buffer))
-    (assert (rl-observation (name ?pf:name) (param-values ?pf:params)))
-  )
-  (do-for-all-facts ((?pnf pddl-numeric-fluent))
-    TRUE
-    (bind ?value UNDEFINED)
-    (switch (integer ?pnf:value)
-      (case 0 
-        then
-          (bind ?value ZERO)
-      )
-      (case 1
-        then
-          (bind ?value ONE)
-      )
-      (case 2
-        then
-          (bind ?value TWO)
-      )
-    )
-    (assert (rl-observation (name ?pnf:name) 
-                            (param-values (create$ ?pnf:params ?value))))
-  )
-)
-
 (deffunction rl-add-robots ()
   (assert (rl-robot (name robot1)))
   ;(assert (rl-robot (name robot2)))
   ;(assert (rl-robot (name robot3)))
+)
+
+(deffunction rl-define-actions ()
+  (rl-observable-action (name spawn-and-transport) (param-names order) (param-types product))
+  (rl-observable-action (name transport) (param-names order) (param-types product))
+  (rl-observable-action (name base-transport) (param-names order) (param-types product))
+  (rl-observable-action (name pay-with-carrier) (param-names rs c) (param-types ring-station carrier))
+  (rl-observable-action (name carrier-to-input) (param-names c cs) (param-types carrier cap-station))
+  (rl-observable-action (name transport-to-slide) (param-names c rs) (param-types carrier ring-station))
+  (rl-observable-action (name pay-from-bs) (param-names rs) (param-types ring-station))
 )
 
 (defrule init-load-domain
@@ -109,33 +90,14 @@
    (rl-observe-predicates)
    (rl-observe-functions)
    (rl-add-robots)
+   (rl-define-actions)
    (assert (domain-facts-loaded))
  )
 
-(defrule episode-end
-  (game-state (phase POST_GAME))
-  ?a <- (rl-action (is-selected TRUE) (is-finished FALSE))
+(defrule domain-loaded-save-facts
+  (domain-facts-loaded)
+  (not (cx-rl-node (name ?name)))
+  (not (saved-facts))
   =>
-  (assert (rl-episode-end (success TRUE)))
-  (modify ?a (is-finished TRUE) (points 0))
-)
-
-(defrule all-services-actions-created
-    (declare (salience ?*SALIENCE-RL-SAVE-FACTS*))
-    (not (saved-facts))
-    (cx-rl-interfaces-set-rl-mode-service)
-    (cx-rl-interfaces-create-rl-env-state-service)
-    (cx-rl-interfaces-exec-action-selection-client)
-    (cx-rl-interfaces-get-observable-objects-service)
-    (cx-rl-interfaces-get-observable-predicates-service)
-    (cx-rl-interfaces-get-predefined-observables-service)
-    (cx-rl-interfaces-get-action-list-robot-service)
-    (cx-rl-interfaces-get-action-list-service)
-    (cx-rl-interfaces-get-free-robot-server)
-    (cx-rl-interfaces-action-selection-server)
-    (cx-rl-interfaces-reset-cx-server)
-    (not (pddl-instance (busy-with ~FALSE)))
-=>
-    (assert (saved-facts))
-    (save-facts reset-save)
+  (assert (cx-rl-node (name ?*CX-RL-NODE-NAME*) (mode UNSET)))
 )

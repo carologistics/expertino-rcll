@@ -36,17 +36,17 @@
     
 )
 
-(defrule delay-executability-check
+(defrule delay-action-space
     (declare (salience (+ ?*SALIENCE-ACTION-EXECUTABLE-CHECK* 1)))
     (agenda-action-item (action ?action-id) (worker-type AGENT) (worker AGENT) (execution-state SELECTED))
     (not (executor (id ?ex-id) (pddl-action-id ?action-id) (worker AGENT)))
     =>
-    (assert (delay-executability-check))
+    (assert (delay-action-space))
 )
 
 (defrule check-action
     (declare (salience ?*SALIENCE-ACTION-EXECUTABLE-CHECK*))
-    (rl-executability-check (state CHECKING))
+    (rl-current-action-space (state PENDING))
     (pddl-action (id ?action-id) (name ?name))
     (not (pddl-action-condition (id ?action-id)))
     (not (agenda-action-item (action ?action-id)))
@@ -66,7 +66,7 @@
 
 (defrule executable-action
     (declare (salience ?*SALIENCE-ACTION-EXECUTABLE-CHECK*))
-    (rl-executability-check (state CHECKING))
+    (rl-current-action-space (state PENDING))
     (pddl-action-condition (id ?action-id) (state CONDITION-SAT))
     (pddl-action (id ?action-id)  (plan ?plan-id) (name ?name) (params $?params))
     
@@ -85,7 +85,7 @@
         (bind ?points (nth$ 1 $?mapping))
         (bind ?action-params (rest$ $?mapping))
         
-        (assert (rl-action (id ?action-id) (name (sym-cat ?name "#" (create-slot-value-string ?action-params))) (points ?points)))
+        (assert (rl-action (id ?action-id) (name ?name) (params ?action-params) (reward ?points)))
     else
         (assert (agenda-action-item (action ?action-id) (plan ?plan-id) (priority 0 1) (worker-type ?worker-type) (worker REFBOX) (execution-state SELECTED)))
         (printout green "Executing REFBOX action " ?name ?params crlf)
@@ -94,11 +94,11 @@
 
 (defrule executability-check-finished
     (declare (salience (- ?*SALIENCE-ACTION-EXECUTABLE-CHECK* 1)))
-    ?ec <- (rl-executability-check (state CHECKING))
+    ?ca <- (rl-current-action-space (state PENDING))
     (not (pddl-action-condition (state PENDING|CHECK-CONDITION)))
-    (not (delay-executability-check))
+    (not (delay-action-space))
     =>
-    (modify ?ec (state CHECKED))
+    (modify ?ca (state DONE))
     ;(retract ?ec)
     ;(assert (rl-executability-check (state CHECKED)))
     (do-for-all-facts ((?ap pddl-action-condition))
