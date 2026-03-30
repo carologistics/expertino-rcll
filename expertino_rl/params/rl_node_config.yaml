@@ -69,6 +69,7 @@ clips_manager:
 
     set_rl_mode:
       plugin: "cx::CXCxRlInterfacesSetRLModePlugin"
+      
 
     get_free_robot:
       plugin: "cx::CXCxRlInterfacesGetFreeRobotPlugin"
@@ -100,9 +101,16 @@ clips_manager:
         "clips/pddl-no-deftemplates.clp"
         ]
 
+    rl_files:
+      plugin: "cx::FileLoadPlugin"
+      pkg_share_dirs: ["cx_rl_bringup", "cx_rl_clips"]
+      batch: [
+        "clips/cx_rl_clips/cx-rl.clp",
+      ]
+
     files:
       plugin: "cx::FileLoadPlugin"
-      pkg_share_dirs: ["expertino", "cx_rl_clips", "expertino_rl"]
+      pkg_share_dirs: ["expertino", "expertino_rl"]
       load: [
         # Specific isolated concepts
         "clips/expertino/unwatch.clp",
@@ -126,20 +134,6 @@ clips_manager:
         "clips/expertino/workers/workers.clp",
         "clips/expertino/production-strategy.clp",
         "clips/expertino_rl/point-mapping.clp",
-        "clips/cx_rl_clips/reinforcementlearning.clp",
-        "clips/cx_rl_clips/reset-cx.clp",
-        "clips/cx_rl_clips/rl-utils.clp",
-        "clips/cx_rl_clips/create-rl-env-state-srv.clp",
-        "clips/cx_rl_clips/exec-action-selection-client.clp",
-        "clips/cx_rl_clips/get-observable-objects-srv.clp",
-        "clips/cx_rl_clips/get-observable-predicates-srv.clp",
-        "clips/cx_rl_clips/get-predefined-observables-srv.clp",
-        "clips/cx_rl_clips/get-action-list-srv.clp",
-        "clips/cx_rl_clips/get-action-list-robot-srv.clp",
-        "clips/cx_rl_clips/set-rl-mode-srv.clp",
-        "clips/cx_rl_clips/get-free-robot-action.clp",
-        "clips/cx_rl_clips/action-selection-action.clp",
-        "clips/cx_rl_clips/reset-cx-action.clp",
         "clips/expertino_rl/init.clp",
         "clips/expertino_rl/reset.clp",
         "clips/expertino_rl/action-executability.clp",
