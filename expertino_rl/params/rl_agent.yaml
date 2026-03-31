@@ -1,28 +1,123 @@
-/**:
+clips_manager:
   ros__parameters:
+    environments: ["expertino_rl"]
+    expertino_rl:
+        plugins: ["executive",
+                  "ament_index",
+                  "config",
+                  "protobuf",
+                  "ros_msgs",
+                  "ros_param",
+                  "get_free_robot",
+                  "action_selection",
+                  "reset_env",
+                  "plan_temporal_action",
+                  "timed_plan_action_msg",
+                  "start_refbox",
+                  "stop_refbox",
+                  "pddl_files",
+                  "rl_files",
+                  "files"]
+        log_clips_to_file: true
+        watch: ["facts", "rules"]
+        redirect_stdout_to_debug: true
 
-    model_name: "ExpertinoAgent"
-
-    training:
-      retraining: false
-      max_episodes: 500
-      timesteps: 100000000
-
-    env:
-      entrypoint: "expertino_rl.expertino_env:ExpertinoEnv"
-
-    model:
-      learning_rate: 0.0003
-      gamma: 0.99
-      gae_lambda: 0.95
-      ent_coef: 0.0
-      vf_coef: 0.5
-      max_grad_norm: 0.5
-      batch_size: 64
-      n_steps: 10
-      seed: 42
-      verbose: 1
-      wait_for_all_robots: false
-
+    ament_index:
+      plugin: "cx::AmentIndexPlugin"
     
+    protobuf:
+      plugin: "cx::ProtobufPlugin"
+      pkg_share_dirs: ["rcll_protobuf_msgs"]
+      proto_paths: ["rcll-protobuf-msgs"]
+
+    config:
+      plugin: "cx::ConfigPlugin"
+
+    executive:
+      plugin: "cx::ExecutivePlugin"
+      publish_on_refresh: false
+      assert_time: true
+      refresh_rate: 10
+
+    ros_msgs:
+      plugin: "cx::RosMsgsPlugin"
+
+    ros_param:
+      plugin: "cx::RosParamPlugin"
     
+    get_free_robot:
+      plugin: "cx::CXCxRlInterfacesGetFreeRobotPlugin"
+
+    action_selection:
+      plugin: "cx::CXCxRlInterfacesActionSelectionPlugin"
+
+    reset_env:
+      plugin: "cx::CXCxRlInterfacesResetEnvPlugin"
+
+    plan_temporal_action:
+      plugin: "cx::CXCxPddlInterfacesPlanTemporalPlugin"
+
+    timed_plan_action_msg:
+      plugin: "cx::CXCxPddlInterfacesTimedPlanActionPlugin"
+
+    start_refbox:
+      plugin: "cx::CXExpertinoRlInterfacesStartRefboxPlugin"
+
+    stop_refbox:
+      plugin: "cx::CXExpertinoRlInterfacesStopRefboxPlugin"
+    
+    pddl_files:
+      plugin: "cx::FileLoadPlugin"
+      pkg_share_dirs: ["cx_pddl_clips", "expertino_rl"]
+      batch: [
+        "clips/cx_pddl_clips/deftemplates.clp",
+        "clips/expertino_rl/pddl/deftemplates-overrides.clp",
+        "clips/cx_pddl_clips/pddl-no-deftemplates.clp"
+        ]
+
+    rl_files:
+      plugin: "cx::FileLoadPlugin"
+      pkg_share_dirs: ["cx_rl_bringup", "cx_rl_clips"]
+      batch: [
+        "clips/cx_rl_clips/cx-rl.clp",
+      ]
+
+    files:
+      plugin: "cx::FileLoadPlugin"
+      pkg_share_dirs: ["expertino", "expertino_rl"]
+      load: [
+        # Specific isolated concepts
+        "clips/expertino/unwatch.clp",
+        "clips/expertino/start-tasks/start-tasks.clp",
+        # General utility stuff
+        "clips/expertino/defglobals.clp",
+        "clips/expertino_rl/deftemplates.clp",
+        "clips/expertino/deffunctions.clp",
+        # Startup
+        "clips/expertino_rl/init-pddl.clp",
+        # Actual Reasoning
+        #"clips/expertino_rl/pddl/plan.clp",
+        "clips/expertino/refbox-comm-init.clp",
+        "clips/expertino/refbox-recv.clp",
+        "clips/expertino/refbox-action.clp",
+        "clips/expertino/sim-interface.clp",
+        "clips/expertino_rl/orders/order-selection.clp",
+        "clips/expertino_rl/action/action-precond-check.clp",
+        "clips/expertino/sim-agent-task.clp",
+        "clips/expertino_rl/executor.clp",
+        "clips/expertino/workers/workers.clp",
+        "clips/expertino_rl/production-strategy.clp",
+        "clips/expertino_rl/point-mapping.clp",
+        "clips/expertino_rl/init.clp",
+        "clips/expertino_rl/reset.clp",
+        "clips/expertino_rl/action-executability.clp",
+        "clips/expertino_rl/action-selection.clp",
+        "clips/expertino_rl/action-finalization.clp",
+        # Finalize
+        "clips/expertino_rl/shutdown/finalize-ros.clp",
+        ]
+    ros_msgs:
+      plugin: "cx::RosMsgsPlugin"
+
+
+        

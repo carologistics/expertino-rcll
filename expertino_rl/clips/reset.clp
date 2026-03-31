@@ -3,7 +3,6 @@
 )
 
 (defrule reset-cx-stage-pre-reset
-    (declare (salience ?*SALIENCE-RESET-CX-HIGH*))
     (rl-reset-env (state USER-CLEANUP))
     (expertino-rl-interfaces-stop-refbox-client (server ?server&:(eq ?server "cx_rl_node/stop_refbox")))
     (not (reset-goal (goal ?g)))
@@ -15,7 +14,6 @@
 )
 
 (defrule reset-cx-stage-pre-reset-finished
-    (declare (salience ?*SALIENCE-RESET-CX-HIGH*))
     ?r <- (rl-reset-env (state USER-CLEANUP))
     ?rg <- (reset-goal (goal ?goal))
     ?f <- (expertino-rl-interfaces-stop-refbox-goal-response (server "cx_rl_node/stop_refbox") (client-goal-handle-ptr ?ghp))
@@ -37,7 +35,6 @@
 )
 
 (defrule reset-cx-stage-post-reset
-    (declare (salience ?*SALIENCE-RESET-CX-HIGH*))
     (rl-reset-env (state USER-INIT))
     (expertino-rl-interfaces-start-refbox-client (server ?server&:(eq ?server "cx_rl_node/start_refbox")))
     (not (reset-goal (goal ?g)))
@@ -58,7 +55,6 @@
 )
 
 (defrule reset-cx-stage-post-reset-finished
-    (declare (salience ?*SALIENCE-RESET-CX-HIGH*))
     ?r <- (rl-reset-env (state USER-INIT))
     ?rg <- (reset-goal (goal ?goal))
     ?f <- (expertino-rl-interfaces-start-refbox-goal-response (server "cx_rl_node/start_refbox") (client-goal-handle-ptr ?ghp))

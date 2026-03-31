@@ -1,10 +1,9 @@
 (defrule agenda-select-first-plan
   ;(not (pddl-plan (state EXECUTING)))
-  ?plan <- (pddl-plan (id ?plan-id) (state SELECTED))
+  (pddl-plan (id ?plan-id) (state PLANNING))
   (not (agenda (plan ?plan-id)))
   =>
   (assert (agenda (plan ?plan-id) (state ACTIVE)))
-  (modify ?plan (state EXECUTING))
   (printout green "Initialiasing new action agenda from plan " ?plan-id crlf)
 )
 

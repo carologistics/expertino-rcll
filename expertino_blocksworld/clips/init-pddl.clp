@@ -76,7 +76,7 @@
      (bind ?service-type (nth$ (+ ?index 1) ?services))
      (ros-msgs-create-client
        (str-cat ?node "/" ?service-name)
-       (str-cat "cx_pddl_msgs/srv/" ?service-type)
+       (str-cat "cx_pddl_interfaces/srv/" ?service-type)
      )
      (bind ?index (+ ?index 2))
   )

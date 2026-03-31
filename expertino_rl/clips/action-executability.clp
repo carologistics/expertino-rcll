@@ -37,7 +37,7 @@
 )
 
 (defrule delay-action-space
-    (declare (salience (+ ?*SALIENCE-ACTION-EXECUTABLE-CHECK* 1)))
+    (declare (salience 1))
     (agenda-action-item (action ?action-id) (worker-type AGENT) (worker AGENT) (execution-state SELECTED))
     (not (executor (id ?ex-id) (pddl-action-id ?action-id) (worker AGENT)))
     =>
@@ -45,10 +45,9 @@
 )
 
 (defrule check-action
-    (declare (salience ?*SALIENCE-ACTION-EXECUTABLE-CHECK*))
     (rl-current-action-space (state PENDING))
     (pddl-action (id ?action-id) (name ?name))
-    (not (pddl-action-condition (id ?action-id)))
+    (not (pddl-action-condition (action ?action-id)))
     (not (agenda-action-item (action ?action-id)))
     (not (delay-executability-check))
 
@@ -61,13 +60,12 @@
     ;(not (rl-action (id ?action-id) (is-finished TRUE)))
     ;(not (rl-action (id ?action-id) (is-selected TRUE)))
     =>
-    (assert (pddl-action-condition (id ?action-id)))
+    (assert (pddl-action-condition (action ?action-id)))
 )
 
 (defrule executable-action
-    (declare (salience ?*SALIENCE-ACTION-EXECUTABLE-CHECK*))
     (rl-current-action-space (state PENDING))
-    (pddl-action-condition (id ?action-id) (state CONDITION-SAT))
+    (pddl-action-condition (action ?action-id) (state CONDITION-SAT))
     (pddl-action (id ?action-id)  (plan ?plan-id) (name ?name) (params $?params))
     
     (confval (path "/pddl/actions/robot") (list-value $?robot-actions))
@@ -93,7 +91,6 @@
 )
 
 (defrule executability-check-finished
-    (declare (salience (- ?*SALIENCE-ACTION-EXECUTABLE-CHECK* 1)))
     ?ca <- (rl-current-action-space (state PENDING))
     (not (pddl-action-condition (state PENDING|CHECK-CONDITION)))
     (not (delay-action-space))

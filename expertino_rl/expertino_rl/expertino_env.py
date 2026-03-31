@@ -14,8 +14,8 @@ from ament_index_python.packages import get_package_share_directory
 
 
 class ExpertinoEnv(CXRLGym):
-    def __init__(self, node: Node, mode: str, number_robots: int):
-        super().__init__(node, mode, number_robots)
+    def __init__(self, node: Node, mode: str):
+        super().__init__(node, mode)
         
         self.reward_in_episode = 0
         self.episode_number = 0

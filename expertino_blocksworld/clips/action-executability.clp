@@ -2,17 +2,17 @@
     (declare (salience ?*SALIENCE-ACTION-EXECUTABLE-CHECK*))
     (rl-executability-check (state CHECKING))
     (pddl-action (id ?action-id) (name ?action))
-    (not (pddl-action-condition (id ?action-id)))
+    (not (pddl-action-condition (action ?action-id)))
     (not (rl-action (id ?action-id) (is-finished TRUE)))
     (not (rl-action (name ?action) (is-selected TRUE)))
     =>
-    (assert (pddl-action-condition (id ?action-id)))
+    (assert (pddl-action-condition (action ?action-id)))
 )
 
 (defrule executable-action
     (declare (salience ?*SALIENCE-ACTION-EXECUTABLE-CHECK*))
     (rl-executability-check (state CHECKING))
-    (pddl-action-condition (id ?action-id) (state CONDITION-SAT))
+    (pddl-action-condition (action ?action-id) (state CONDITION-SAT))
     (pddl-action (id ?action-id) (name ?name) (params $?params))
     =>
     (assert (rl-action (id ?action-id) (name (sym-cat ?name "#" (create-slot-value-string $?params))) (points 0)))

@@ -3,7 +3,7 @@
     (member$ ?pf:name (create$ at free spawnable usable                                 
                                token-usable on-shelf buffered 
                                can-buffer))
-    (assert (rl-observation (name ?pf:name) (param-values ?pf:params)))
+    (assert (rl-observation (name ?pf:name) (params ?pf:params)))
   )
   (do-for-all-facts ((?pnf pddl-numeric-fluent))
     TRUE
@@ -23,7 +23,7 @@
       )
     )
     (assert (rl-observation (name ?pnf:name) 
-                            (param-values (create$ ?pnf:params ?value))))
+                            (params (create$ ?pnf:params ?value))))
   )
 )
 
@@ -41,6 +41,6 @@
     ?r <- (rl-action (id ?action-id) (is-selected TRUE) (is-finished FALSE))
     =>
     (rl-generate-observations)
-    (modify ?r (is-finished TRUE) (points 0))
+    (modify ?r (is-finished TRUE) (reward 0))
 )
 

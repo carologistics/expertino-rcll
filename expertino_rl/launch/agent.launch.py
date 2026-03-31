@@ -55,7 +55,7 @@ def generate_launch_description():
 
     declare_rl_mode = DeclareLaunchArgument(
         'rl_mode',
-        default_value='EXECUTION',
+        default_value='TRAINING',
         description='Mode for RL',
     )
 
@@ -97,11 +97,15 @@ def generate_launch_description():
     # -----------------------------
     # Paths to packages and files
     # -----------------------------
-    cx_rl_bringup_dir = get_package_share_directory('cx_rl_bringup')
+    expertino_rl_dir = get_package_share_directory('expertino_rl')
     cx_bringup_dir = get_package_share_directory('cx_bringup')
 
-    rl_config_file = PathJoinSubstitution([cx_rl_bringup_dir, 'params', training_config])
+    rl_config_file = PathJoinSubstitution([expertino_rl_dir, 'params', training_config])
     cx_launch_file = PathJoinSubstitution([cx_bringup_dir, 'launch', 'cx_launch.py'])
+
+    pddl_manager_launch = PathJoinSubstitution(
+        [get_package_share_directory('cx_pddl_manager'), 'launch', 'pddl_manager.launch.py']
+    )
 
     # -----------------------------
     # Nodes and included launches
@@ -117,10 +121,14 @@ def generate_launch_description():
         arguments=['--ros-args', '--log-level', log_level],
     )
 
+    include_pddl_manager = IncludeLaunchDescription(
+        PythonLaunchDescriptionSource(pddl_manager_launch)
+    )
+
     include_cx_launch = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(cx_launch_file),
         launch_arguments={
-            'package': 'cx_rl_bringup',
+            'package': 'expertino_rl',
             'manager_config': manager_config,
         }.items(),
     )
@@ -142,6 +150,7 @@ def generate_launch_description():
     ld.add_action(SetParameter(name='storage_dir', value=storage_dir))
     ld.add_action(SetParameter(name='rl_mode', value=rl_mode))
     ld.add_action(cx_rl_node)
+    ld.add_action(include_pddl_manager)
     ld.add_action(include_cx_launch)
 
     return ld
