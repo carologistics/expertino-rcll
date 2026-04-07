@@ -52,7 +52,7 @@
       )
   )
   (pddl-action (id ?action-id) (name ?action-name) (params $?action-params))
-  (not (agenda-action-item (execution-state INITIAL))) ;all agenda items are precondition checked
+  (not (agenda-action-item (plan ?plan-id) (execution-state INITIAL))) ;all agenda items are precondition checked
   ;assign the worker of the right type with the longest waiting time
   (worker (id ?worker) (state IDLE) (type ?worker-type))
   (worker-idle-timer (worker ?worker) (start-time ?start-time))
@@ -72,7 +72,7 @@
   ?action <- (agenda-action-item (action ?action-id) (plan ?plan-id) (priority $?priority) (execution-state PENDING)
                  (worker-type ?worker-type&AGENT))
   (agenda (plan ?plan-id) (state ACTIVE))
-  (not (agenda-action-item (action ?another-action-id) (plan ?plan-id) (worker ?worker-type) (execution-state SELECTED|EXECUTING)))
+  (not (agenda-action-item (action ?another-action-id) (plan ?plan-id) (worker ?worker-type) (execution-state SELECTED|EXECUTING|INITIAL)))
   (not
       (and
           (agenda-action-item (action ?other-action-id) (plan ?plan-id) (priority $?other-priority) (execution-state PENDING) (worker-type ?worker-type))
@@ -80,7 +80,7 @@
       )
   )
   (pddl-action (id ?action-id) (name ?action-name) (params $?action-params))
-  (not (agenda-action-item (execution-state INITIAL))) ;all agenda items are precondition checked
+  (not (agenda-action-item (plan ?plan-id) (execution-state INITIAL))) ;all agenda items are precondition checked
   =>
   (bind ?worker AGENT)
   (modify ?action (execution-state SELECTED) (worker ?worker))

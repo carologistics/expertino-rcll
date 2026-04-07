@@ -106,3 +106,15 @@
   =>
   (modify ?p (state SELECTED))
 )
+
+(defrule pddl-set-goals-done
+  ?set-goals-f <- (pddl-set-goals (instance ?instance) (state DONE)) 
+  ?pi-f <- (pddl-instance (name ?instance) (state LOADED) (busy-with FALSE))
+  =>
+  (do-for-all-facts ((?ppf pddl-goal-fluent)) (eq ?ppf:instance ?instance)
+    (retract ?ppf) 
+  ) 
+  (do-for-all-facts ((?ppf pddl-goal-numeric-fluent)) (eq ?ppf:instance ?instance)
+    (retract ?ppf)
+  )
+)
