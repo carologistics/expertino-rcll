@@ -8,7 +8,7 @@ rc_stop
 echo ======================
 echo Removing containers...
 echo ======================
-podman rm refbox refbox-frontend mongodb simulator-frontend mqtt-broker
+podman rm refbox refbox-frontend mongodb mqtt-broker
 podman rm mongodb-check simulator
 
 echo ======================

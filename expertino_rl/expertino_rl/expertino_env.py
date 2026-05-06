@@ -21,8 +21,8 @@ class ExpertinoEnv(CXRLGym):
         self.episode_number = 0
         
         self.expertino_dir = get_package_share_directory('expertino_rl')
-        self.start_refbox_server = ActionServer(self.node, StartRefbox, 'start_refbox', self.start_refbox_callback)
-        self.stop_refbox_server = ActionServer(self.node, StopRefbox, 'stop_refbox', self.stop_refbox_callback)
+        self.start_refbox_server = ActionServer(self.node, StartRefbox, 'cx_rl_node/start_refbox', self.start_refbox_callback)
+        self.stop_refbox_server = ActionServer(self.node, StopRefbox, 'cx_rl_node/stop_refbox', self.stop_refbox_callback)
         
 
     def step(self, action):

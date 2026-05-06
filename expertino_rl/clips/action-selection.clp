@@ -1,6 +1,6 @@
 (defrule agenda-select-first-plan
   ;(not (pddl-plan (state EXECUTING)))
-  (pddl-plan (id ?plan-id) (state PLANNING))
+  (pddl-plan (id ?plan-id) (state SUCCESS))
   (not (agenda (plan ?plan-id)))
   =>
   (assert (agenda (plan ?plan-id) (state ACTIVE)))
@@ -8,6 +8,7 @@
 )
 
 (defrule rl-action-selected-spawn-and-transport
+    (declare (salience 2))
     (rl-action (id ?action-id) (is-selected TRUE))
     ?a <- (pddl-action (name spawn-and-transport) (id ?action-id))
     (not (agenda-action-item (action ?action-id)))
@@ -97,6 +98,7 @@
 )
 
 (defrule rl-action-selected-pay-from-bs
+    (declare (salience 2))
     (rl-action (id ?action-id) (is-selected TRUE))
     ?a <- (pddl-action (name pay-from-bs) (id ?action-id))
     (not (agenda-action-item (action ?action-id)))
@@ -128,9 +130,9 @@
 (defrule rl-action-agent-expand
     (agenda-action-item (action ?action-id) (worker-type AGENT) (worker AGENT) (execution-state EXECUTING))
     (executor (id ?ex-id) (pddl-action-id ?action-id) (worker AGENT))
-    (pddl-plan (id ?plan-id) (context ?ex-id))
+    (pddl-plan (id ?plan-id) (context ?ex-id) (state SUCCESS))
     (not (agenda-action-item (plan ?plan-id)))
-    ?d <- (delay-executability-check)
+    ?d <- (delay-action-space)
 
     ;assign the worker of the right type with the longest waiting time
     (worker (id ?worker) (state IDLE) (type ROBOT))

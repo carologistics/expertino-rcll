@@ -37,7 +37,8 @@
 )
 
 (defrule delay-action-space
-    (declare (salience 1))
+    (declare (salience 2))
+    (rl-current-action-space (state PENDING))
     (agenda-action-item (action ?action-id) (worker-type AGENT) (worker AGENT) (execution-state SELECTED))
     (not (executor (id ?ex-id) (pddl-action-id ?action-id) (worker AGENT)))
     =>
@@ -45,11 +46,13 @@
 )
 
 (defrule check-action
+    (declare (salience 1))
     (rl-current-action-space (state PENDING))
     (pddl-action (id ?action-id) (name ?name))
     (not (pddl-action-condition (action ?action-id)))
     (not (agenda-action-item (action ?action-id)))
-    (not (delay-executability-check))
+    (not (delay-action-space))
+    (not (pddl-action-get-effect (state WAITING)))
 
     (confval (path "/pddl/actions/robot") (list-value $?robot-actions))
     (confval (path "/pddl/actions/refbox") (list-value $?refbox-actions))
@@ -93,7 +96,10 @@
 (defrule executability-check-finished
     ?ca <- (rl-current-action-space (state PENDING))
     (not (pddl-action-condition (state PENDING|CHECK-CONDITION)))
+    (not (pddl-action-get-effect (state WAITING)))
+    (rl-action (id ?action-id))
     (not (delay-action-space))
+    (not (pddl-action-get-effect (state WAITING)))
     =>
     (modify ?ca (state DONE))
     ;(retract ?ec)

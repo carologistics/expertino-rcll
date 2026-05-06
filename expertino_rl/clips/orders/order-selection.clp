@@ -98,8 +98,8 @@
   (not (freeze-agenda (instance ?instance)))
   =>
   (printout green "Start planning" crlf)
-  (bind ?goal (cx-pddl-interfaces-plan-temporal-goal-create))
-  (assert (pddl-plan (instance ?instance) (context test-plan) (goal ?goal) (type TEMPORAL) (state PENDING)))
+  (printout green ?instance crlf)
+  (assert (pddl-plan (instance ?instance) (id (sym-cat plan- (gensym*))) (context test-plan) (goal ?*GOAL-INSTANCE-BASE*) (type TEMPORAL) (state PENDING)))
   ;(assert (planned-for-main))
   (retract ?set-f)
   ;clear all old goals in pddl_manager                                           

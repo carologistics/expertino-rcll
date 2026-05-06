@@ -111,8 +111,7 @@
   (cx-pddl-interfaces-plan-temporal-client (server ?server&:(eq ?server (str-cat ?node "/temp_plan"))))
   =>                                                                            
   (printout green "Start re-planning" crlf)                                        
-  (bind ?goal (cx-pddl-interfaces-plan-temporal-goal-create))                       
-  (assert (pddl-plan (instance ?instance) (context ?ex-id) (goal ?goal) (type TEMPORAL) (state PENDING)))                                       
+  (assert (pddl-plan (id (gensym*))(instance ?instance) (context ?ex-id) (goal ?goal)))                                       
   (retract ?set-f)                                                              
   ;clear existing goals for the goal-instance
   (do-for-all-facts ((?goal-fluent pddl-goal-fluent)) 
@@ -127,7 +126,7 @@
 
 (defrule executor-agent-worker-succeeded
   ?ex <- (executor (id ?ex-id) (pddl-action-id ?action-id) (worker AGENT) (state ACCEPTED))
-  (pddl-plan (id ?plan-id) (context ?ex-id) (state PLANNING))
+  (pddl-plan (id ?plan-id) (context ?ex-id) (state SUCCESS))
   (agenda (plan ?plan-id))
   (agenda-action-item (plan ?plan-id))
   (not (agenda-action-item (plan ?plan-id) (execution-state ?state&~COMPLETED)))
