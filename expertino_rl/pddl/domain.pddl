@@ -1,5 +1,5 @@
 
-(define (domain rcll)
+(define (domain workpiece-flow)
 
 (:requirements :strips :typing :equality :numeric-fluents :negative-preconditions)
 
@@ -129,7 +129,7 @@
       (at ?carrier ?in)
       (out ?cs ?out)
       (in ?cs ?in)
-      (step-place ?step ?cs)
+      (step-place ?step ?in)
       (can-buffer ?cs ?step)
       (free ?out)
       (token-step ?carrier ?in ?step)
@@ -165,7 +165,7 @@
 )
 
 (:action cs-mount-cap
-    :parameters (?prod - product, ?cs - cap-station ?in - place ?out - place ?step - cap ?next - step-name)
+    :parameters (?prod - product ?cs - cap-station ?in - place ?out - place ?step - cap ?next - step-name)
     :precondition (and 
       (at ?prod ?in)
       (in ?cs ?in)
@@ -189,14 +189,14 @@
 )
 
 (:action pay-with-carrier
-    :parameters (?m - ring-station ?carrier - carrier ?from - place ?to - slide)
+    :parameters (?carrier - carrier ?from - place ?rs - ring-station ?to - slide)
     :precondition (and 
       (at ?carrier ?from)
-      (rs-slide ?m ?to)
+      (rs-slide ?rs ?to)
       (token-usable ?carrier ?from)
       (token-step ?carrier ?from dispose)
       (step-place dispose ?to)
-      (<= (pay-count ?m) 2)
+      (<= (pay-count ?rs) 2)
     )
     :effect (and 
       (not (token-usable ?carrier ?from))
@@ -221,7 +221,7 @@
 )
 
 (:action pay-with-base
-    :parameters (?token - payment ?from - bs-place ?to - slide ?rs - ring-station)
+    :parameters (?token - payment ?from - bs-place ?rs - ring-station ?to - slide)
     :precondition (and 
       (<= (pay-count ?rs) 2)
       (at ?token ?from)
@@ -244,7 +244,7 @@
       (in ?rs ?in)
       (out ?rs ?out)
       (>= (pay-count ?rs) (price ?step))
-      (step-place ?step ?rs)
+      (step-place ?step ?in)
       (free ?out)
       (step ?prod ?step)
       (next-step ?prod ?step ?next)
