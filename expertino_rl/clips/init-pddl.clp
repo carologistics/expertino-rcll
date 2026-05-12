@@ -25,7 +25,7 @@
 (deffacts pddl-task
   (start-task (name pddl)
     (wait-for)
-    (parts init-cfg init-clients init-problem init-planning-actions init-replanning-actions init-fluents init-objects init-planner)
+    (parts init-cfg init-clients init-problem init-fluents init-objects)
   )
 )
 
@@ -104,71 +104,6 @@
   (modify ?st (parts $?rest-parts))
 )
 
-(defrule pddl-request-load-planning-action-domain
-  (pddl-manager (node ?node))
-  (confval (path "/pddl/pddl_dir") (value ?dir))
-  (confval (path "/pddl/planning_domain_file") (value ?domain))
-  (confval (path "/pddl/planning_instance") (value ?instance))
-  (start-task (name pddl) (state ACTIVE) (parts init-planning-actions $?rest-parts))
-  =>
-  (bind ?share-dir (ament-index-get-package-share-directory "expertino_rl"))
-  (assert (pddl-instance (name (sym-cat ?instance)) (domain (str-cat ?domain)) (problem "") (directory (str-cat ?share-dir "/" ?dir)) (state PENDING)))
-)
-
-(defrule pddl-init-problem-request-planning-action-domain
-  (confval (path "/pddl/planning_instance") (value ?instance-str))
-  (pddl-instance (state LOADED) (name ?instance&:(eq ?instance (sym-cat ?instance-str))))
-  (not (pddl-action-names (instance ?instance)))
-  (start-task (name pddl) (state ACTIVE) (parts init-planning-actions $?rest-parts))
-  =>
-  (assert (pddl-action-names (instance ?instance)))
-)
-
-(defrule pddl-init-problem-finish-planning-action-domain
-  (confval (path "/pddl/planning_instance") (value ?instance-str))
-  (confval (path "/pddl/problem_instance") (value ?problem-instance-str))
-  (pddl-instance (state LOADED) (name ?instance&:(eq ?instance (sym-cat ?instance-str))))
-  ?pan-f <- (pddl-action-names (instance ?instance) (state DONE) (action-names $?an))
-  ?st <- (start-task (name pddl) (state ACTIVE) (parts init-planning-actions $?rest-parts))
-  =>
-  (assert (pddl-planning-filter (id (sym-cat ?instance-str)) (filter ?an) (instance (sym-cat ?problem-instance-str)) (goal ?*GOAL-INSTANCE-BASE*) (type ACTIONS)))
-  (retract ?pan-f)
-  (modify ?st (parts ?rest-parts))
-)
-
-(defrule pddl-request-load-re-planning-action-domain
-  (pddl-manager (node ?node))
-  (confval (path "/pddl/pddl_dir") (value ?dir))
-  (confval (path "/pddl/replanning_domain_file") (value ?domain))
-  (confval (path "/pddl/replanning_instance") (value ?instance))
-  (confval (path "/pddl/problem_instance") (value ?problem-instance-str))
-  (start-task (name pddl) (state ACTIVE) (parts init-replanning-actions $?rest-parts))
-  =>
-  (bind ?share-dir (ament-index-get-package-share-directory "expertino_rl"))
-  (assert (pddl-instance (name (sym-cat ?instance)) (domain (str-cat ?domain)) (problem "") (directory (str-cat ?share-dir "/" ?dir)) (state PENDING)))
-  (assert (pddl-create-goal-instance (instance (sym-cat ?problem-instance-str)) (goal ?*GOAL-INSTANCE-REPLANNING*)))
-)
-
-(defrule pddl-init-problem-request-re-planning-action-domain
-  (confval (path "/pddl/replanning_instance") (value ?instance-str))
-  (pddl-instance (state LOADED) (name ?instance&:(eq ?instance (sym-cat ?instance-str))))
-  (not (pddl-action-names (instance ?instance)))
-  (start-task (name pddl) (state ACTIVE) (parts init-replanning-actions $?rest-parts))
-  =>
-  (assert (pddl-action-names (instance ?instance)))
-)
-
-(defrule pddl-init-problem-finish-re-planning-action-domain
-  (confval (path "/pddl/replanning_instance") (value ?instance-str))
-  (confval (path "/pddl/problem_instance") (value ?problem-instance-str))
-  (pddl-instance (state LOADED) (name ?instance&:(eq ?instance (sym-cat ?instance-str))))
-  ?pan-f <- (pddl-action-names (instance ?instance) (state DONE) (action-names $?an))
-  ?st <- (start-task (name pddl) (state ACTIVE) (parts init-replanning-actions $?rest-parts))
-  =>
-  (assert (pddl-planning-filter (id (sym-cat ?instance-str)) (filter ?an) (instance (sym-cat ?problem-instance-str)) (goal ?*GOAL-INSTANCE-REPLANNING*) (type ACTIONS)))
-  (retract ?pan-f)
-  (modify ?st (parts ?rest-parts))
-)
 
 (defrule pddl-init-load-facts
   (start-task (name pddl) (state ACTIVE) (parts init-fluents $?rest-parts))
@@ -213,14 +148,12 @@
 (defrule pddl-init-load-objects-done
   (pddl-get-type-objects (instance ?instance) (state DONE))
   (not (pddl-get-type-objects (instance ?instance) (state ?state&~DONE)))
-  ?int <- (pddl-type-objects (type interactable) (objects $?int-objects))
   ?wp <- (pddl-type-objects (type workpiece) (objects $?wp-objects))
   ?prod <- (pddl-type-objects (type product) (objects $?prod-objects))
   (confval (path "/pddl/problem_instance") (value ?instance-str&:(eq ?instance (sym-cat ?instance-str))))
   ?st <- (start-task (name pddl) (state ACTIVE) (parts init-objects $?rest-parts))
   =>
   (bind ?orders (create$ o1 o2 o3 o4 o5 o6 o7 o8 o9 o10))
-  (modify ?int (objects (create$ $?int-objects ?orders)))
   (modify ?wp (objects (create$ $?wp-objects ?orders)))
   (modify ?prod (objects (create$ $?prod-objects ?orders)))
 
@@ -229,17 +162,3 @@
   (modify ?st (parts $?rest-parts))
 )
 
-(defrule pddl-init-plan-client
-  (confval (path "/pddl/manager_node") (value ?node))
-  (start-task (name pddl) (state ACTIVE) (parts init-planner $?rest-parts))
-  =>
-  (cx-pddl-interfaces-plan-temporal-create-client (str-cat ?node "/temp_plan"))
-)
-
-(defrule pddl-init-plan-client-successful
-  (confval (path "/pddl/manager_node") (value ?node))
-  (cx-pddl-interfaces-plan-temporal-client (server ?s&:(eq ?s (str-cat ?node "/temp_plan"))))
-  ?st <- (start-task (name pddl) (state ACTIVE) (parts init-planner $?rest-parts))
-  =>
-  (modify ?st (parts ?rest-parts))
-)

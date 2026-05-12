@@ -47,13 +47,11 @@
 
 (deffunction rl-define-actions ()
   (assert
-    (rl-observable-action (name spawn-and-transport) (param-names order) (param-types product))
     (rl-observable-action (name transport) (param-names order) (param-types product))
-    (rl-observable-action (name base-transport) (param-names order) (param-types product))
-    (rl-observable-action (name pay-with-carrier) (param-names rs c) (param-types ring-station carrier))
+    (rl-observable-action (name transport-to-cs) (param-names order) (param-types product))
+    (rl-observable-action (name pay-with-carrier) (param-names c rs) (param-types carrier ring-station))
+    (rl-observable-action (name pay-with-base) (param-names c rs) (param-types carrier ring-station))
     (rl-observable-action (name carrier-to-input) (param-names c cs) (param-types carrier cap-station))
-    (rl-observable-action (name transport-to-slide) (param-names c rs) (param-types carrier ring-station))
-    (rl-observable-action (name pay-from-bs) (param-names rs) (param-types ring-station))
   )
 )
 

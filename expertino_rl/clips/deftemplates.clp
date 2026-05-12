@@ -89,37 +89,13 @@
   (slot last-updated (type FLOAT))
 )
 
-;(deftemplate pddl-plan
-;  (slot id (type SYMBOL))
-;  (slot instance (type SYMBOL))
-;  (slot duration (type FLOAT))
-;  (slot state (type SYMBOL) (allowed-values PENDING SELECTED EXECUTING) (default PENDING))
-;  (slot context (type SYMBOL) (default nil))
-;)
-
-(deftemplate agenda
-  (slot plan (type SYMBOL))
-  (slot class-selection (type INTEGER) (default 0))
-  (slot class-relaxation (type INTEGER) (default 1))
-  (slot state (type SYMBOL) (allowed-values ACTIVE INACTIVE) (default INACTIVE))
-)
-
-(deftemplate agenda-action-item
-  (slot plan (type SYMBOL))
-  (slot action (type SYMBOL))
-  (slot execution-state (type SYMBOL) (allowed-values INITIAL UNSAT PENDING SELECTED EXECUTING COMPLETED ERROR EFFECTS-APPLIED) (default INITIAL))
-  (multislot priority (type INTEGER) (default (create$ 0)))
-  (slot worker-type (type SYMBOL) (allowed-values ROBOT REFBOX AGENT))
-  (slot worker (type SYMBOL) (default UNSET))
-)
-
 (deftemplate executor
 " Interface to the execution layer. Asserted when an (action) is ready to be executed by a worker. 
   Once the action has started executing, at-start effects are applied. Throughout the duration of action,
   feedback is received and corresponding effects are applied.
   @slot id: id of the executor.
   @slot worker: id of the worker which could be a robot or a refbox machine. For now, assuming ROBOT1, ROBOT2, ROBOT3 or REFBOX.
-  @slot pddl-action-id: the id of the pddl-action to be executed.
+  @slot action-id: the id of the pddl-action to be executed.
   @slot state: modelled on the states of ros2 action server responses
    - INIT: initial state before the execution layer is invoked.
    - REQUESTED: the execution layer has been requested to execute the action.
@@ -130,7 +106,7 @@
 "
   (slot id (type SYMBOL))
   (slot worker (type SYMBOL))
-  (slot pddl-action-id (type SYMBOL))
+  (slot action-id (type SYMBOL))
   (slot state (type SYMBOL) (allowed-values INIT REQUESTED ACCEPTED ABORTED CANCELLED SUCCEEDED))
 )
 
@@ -193,6 +169,3 @@
   (multislot orders (type SYMBOL) (default (create$)))
 )
 
-(deftemplate freeze-agenda
-  (slot instance (type SYMBOL))
-)

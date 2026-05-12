@@ -32,15 +32,10 @@ pddl:
   # Name of the main pddl instance.
   problem_instance: "rcll"
   # Initial pddl model split in domain and problem file.
-  init_domain_file: "domain.jinja.pddl"
-  init_problem_file: "problem.jinja.pddl"
-  # For planning, a subset of actions is used, only actions from the provided domain file are used.
-  planning_instance: "planning"
-  planning_domain_file: "planning_domain.jinja.pddl"
-  replanning_instance: "replanning"
-  replanning_domain_file: "planning_domain_level2.jinja.pddl"
+  init_domain_file: "domain.pddl"
+  init_problem_file: "problem.pddl"
   # differenciating between pddl actions carried out by different workers
   actions:
-    refbox: ["bs-dispense", "bs-dispense-pay", "cs-mount-cap", "cs-buffer", "rs-mount-ring", "finalize"]
-    robot: ["transport", "transport-to-slide", "carrier-to-input", "base-transport", "pay-with-carrier"]
-    agent: ["spawn-and-transport", "pay-from-bs"]
+    refbox_auto: ["cs-mount-cap", "cs-buffer", "rs-mount-ring", "finalize"]
+    refbox_select: ["bs-dispense", "bs-dispense-pay"]
+    robot: ["transport", "transport-to-cs", "carrier-to-input", "pay-with-carrier", "pay-with-base"]

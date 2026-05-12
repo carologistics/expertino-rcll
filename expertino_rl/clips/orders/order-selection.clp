@@ -68,51 +68,6 @@
   (retract ?goal-f)
 )
 
-(defrule set-goal-for-orders
-  (startup-completed)
-  (pddl-goal-fluent (instance ?instance) (goal ?goal&:(eq ?goal ?*GOAL-INSTANCE-BASE*)) (name step) (params ?wp1 $?))
-  ?clear-f <- (pddl-clear-goals (instance ?instance) (state DONE) (goal ?goal&:(eq ?goal ?*GOAL-INSTANCE-BASE*)))
-  =>
-  ; notify to add the goal to the domain
-  (assert (pddl-set-goals (instance ?instance) (goal ?*GOAL-INSTANCE-BASE*)))
-  ;freeze the current agenda execution
-  (if (any-factp ((?agenda agenda) (?plan pddl-plan)) (and (eq ?agenda:plan ?plan:id) (eq ?plan:instance ?instance)))
-   then
-    (assert (freeze-agenda (instance ?instance)))
-  )
-  (retract ?clear-f)
-)
-
-(defrule goal-updated-start-planning-for-orders
-  (startup-completed)
-  ?set-f <- (pddl-set-goals (instance ?instance) (state DONE) (goal ?goal&:(eq ?goal ?*GOAL-INSTANCE-BASE*)))
-  (pddl-manager (node ?node))
-  (pddl-instance (name ?instance) (busy-with FALSE) (state LOADED))
-  (cx-pddl-interfaces-plan-temporal-client (server ?server&:(eq ?server (str-cat ?node "/temp_plan"))))
-  ;(not (planned-for-main))
-  (not (and 
-        (agenda (plan ?plan-id) (state ACTIVE))
-        (pddl-plan (id ?plan-id) (instance ?instance))
-       )
-  )
-  (not (freeze-agenda (instance ?instance)))
-  =>
-  (printout green "Start planning" crlf)
-  (printout green ?instance crlf)
-  (assert (pddl-plan (instance ?instance) (id (sym-cat plan- (gensym*))) (context test-plan) (goal ?*GOAL-INSTANCE-BASE*) (type TEMPORAL) (state PENDING)))
-  ;(assert (planned-for-main))
-  (retract ?set-f)
-  ;clear all old goals in pddl_manager                                           
-  (do-for-all-facts ((?goal-fluent pddl-goal-fluent))                            
-    (and (eq ?goal-fluent:instance ?instance) (eq ?goal-fluent ?goal))          
-    (retract ?goal-fluent)                                                       
-  )                                                                              
-  (do-for-all-facts ((?goal-fluent pddl-goal-numeric-fluent))                    
-    (and (eq ?goal-fluent:instance ?instance) (eq ?goal-fluent ?goal))          
-    (retract ?goal-fluent)                                                       
-  )
-)
-
 (defrule remove-delivered-product-objects
   (confval (path "/pddl/problem_instance") (value ?instance-str))
   (pddl-fluent (instance ?instance&:(eq ?instance (sym-cat ?instance-str))) (name step) (params ?wp done))

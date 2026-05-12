@@ -96,7 +96,6 @@ clips_manager:
         # Startup
         "clips/expertino_rl/init-pddl.clp",
         # Actual Reasoning
-        #"clips/expertino_rl/pddl/plan.clp",
         "clips/expertino/refbox-comm-init.clp",
         "clips/expertino/refbox-recv.clp",
         "clips/expertino/refbox-action.clp",

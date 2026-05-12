@@ -1,32 +1,31 @@
 (deffunction rl-action-map-params-and-points (?id ?name ?params)
     (switch ?name
-        (case spawn-and-transport then
+        (case transport-to-cs then
             (bind ?param-indices (create$ 1))
-            (bind ?points ?*POINTS-ACTION-SPAWN-AND-TRANSPORT*))
+            (bind ?points ?*POINTS-ACTION-TRANSPORT-TO-CS*))
         (case transport then
             (bind ?param-indices (create$ 1))
             (bind ?points ?*POINTS-ACTION-TRANSPORT*))
-        (case base-transport then
-            (bind ?param-indices (create$ 1))
-            (bind ?points ?*POINTS-ACTION-BASE-TRANSPORT*))
+        (case pay-with-base then
+            (bind ?param-indices (create$ 1 3))
+            (bind ?points ?*POINTS-ACTION-PAY-WITH-BASE*))
         (case pay-with-carrier then
-            (bind ?param-indices (create$ 1 2))
+            (bind ?param-indices (create$ 1 3))
             (bind ?points ?*POINTS-ACTION-PAY-WITH-CARRIER*))
         (case carrier-to-input then
             (bind ?param-indices (create$ 1 3))
             (bind ?points ?*POINTS-ACTION-CARRIER-TO-INPUT*))
-        (case pay-from-bs then
+        (case bs-dispense then
             (bind ?param-indices (create$ 1))
-            (bind ?points ?*POINTS-ACTION-PAY-FROM-BS*))
-        (case transport-to-slide then
-            (bind ?param-indices (create$ 1 4))
-            (bind ?points ?*POINTS-ACTION-TRANSPORT-TO-SLIDE*))
-        (default (bind ?param-indices (create$)))
+            (bind ?points ?*POINTS-ACTION-BS-DISPENSE*))
+        (case bs-dispense-pay then
+            (bind ?param-indices (create$ 1))
+            (bind ?points ?*POINTS-ACTION-BS-DISPENSE-PAY))
     )
     (bind ?action-params (create$))
     (foreach ?index ?param-indices
         (bind ?param (nth$ ?index ?params))
-        (if (member$ ?name (create$ spawn-and-transport transport base-transport)) then
+        (if (member$ ?name (create$ transport transport-to-cs bs-dispense)) then
             (bind ?prod-name-end (- (str-index "-gen" (str-cat ?param)) 1))
             (bind ?param (sym-cat (sub-string 1 ?prod-name-end (str-cat ?param))))
         )
@@ -36,29 +35,19 @@
     
 )
 
-(defrule delay-action-space
-    (declare (salience 2))
-    (rl-current-action-space (state PENDING))
-    (agenda-action-item (action ?action-id) (worker-type AGENT) (worker AGENT) (execution-state SELECTED))
-    (not (executor (id ?ex-id) (pddl-action-id ?action-id) (worker AGENT)))
-    =>
-    (assert (delay-action-space))
-)
-
 (defrule check-action
     (declare (salience 1))
     (rl-current-action-space (state PENDING))
     (pddl-action (id ?action-id) (name ?name))
     (not (pddl-action-condition (action ?action-id)))
-    (not (agenda-action-item (action ?action-id)))
-    (not (delay-action-space))
+    (not (executor (pddl-action-id ?action-id)))
     (not (pddl-action-get-effect (state WAITING)))
 
     (confval (path "/pddl/actions/robot") (list-value $?robot-actions))
-    (confval (path "/pddl/actions/refbox") (list-value $?refbox-actions))
-    (confval (path "/pddl/actions/agent") (list-value $?agent-actions))
+    (confval (path "/pddl/actions/refbox_auto") (list-value $?refbox-auto-actions))
+    (confval (path "/pddl/action/refbox_select") (list-value $?refbox-select-actions))
 
-    (test (member$ (str-cat ?name) (create$ ?robot-actions ?refbox-actions ?agent-actions)))
+    (test (member$ (str-cat ?name) (create$ ?robot-actions ?refbox-auto-actions ?refbox-select-action)))
 
     ;(not (rl-action (id ?action-id) (is-finished TRUE)))
     ;(not (rl-action (id ?action-id) (is-selected TRUE)))
@@ -72,23 +61,17 @@
     (pddl-action (id ?action-id)  (plan ?plan-id) (name ?name) (params $?params))
     
     (confval (path "/pddl/actions/robot") (list-value $?robot-actions))
-    (confval (path "/pddl/actions/refbox") (list-value $?refbox-actions))
-    (confval (path "/pddl/actions/agent") (list-value $?agent-actions))
+    (confval (path "/pddl/actions/refbox_auto") (list-value $?refbox-auto-actions))
+    (confval (path "/pddl/action/refbox_select") (list-value $?refbox-select-actions))
     =>
-    (bind ?worker-type (if (member$ (str-cat ?name) ?robot-actions)
-                       then ROBOT
-                       else 
-                         (if (member$ (str-cat ?name) ?refbox-actions)
-                          then REFBOX
-                          else AGENT)))
-    (if (or (eq ?worker-type ROBOT) (eq ?worker-type AGENT)) then
+    (if (member$ (str-cat ?name) (create$ ?robot-actions ?refbox-select-actions)) then
         (bind $?mapping (rl-action-map-params-and-points ?action-id ?name ?params))
         (bind ?points (nth$ 1 $?mapping))
         (bind ?action-params (rest$ $?mapping))
         
         (assert (rl-action (id ?action-id) (name ?name) (params ?action-params) (reward ?points)))
     else
-        (assert (agenda-action-item (action ?action-id) (plan ?plan-id) (priority 0 1) (worker-type ?worker-type) (worker REFBOX) (execution-state SELECTED)))
+        (assert (executor (id (sym-cat EXECUTOR-(gensym*))) (action-id ?action-id) (worker REFBOX) (state INIT)))
         (printout green "Executing REFBOX action " ?name ?params crlf)
     )
 )
@@ -98,8 +81,6 @@
     (not (pddl-action-condition (state PENDING|CHECK-CONDITION)))
     (not (pddl-action-get-effect (state WAITING)))
     (rl-action (id ?action-id))
-    (not (delay-action-space))
-    (not (pddl-action-get-effect (state WAITING)))
     =>
     (modify ?ca (state DONE))
     ;(retract ?ec)

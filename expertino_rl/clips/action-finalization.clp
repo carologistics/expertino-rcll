@@ -28,7 +28,7 @@
 )
 
 (defrule expertino-rl-action-finished
-    (agenda-action-item (action ?action-id) (execution-state COMPLETED))
+    (executor (action-id ?action-id) (state SUCCEEDED))
     ?r <- (rl-action (id ?action-id) (is-selected TRUE) (is-finished FALSE))
     =>
     (rl-generate-observations)
@@ -37,7 +37,7 @@
 )
 
 (defrule expertino-rl-action-error
-    (agenda-action-item (action ?action-id) (execution-state ERROR))
+    (executor (action-id ?action-id) (state ABORTED))
     ?r <- (rl-action (id ?action-id) (is-selected TRUE) (is-finished FALSE))
     =>
     (rl-generate-observations)
