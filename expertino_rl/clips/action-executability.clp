@@ -20,7 +20,7 @@
             (bind ?points ?*POINTS-ACTION-BS-DISPENSE*))
         (case bs-dispense-pay then
             (bind ?param-indices (create$ 1))
-            (bind ?points ?*POINTS-ACTION-BS-DISPENSE-PAY))
+            (bind ?points ?*POINTS-ACTION-BS-DISPENSE-PAY*))
     )
     (bind ?action-params (create$))
     (foreach ?index ?param-indices
@@ -40,14 +40,14 @@
     (rl-current-action-space (state PENDING))
     (pddl-action (id ?action-id) (name ?name))
     (not (pddl-action-condition (action ?action-id)))
-    (not (executor (pddl-action-id ?action-id)))
+    (not (executor (action-id ?action-id)))
     (not (pddl-action-get-effect (state WAITING)))
 
     (confval (path "/pddl/actions/robot") (list-value $?robot-actions))
     (confval (path "/pddl/actions/refbox_auto") (list-value $?refbox-auto-actions))
-    (confval (path "/pddl/action/refbox_select") (list-value $?refbox-select-actions))
+    (confval (path "/pddl/actions/refbox_select") (list-value $?refbox-select-actions))
 
-    (test (member$ (str-cat ?name) (create$ ?robot-actions ?refbox-auto-actions ?refbox-select-action)))
+    (test (member$ (str-cat ?name) (create$ ?robot-actions ?refbox-auto-actions ?refbox-select-actions)))
 
     ;(not (rl-action (id ?action-id) (is-finished TRUE)))
     ;(not (rl-action (id ?action-id) (is-selected TRUE)))
@@ -62,7 +62,7 @@
     
     (confval (path "/pddl/actions/robot") (list-value $?robot-actions))
     (confval (path "/pddl/actions/refbox_auto") (list-value $?refbox-auto-actions))
-    (confval (path "/pddl/action/refbox_select") (list-value $?refbox-select-actions))
+    (confval (path "/pddl/actions/refbox_select") (list-value $?refbox-select-actions))
     =>
     (if (member$ (str-cat ?name) (create$ ?robot-actions ?refbox-select-actions)) then
         (bind $?mapping (rl-action-map-params-and-points ?action-id ?name ?params))

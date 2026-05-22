@@ -201,7 +201,7 @@
     :effect (and 
       (not (token-usable ?carrier ?from))
       (free ?from)
-      (increase (pay-count ?m) 1)
+      (increase (pay-count ?rs) 1)
       (not (at ?carrier ?from))
     )
 )

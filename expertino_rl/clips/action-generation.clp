@@ -2,15 +2,18 @@
     (pddl-fluent (name next-step) (params ?wp ?base-step ?cap-step))
     (test (str-index base ?base-step))
     (test (str-index cap ?cap-step))
-    (pddl-fluent (name step-place) (params ?cap-step ?cap-place))
-    (pddl-fluent (name in) (params ?cap-station ?cap-place))
+    (pddl-fluent (name step-place) (params ?cap-step ?cap-in))
+    (pddl-fluent (name in) (params ?cap-station ?cap-in))
+    (pddl-fluent (name token-step) (params ?carrier ?cap-in ?cap-step))
     (confval (path "/pddl/problem_instance") (value ?instance-str))
     =>
     (bind ?instance (sym-cat ?instance-str))
     (assert (pddl-action (instance ?instance) (id (gensym*)) 
                          (name bs-dispense) (params ?wp bs-output ?base-step ?cap-step)))
     (assert (pddl-action (instance ?instance) (id (gensym*)) 
-                         (name transport-to-cs) (params ?wp bs-output ?cap-station ?cap-place ?cap-step)))
+                         (name transport-to-cs) (params ?wp bs-output ?cap-station ?cap-in ?cap-step)))
+    (assert (pddl-action (instance ?instance) (id (gensym*))
+                         (name carrier-to-input) (params ?carrier ?cap-step ?cap-station ?cap-in)))
 )
 
 (defrule pddl-action-from-step-base-to-ring
@@ -32,7 +35,7 @@
     (test (str-index ring ?ring-step))
     (test (str-index ring ?next-ring-step))
     (pddl-fluent (name step-place) (params ?ring-step ?ring-input))
-    (pddl-fluent (name in) (params ?ring-station ?ring-intput))
+    (pddl-fluent (name in) (params ?ring-station ?ring-input))
     (pddl-fluent (name out) (params ?ring-station ?ring-output))
     (pddl-fluent (name step-place) (params ?next-ring-step ?next-ring-place))
     (confval (path "/pddl/problem_instance") (value ?instance-str))
@@ -49,7 +52,7 @@
     (test (str-index ring ?ring-step))
     (test (str-index cap ?cap-step))
     (pddl-fluent (name step-place) (params ?ring-step ?ring-input))
-    (pddl-fluent (name in) (params ?ring-station ?ring-intput))
+    (pddl-fluent (name in) (params ?ring-station ?ring-input))
     (pddl-fluent (name out) (params ?ring-station ?ring-output))
     (pddl-fluent (name step-place) (params ?cap-step ?cap-place))
     (pddl-fluent (name in) (params ?cap-station ?cap-place))
@@ -79,6 +82,40 @@
                          (name finalize) (params ?wp ds ds-input deliver)))
 )
 
-(defrule pddl-action-create-pay-with-carrier
-    
+(defrule pddl-action-pay-with-carrier
+    (pddl-fluent (name token-usable) (params ?carrier ?from))
+    (test (str-index carrier ?carrier))
+    (pddl-numeric-fluent (name pay-count) (params ?rs) (value ?rs-count))
+    (pddl-fluent (name rs-slide) (params ?rs ?slide))
+    (test (<= ?rs-count 2))
+    (not (and (pddl-action (id ?action-id) (name pay-with-carrier) (params ?carrier ?from ?rs ?slide))
+              (not (executor (action-id ?action-id) (state SUCCEEDED)))
+    ))
+    (confval (path "/pddl/problem_instance") (value ?instance-str))
+    =>
+    (bind ?instance (sym-cat ?instance-str))
+    (assert (pddl-action (instance ?instance) (id (gensym*))
+                         (name pay-with-carrier) (params ?carrier ?from ?rs ?slide)))
 )
+
+(defrule pddl-action-pay-with-base
+    (pddl-numeric-fluent (name price) (params ?ring) (value ?ring-price))
+    (test (> ?ring-price 0))
+    (pddl-fluent (name step-place) (params ?ring ?rs-input))
+    (pddl-fluent (name in) (params ?rs ?rs-input))
+    (pddl-fluent (name token-step) (params pay-token ?bs-place dispose))
+    (pddl-numeric-fluent (name pay-count) (params ?rs) (value ?rs-count))
+    (pddl-fluent (name rs-slide) (params ?rs ?slide))
+    (test (<= ?rs-count ?ring-price))
+    (not (and (pddl-action (id ?action-id) (name pay-with-base) (params pay-token ?bs-place ?rs ?slide))
+              (not (executor (action-id ?action-id) (state SUCCEEDED)))
+    ))
+    (confval (path "/pddl/problem_instance") (value ?instance-str))
+    =>
+    (bind ?instance (sym-cat ?instance-str))
+    (assert (pddl-action (instance ?instance) (id (gensym*))
+                         (name bs-dispense-pay) (params pay-token bs ?bs-place)))
+    (assert (pddl-action (instance ?instance) (id (gensym*))
+                         (name pay-with-base) (params pay-token ?bs-place ?rs ?slide)))
+)
+

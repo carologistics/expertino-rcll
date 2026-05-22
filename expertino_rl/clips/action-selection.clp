@@ -22,9 +22,9 @@
     (rl-action (id ?action-id) (is-selected TRUE))
     ?a <- (pddl-action (name ?name) (id ?action-id))
     (not (executor (action-id ?action-id)))
-    (confval (path "/pddl/action/refbox_select") (list-value $?refbox-select-actions))
+    (confval (path "/pddl/actions/refbox_select") (list-value $?refbox-select-actions))
     (test (member$ (str-cat ?name) ?refbox-select-actions))
     =>
-    (assert (executor (id (sym-cat EXECUTOR-(gensym*))) (action-id ?action-id) (state INIT) (worker ?worker)))
-    (printout green "Executing REFBOX action " ?name ?params crlf)
+    (assert (executor (id (sym-cat EXECUTOR-(gensym*))) (action-id ?action-id) (state INIT) (worker REFBOX)))
+    (printout green "Executing REFBOX action " ?name crlf)
 )

@@ -52,6 +52,8 @@
     (rl-observable-action (name pay-with-carrier) (param-names c rs) (param-types carrier ring-station))
     (rl-observable-action (name pay-with-base) (param-names c rs) (param-types carrier ring-station))
     (rl-observable-action (name carrier-to-input) (param-names c cs) (param-types carrier cap-station))
+    (rl-observable-action (name bs-dispense) (param-names order) (param-types product))
+    (rl-observable-action (name bs-dispense-pay) (param-names token) (param-types payment))
   )
 )
 
@@ -82,7 +84,6 @@
 ;     (assert (worker (id ?robot) (state IDLE) (type ROBOT)))
 ;   )
    (assert (worker (id REFBOX) (state IDLE) (type REFBOX)))
-   (assert (worker (id AGENT) (state IDLE) (type AGENT)))
    (assert (game-state (team ?team-name)))
    (assert (game-time 0.))
 

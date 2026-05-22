@@ -149,7 +149,7 @@
 (deftemplate worker
   (slot id (type SYMBOL))
   (slot name (type SYMBOL))
-  (slot type (type SYMBOL) (allowed-values ROBOT REFBOX AGENT))
+  (slot type (type SYMBOL) (allowed-values ROBOT REFBOX))
   (slot state (type SYMBOL) (allowed-values IDLE BUSY RECOVERY))
   (slot refbox-state (type SYMBOL) (allowed-values ACTIVE MAINTENANCE))
 )

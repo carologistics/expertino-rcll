@@ -136,6 +136,8 @@
 	  )
   )
   (assert (pddl-get-type-objects (instance ?instance) (type ring)))
+  (assert (pddl-get-type-objects (instance ?instance) (type payment)))
+
 )
 
 (defrule pddl-init-load-objects
