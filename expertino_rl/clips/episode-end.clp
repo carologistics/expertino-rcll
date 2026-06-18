@@ -8,7 +8,7 @@
   (modify ?a (reward ?*POINTS-EPISODE-END-SUCCESS*))
 )
 
-(defrule rl-blocksworld-stop-agent-on-training-end
+(defrule rl-stop-agent-on-training-end
   (rl-end-training)
 =>
   (cx-shutdown)

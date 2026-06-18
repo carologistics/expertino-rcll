@@ -113,6 +113,7 @@ clips_manager:
         "clips/expertino_rl/action-executability.clp",
         "clips/expertino_rl/action-selection.clp",
         "clips/expertino_rl/action-finalization.clp",
+        "clips/expertino_rl/episode-end.clp",
         # Finalize
         "clips/expertino_rl/shutdown/finalize-ros.clp",
         ]

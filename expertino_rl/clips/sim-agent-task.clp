@@ -5,7 +5,7 @@
   (protobuf-peer (name ?robot) (peer-id ?peer-id))
   (not (agent-task-list (executor-id ?ex-id)))
   ?pa <- (pddl-action (id ?action-id) 
-           (name ?action-name&transport|transport-to-slide|carrier-to-input|base-transport|pay-with-carrier)
+           (name ?action-name&transport|transport-to-cs|carrier-to-input|pay-with-base|pay-with-carrier)
            (params $?action-params))
   (game-state (team-color ?team-color))
   =>
@@ -17,17 +17,17 @@
       (bind ?to-side (pddl-place-to-mps-side (nth$ 4 ?action-params)))
       (bind ?to-mps ?from-mps)
     )
-    (case pay-with-carrier then
-      (bind ?from-mps (pddl-place-to-refbox-mps (nth$ 3 ?action-params) ?team-color))
-      (bind ?from-side (pddl-place-to-mps-side (nth$ 3 ?action-params)))
-      (bind ?to-mps (pddl-place-to-refbox-mps (nth$ 4 ?action-params) ?team-color))
-      (bind ?to-side (pddl-place-to-mps-side (nth$ 4 ?action-params)))
-    )
-    (default
+    (case transport then
       (bind ?from-mps (pddl-place-to-refbox-mps (nth$ 2 ?action-params) ?team-color))
       (bind ?from-side (pddl-place-to-mps-side (nth$ 2 ?action-params)))
       (bind ?to-mps (pddl-place-to-refbox-mps (nth$ 3 ?action-params) ?team-color))
       (bind ?to-side (pddl-place-to-mps-side (nth$ 3 ?action-params)))
+    )
+    (default
+      (bind ?from-mps (pddl-place-to-refbox-mps (nth$ 2 ?action-params) ?team-color))
+      (bind ?from-side (pddl-place-to-mps-side (nth$ 2 ?action-params)))
+      (bind ?to-mps (pddl-place-to-refbox-mps (nth$ 4 ?action-params) ?team-color))
+      (bind ?to-side (pddl-place-to-mps-side (nth$ 4 ?action-params)))
     )
   )
   (assert (agent-task-list (id (sym-cat TASK-LIST-(gensym*))) (executor-id ?ex-id) (pddl-action-id ?action-id)
@@ -111,28 +111,7 @@
   (pddl-action (id ?action-id) (name ?action) (instance ?instance) (params $?params))
   =>
   (modify ?at-list (tasks $?rest))
-  (modify ?cur-task-seq (task-id (+ 1 ?seq)))
-  (if (not (eq ?action carrier-to-input))
-   then
-     (bind ?sub-action nil)
-     (switch ?cur-task
-       (case Move-src then
-         (bind ?sub-action (sym-cat ?action -step-1-drive-to))
-       )
-       (case Retrieve then
-         (bind ?sub-action (sym-cat ?action -step-2-pick-up))
-       )
-       (case Deliver then 
-         (bind ?sub-action (sym-cat ?action -step-4-place-down))
-       )
-     )
-     (if (neq ?sub-action nil)
-      then
-        (bind ?sub-action-id (gensym*)) 
-        (assert (pddl-action (id ?sub-action-id) (name ?sub-action) (instance ?instance) (params ?params)))
-        (assert (pddl-action-get-effect (action ?sub-action-id) (effect-type ALL) (apply TRUE)))
-     )
-  ) 
+  (modify ?cur-task-seq (task-id (+ 1 ?seq))) 
 )
 
 (defrule agent-task-list-mark-done
@@ -145,10 +124,7 @@
   (if (eq ?outcome SUCCEEDED)
    then
      (modify ?ex (state SUCCEEDED))
-     (if (eq ?action-name carrier-to-input)
-      then
-        (assert (pddl-action-get-effect (action ?action-id) (effect-type END) (apply TRUE))) 
-     )
+     (assert (pddl-action-get-effect (action ?action-id) (effect-type END) (apply TRUE))) 
    ;else
      ;(modify ?ex (state ABORTED))
   )

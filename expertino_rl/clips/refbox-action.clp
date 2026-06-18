@@ -7,7 +7,7 @@
   (machine (name ?mps) (state IDLE))
   (test (or 
     (and (eq ?action-name bs-dispense)
-         (eq ?mps (pddl-place-to-refbox-mps (nth$ 5 ?action-params) ?team-color))
+         (eq ?mps (pddl-place-to-refbox-mps (nth$ 2 ?action-params) ?team-color))
     )
     (eq ?mps (pddl-place-to-refbox-mps (nth$ 3 ?action-params) ?team-color))
   ) )
@@ -20,8 +20,8 @@
     (case bs-dispense
       then
         (bind ?bs-inst (pb-create "llsf_msgs.PrepareInstructionBS"))
-        (pb-set-field ?bs-inst "side" (pddl-place-to-mps-side (nth$ 5 ?action-params)))
-        (pb-set-field ?bs-inst "color" (pddl-task-to-base-color (nth$ 2 ?action-params)))
+        (pb-set-field ?bs-inst "side" (pddl-place-to-mps-side (nth$ 2 ?action-params)))
+        (pb-set-field ?bs-inst "color" (pddl-task-to-base-color (nth$ 3 ?action-params)))
         (pb-set-field ?machine-instruction "instruction_bs" ?bs-inst)
     )
     (case bs-dispense-pay
@@ -78,7 +78,7 @@
   =>
   (if (eq ?action-name bs-dispense)
    then
-    (bind ?o-mps (pddl-place-to-refbox-mps (nth$ 5 ?action-params) ?team-color))
+    (bind ?o-mps (pddl-place-to-refbox-mps (nth$ 2 ?action-params) ?team-color))
    else
     (bind ?o-mps (pddl-place-to-refbox-mps (nth$ 3 ?action-params) ?team-color))
   )

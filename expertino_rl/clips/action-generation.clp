@@ -4,6 +4,7 @@
     (test (str-index cap ?cap-step))
     (pddl-fluent (name step-place) (params ?cap-step ?cap-in))
     (pddl-fluent (name in) (params ?cap-station ?cap-in))
+    (pddl-fluent (name out) (params ?cap-station ?cap-out))
     (pddl-fluent (name token-step) (params ?carrier ?cap-in ?cap-step))
     (confval (path "/pddl/problem_instance") (value ?instance-str))
     =>
@@ -14,6 +15,8 @@
                          (name transport-to-cs) (params ?wp bs-output ?cap-station ?cap-in ?cap-step)))
     (assert (pddl-action (instance ?instance) (id (gensym*))
                          (name carrier-to-input) (params ?carrier ?cap-step ?cap-station ?cap-in)))
+    (assert (pddl-action (instance ?instance) (id (gensym*))
+                         (name cs-buffer) (params ?carrier ?cap-station ?cap-in ?cap-out ?cap-step)))
 )
 
 (defrule pddl-action-from-step-base-to-ring
@@ -54,15 +57,21 @@
     (pddl-fluent (name step-place) (params ?ring-step ?ring-input))
     (pddl-fluent (name in) (params ?ring-station ?ring-input))
     (pddl-fluent (name out) (params ?ring-station ?ring-output))
-    (pddl-fluent (name step-place) (params ?cap-step ?cap-place))
-    (pddl-fluent (name in) (params ?cap-station ?cap-place))
+    (pddl-fluent (name step-place) (params ?cap-step ?cap-in))
+    (pddl-fluent (name in) (params ?cap-station ?cap-in))
+    (pddl-fluent (name out) (params ?cap-station ?cap-out))
+    (pddl-fluent (name token-step) (params ?carrier ?cap-in ?cap-step))
     (confval (path "/pddl/problem_instance") (value ?instance-str))
     =>
     (bind ?instance (sym-cat ?instance-str))
     (assert (pddl-action (instance ?instance) (id (gensym*))
                          (name rs-mount-ring) (params ?wp ?ring-station ?ring-input ?ring-output ?ring-step ?cap-step)))
     (assert (pddl-action (instance ?instance) (id (gensym*)) 
-                         (name transport-to-cs) (params ?wp ?ring-output ?cap-station ?cap-place ?cap-step)))
+                         (name transport-to-cs) (params ?wp ?ring-output ?cap-station ?cap-in ?cap-step)))
+    (assert (pddl-action (instance ?instance) (id (gensym*))
+                         (name carrier-to-input) (params ?carrier ?cap-step ?cap-station ?cap-in)))
+    (assert (pddl-action (instance ?instance) (id (gensym*))
+                         (name cs-buffer) (params ?carrier ?cap-station ?cap-in ?cap-out ?cap-step)))
 )
 
 (defrule pddl-action-from-step-cap-to-delivery
@@ -114,8 +123,19 @@
     =>
     (bind ?instance (sym-cat ?instance-str))
     (assert (pddl-action (instance ?instance) (id (gensym*))
-                         (name bs-dispense-pay) (params pay-token bs ?bs-place)))
-    (assert (pddl-action (instance ?instance) (id (gensym*))
                          (name pay-with-base) (params pay-token ?bs-place ?rs ?slide)))
+)
+
+(defrule pddl-action-bs-dispense-pay
+    (pddl-action (id ?action-id) (name pay-with-base) (params pay-token ?bs-place ?rs ?slide))
+    (not (rl-action (id ?action-id) (is-finished TRUE)))
+    (not (and (pddl-action (id ?dispense-id) (name bs-dispense-pay) (params pay-token bs ?bs-place))
+              (not (rl-action (id ?dispense-id) (is-finished TRUE)))))
+    (pddl-fluent (name token-step) (params pay-token ?bs-place dispose))
+    (confval (path "/pddl/problem_instance") (value ?instance-str))
+    =>
+    (bind ?instance (sym-cat ?instance-str))
+    (assert (pddl-action (instance ?instance) (id (gensym*))
+                         (name bs-dispense-pay) (params pay-token bs ?bs-place)))
 )
 

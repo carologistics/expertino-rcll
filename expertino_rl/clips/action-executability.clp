@@ -42,6 +42,8 @@
     (not (pddl-action-condition (action ?action-id)))
     (not (executor (action-id ?action-id)))
     (not (pddl-action-get-effect (state WAITING)))
+    (not (rl-action (id ?action-id) (is-selected TRUE)))
+    (not (rl-action (id ?action-id) (is-finished TRUE)))
 
     (confval (path "/pddl/actions/robot") (list-value $?robot-actions))
     (confval (path "/pddl/actions/refbox_auto") (list-value $?refbox-auto-actions))
@@ -74,6 +76,16 @@
         (assert (executor (id (sym-cat EXECUTOR-(gensym*))) (action-id ?action-id) (worker REFBOX) (state INIT)))
         (printout green "Executing REFBOX action " ?name ?params crlf)
     )
+)
+
+(defrule executability-check-filter-bs
+    (declare (salience 1))
+    (rl-current-action-space (state PENDING))
+    (rl-action (name bs-dispense|bs-dispense-pay) (is-selected TRUE) (is-finished FALSE))
+    ?ra <- (rl-action (id ?action-id) (name bs-dispense|bs-dispense-pay) (is-selected FALSE))
+    =>
+    (printout warn "Base station action in progress, disable action " ?action-id crlf)
+    (retract ?ra)
 )
 
 (defrule executability-check-finished

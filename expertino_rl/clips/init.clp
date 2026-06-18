@@ -50,7 +50,7 @@
     (rl-observable-action (name transport) (param-names order) (param-types product))
     (rl-observable-action (name transport-to-cs) (param-names order) (param-types product))
     (rl-observable-action (name pay-with-carrier) (param-names c rs) (param-types carrier ring-station))
-    (rl-observable-action (name pay-with-base) (param-names c rs) (param-types carrier ring-station))
+    (rl-observable-action (name pay-with-base) (param-names p rs) (param-types payment ring-station))
     (rl-observable-action (name carrier-to-input) (param-names c cs) (param-types carrier cap-station))
     (rl-observable-action (name bs-dispense) (param-names order) (param-types product))
     (rl-observable-action (name bs-dispense-pay) (param-names token) (param-types payment))

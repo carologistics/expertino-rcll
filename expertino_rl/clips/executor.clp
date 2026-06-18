@@ -21,14 +21,14 @@
 )
 
 (defrule executor-retract-sending
-  ?sending <- (sending ?action-name ?mps)
+  ?sending <- (sending ?action-id ?mps)
   (or
     (executor (action-id ?action-id) (state ?s&:(neq ?s ACCEPTED)))
     (not (executor (action-id ?action-id)))
   )
   =>
   (retract ?sending)
-  (assert (sent ?action-name))
+  (assert (sent ?action-id))
 )
 
 
