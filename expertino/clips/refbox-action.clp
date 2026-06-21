@@ -51,7 +51,7 @@
     )
     (case finalize
       then
-        (bind ?wp (nth$ 1 ?action-params))
+        (bind ?wp (sym-cat (nth$ 1 ?action-params)))
         (do-for-fact ((?w-f workpiece-for-order)) (eq ?w-f:wp ?wp)
           (bind ?order-id ?w-f:order)
         )

@@ -97,14 +97,10 @@
   ?set-f <- (pddl-set-goals (instance ?instance) (state DONE) (goal ?goal&:(eq ?goal ?*GOAL-INSTANCE-REPLANNING*)))
   (pddl-manager (node ?node))                                                   
   (pddl-instance (name ?instance) (busy-with FALSE) (state LOADED))             
-  (cx-pddl-msgs-plan-temporal-client (server ?server&:(eq ?server (str-cat ?node "/temp_plan"))))
+  (cx-pddl-interfaces-plan-temporal-client (server ?server&:(eq ?server (str-cat ?node "/temp_plan"))))
   =>                                                                            
-  (printout green "Start re-planning" crlf)                                        
-  (bind ?goal (cx-pddl-msgs-plan-temporal-goal-create))                       
-  (assert (pddl-planner-call (context ?ex-id) (goal ?goal)))                 
-  (cx-pddl-msgs-plan-temporal-goal-set-field ?goal "pddl_instance" ?instance) 
-  (cx-pddl-msgs-plan-temporal-goal-set-field ?goal "goal_instance" ?*GOAL-INSTANCE-REPLANNING*)    
-  (cx-pddl-msgs-plan-temporal-send-goal ?goal ?server)                        
+  (printout green "Start re-planning" crlf)
+  (assert (pddl-plan (id (sym-cat ?goal "-" ?ex-id)) (instance ?instance) (goal ?goal) (plan-type TEMPORAL)))                    
   (retract ?set-f)                                                              
   ;clear existing goals for the goal-instance
   (do-for-all-facts ((?goal-fluent pddl-goal-fluent)) 
@@ -119,10 +115,9 @@
 
 (defrule executor-agent-worker-succeeded
   ?ex <- (executor (id ?ex-id) (pddl-action-id ?action-id) (worker AGENT) (state ACCEPTED))
-  (pddl-plan (id ?plan-id) (context ?ex-id))
-  (agenda (plan ?plan-id))
-  (agenda-action-item (plan ?plan-id))
-  (not (agenda-action-item (plan ?plan-id) (execution-state ?state&~COMPLETED)))
+  (pddl-plan (id ?plan-id) (instance ?instance) (goal ?goal&:(eq ?goal ?*GOAL-INSTANCE-REPLANNING*)) (plan-type TEMPORAL))
+  (test (eq ?plan-id (sym-cat ?goal "-" ?ex-id)))
+  (agenda (plan ?plan-id) (state COMPLETED))
   =>
   (modify ?ex (state SUCCEEDED))
 )

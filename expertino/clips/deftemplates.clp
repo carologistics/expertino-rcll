@@ -89,19 +89,10 @@
   (slot last-updated (type FLOAT))
 )
 
-(deftemplate pddl-plan
-  (slot id (type SYMBOL))
-  (slot instance (type SYMBOL))
-  (slot duration (type FLOAT))
-  (slot state (type SYMBOL) (allowed-values PENDING SELECTED EXECUTING) (default PENDING))
-  (slot context (type SYMBOL) (default nil))
-)
-
 (deftemplate agenda
   (slot plan (type SYMBOL))
-  (slot class-selection (type INTEGER) (default 0))
-  (slot class-relaxation (type INTEGER) (default 1))
-  (slot state (type SYMBOL) (allowed-values ACTIVE INACTIVE) (default INACTIVE))
+  (slot current-time (type FLOAT) (default 0.0))
+  (slot state (type SYMBOL) (allowed-values ACTIVE INACTIVE COMPLETED) (default INACTIVE))
 )
 
 (deftemplate agenda-action-item
@@ -196,3 +187,4 @@
 (deftemplate freeze-agenda
   (slot instance (type SYMBOL))
 )
+

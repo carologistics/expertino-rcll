@@ -72,6 +72,6 @@ clips_manager:
     ros_msgs:
       plugin: "cx::RosMsgsPlugin"
     plan_temporal_action:
-      plugin: "cx::CXCxPddlMsgsPlanTemporalPlugin"
+      plugin: "cx::CXCxPddlInterfacesPlanTemporalPlugin"
     timed_plan_action_msg:
-      plugin: "cx::CXCxPddlMsgsTimedPlanActionPlugin"
+      plugin: "cx::CXCxPddlInterfacesTimedPlanActionPlugin"

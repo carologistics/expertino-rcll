@@ -75,8 +75,8 @@
   ?filter <- (production-strategy-order-filter (name active-orders) (orders $?active-orders))
   (order (id ?order-id) (quantity-requested ?q-req) (quantity-delivered ?q-del&:(<> ?q-del ?q-req)))
   (workpiece-for-order (wp ?wp) (order ?order-id))
-  (agenda (plan ?plan-id) (state ACTIVE) (class-selection ?class))
-  (pddl-action (id ?action) (plan ?plan-id) (params $?params) (plan-order-class ?p-class&:(>= ?p-class ?class)))
+  (agenda (plan ?plan-id) (state ACTIVE) (current-time ?ct))
+  (pddl-action (id ?action) (plan ?plan-id) (params $?params) (planned-start-time ?st&:(>= ?st ?ct)))
   (test (member$ ?wp ?params))
   (test (not (member$ ?order-id ?active-orders)))
   =>

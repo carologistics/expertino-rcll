@@ -25,7 +25,7 @@
 (deffacts pddl-task
   (start-task (name pddl)
     (wait-for)
-    (parts init-cfg init-clients init-problem init-planning-actions init-replanning-actions init-fluents init-planner)
+    (parts init-cfg init-problem init-planning-actions init-replanning-actions init-fluents)
   )
 )
 
@@ -35,50 +35,7 @@
   =>
   (assert (pddl-manager (node ?node)))
   (modify ?st (parts ?rest-parts))
-)
-
-(defrule pddl-init-pddl-manager-services
-" Create publisher for ros_cx_out."
-  (pddl-manager (node ?node))
-  ?st <- (start-task
-    (name pddl) (state ACTIVE)
-    (parts init-clients $?rest-parts)
-  )
-  (not (executive-finalize))
-=>
-  ; create all clients
-  (bind ?services (create$
-    add_fluents AddFluents
-    rm_fluents RemoveFluents
-    add_objects AddObjects
-    rm_objects RemoveObjects
-    set_functions SetFunctions
-    add_pddl_instance AddPddlInstance
-    check_action_condition CheckActionCondition
-    get_action_effects GetActionEffects
-    get_action_names GetActionNames
-    get_fluents GetFluents
-    get_functions GetFunctions
-    set_goals SetGoals
-    clear_goals ClearGoals
-    set_action_filter SetActionFilter
-    set_object_filter SetObjectFilter
-    create_goal_instance CreateGoalInstance
-    set_fluent_filter SetFluentFilter
-  ))
-  (bind ?index 1)
-  (bind ?length (length$ ?services))
-  (while (< ?index ?length)
-     (bind ?service-name (nth$ ?index ?services))
-     (bind ?service-type (nth$ (+ ?index 1) ?services))
-     (ros-msgs-create-client
-       (str-cat ?node "/" ?service-name)
-       (str-cat "cx_pddl_msgs/srv/" ?service-type)
-     )
-     (bind ?index (+ ?index 2))
-  )
-  (modify ?st (parts $?rest-parts))
-)
+) 
 
 (defrule pddl-request-load-problem-instance
   (pddl-manager (node ?node))
@@ -184,17 +141,17 @@
   (modify ?st (parts $?rest-parts))
 )
 
-(defrule pddl-init-plan-client
-  (confval (path "/pddl/manager_node") (value ?node))
-  (start-task (name pddl) (state ACTIVE) (parts init-planner $?rest-parts))
-  =>
-  (cx-pddl-msgs-plan-temporal-create-client (str-cat ?node "/temp_plan"))
-)
+;(defrule pddl-init-plan-client
+;  (confval (path "/pddl/manager_node") (value ?node))
+;  (start-task (name pddl) (state ACTIVE) (parts init-planner $?rest-parts))
+;  =>
+;  (cx-pddl-interfaces-plan-temporal-create-client (str-cat ?node "/temp_plan"))
+;)
 
-(defrule pddl-init-plan-client-successful
-  (confval (path "/pddl/manager_node") (value ?node))
-  (cx-pddl-msgs-plan-temporal-client (server ?s&:(eq ?s (str-cat ?node "/temp_plan"))))
-  ?st <- (start-task (name pddl) (state ACTIVE) (parts init-planner $?rest-parts))
-  =>
-  (modify ?st (parts ?rest-parts))
-)
+;(defrule pddl-init-plan-client-successful
+;  (confval (path "/pddl/manager_node") (value ?node))
+;  (cx-pddl-interfaces-plan-temporal-client (server ?s&:(eq ?s (str-cat ?node "/temp_plan"))))
+;  ?st <- (start-task (name pddl) (state ACTIVE) (parts init-planner $?rest-parts))
+;  =>
+;  (modify ?st (parts ?rest-parts))
+;)

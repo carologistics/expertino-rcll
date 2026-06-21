@@ -88,7 +88,7 @@
   ?set-f <- (pddl-set-goals (instance ?instance) (state DONE) (goal ?goal&:(eq ?goal ?*GOAL-INSTANCE-BASE*)))
   (pddl-manager (node ?node))
   (pddl-instance (name ?instance) (busy-with FALSE) (state LOADED))
-  (cx-pddl-msgs-plan-temporal-client (server ?server&:(eq ?server (str-cat ?node "/temp_plan"))))
+  (cx-pddl-interfaces-plan-temporal-client (server ?server&:(eq ?server (str-cat ?node "/temp_plan"))))
   ;(not (planned-for-main))
   (not (and 
         (agenda (plan ?plan-id) (state ACTIVE))
@@ -98,12 +98,7 @@
   (not (freeze-agenda (instance ?instance)))
   =>
   (printout green "Start planning" crlf)
-  (bind ?goal (cx-pddl-msgs-plan-temporal-goal-create))
-  (assert (pddl-planner-call (context test-plan) (goal ?goal)))
-  (cx-pddl-msgs-plan-temporal-goal-set-field ?goal "pddl_instance" ?instance)
-  (cx-pddl-msgs-plan-temporal-goal-set-field ?goal "goal_instance" (str-cat ?*GOAL-INSTANCE-BASE*))
-  (cx-pddl-msgs-plan-temporal-send-goal ?goal ?server)
-  ;(assert (planned-for-main))
+  (assert (pddl-plan (id (sym-cat ?*GOAL-INSTANCE-BASE* - (gensym*))) (instance ?instance) (goal ?*GOAL-INSTANCE-BASE*) (plan-type TEMPORAL)))
   (retract ?set-f)
   ;clear all old goals in pddl_manager                                           
   (do-for-all-facts ((?goal-fluent pddl-goal-fluent))                            

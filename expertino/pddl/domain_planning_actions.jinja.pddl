@@ -17,7 +17,7 @@
    ;; Dispense a workpiece to the initial location
    (:durative-action spawn-and-transport
      :parameters (?prod - product ?to - place ?step - step-name ?next - step-name)
-     :duration (= ?duration 5)
+     :duration (= ?duration 10)
      :condition (and
        (at start (spawnable ?prod))
        (at start (step ?prod ?step))
@@ -80,7 +80,7 @@
 
    (:durative-action pay-from-bs
      :parameters (?rs - ring-station)
-     :duration (= ?duration 5)
+     :duration (= ?duration 10)
      :condition (and
        (at start (<= (pay-count ?rs) 2))
      )
