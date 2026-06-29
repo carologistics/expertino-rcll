@@ -5,7 +5,7 @@
 
     training:
       retraining: false
-      max_episodes: 500
+      max_episodes: 100
       timesteps: 100000000
 
     env:

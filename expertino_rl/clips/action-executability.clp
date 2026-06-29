@@ -81,12 +81,19 @@
 (defrule executability-check-filter-bs
     (declare (salience 1))
     (rl-current-action-space (state PENDING))
-    (rl-action (name bs-dispense|bs-dispense-pay) (is-selected TRUE) (is-finished FALSE))
+    (or
+        (rl-action (name bs-dispense|bs-dispense-pay) (is-selected TRUE) (is-finished FALSE))
+        (not (and
+            (pddl-fluent (name free) (params bs-input))
+            (pddl-fluent (name free) (params bs-output))
+        ))
+    )
     ?ra <- (rl-action (id ?action-id) (name bs-dispense|bs-dispense-pay) (is-selected FALSE))
     =>
-    (printout warn "Base station action in progress, disable action " ?action-id crlf)
+    (printout warn "Base station action not allowed: " ?action-id crlf)
     (retract ?ra)
 )
+
 
 (defrule executability-check-finished
     ?ca <- (rl-current-action-space (state PENDING))

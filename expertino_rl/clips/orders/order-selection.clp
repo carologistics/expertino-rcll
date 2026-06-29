@@ -67,10 +67,3 @@
   =>
   (retract ?goal-f)
 )
-
-(defrule remove-delivered-product-objects
-  (confval (path "/pddl/problem_instance") (value ?instance-str))
-  (pddl-fluent (instance ?instance&:(eq ?instance (sym-cat ?instance-str))) (name step) (params ?wp done))
-  =>
-  (assert (pddl-object-change (instance ?instance) (name ?wp) (type product) (delete TRUE)))
-)

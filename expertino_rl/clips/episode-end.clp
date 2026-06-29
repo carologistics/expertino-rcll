@@ -1,11 +1,17 @@
 (defrule episode-end
   (declare (salience 1))
   (game-state (phase POST_GAME))
-  ?a <- (rl-action (is-selected TRUE) (is-finished TRUE))
   (not (rl-episode-end (success TRUE)))
   =>
   (assert (rl-episode-end (success TRUE)))
-  (modify ?a (reward ?*POINTS-EPISODE-END-SUCCESS*))
+)
+
+(defrule episode-end-finish-rl-action
+  (declare (salience 1))
+  (rl-episode-end (success TRUE))
+  ?a <- (rl-action (is-selected TRUE) (is-finished FALSE))
+  =>
+  (modify ?a (reward ?*POINTS-EPISODE-END-SUCCESS*) (is-finished TRUE))
 )
 
 (defrule rl-stop-agent-on-training-end

@@ -41,8 +41,8 @@
 
 (deffunction rl-add-robots ()
   (assert (rl-robot (name robot1)))
-  ;(assert (rl-robot (name robot2)))
-  ;(assert (rl-robot (name robot3)))
+  (assert (rl-robot (name robot2)))
+  (assert (rl-robot (name robot3)))
 )
 
 (deffunction rl-define-actions ()
@@ -61,8 +61,6 @@
   (not (domain-loaded))
   (not (saved-facts))
 =>
-  (unwatch facts time)
-  (unwatch rules time-retract)
   (bind ?share-dir (ament-index-get-package-share-directory "expertino_rl"))
   ; (parse-pddl-domain (str-cat ?share-dir "/clips/expertino/domain.pddl"))
   (config-load (str-cat ?share-dir "/params/agent_config.yaml") "/")

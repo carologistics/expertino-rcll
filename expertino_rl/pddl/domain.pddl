@@ -155,6 +155,7 @@
       (in ?cs ?in)
       (buffered ?cs ?step)
       (free ?in)
+      (step ?prod ?step)
     )
     :effect (and 
       (at ?prod ?in)
