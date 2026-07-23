@@ -52,6 +52,7 @@
         TRUE
         (retract ?pnf))
     (load-facts reset-protobuf-peers)
+    (assert (last-game-time (game-time 0.) (last-time (time))))
 )
 
 (defrule reset-cx-stage-post-reset-finished

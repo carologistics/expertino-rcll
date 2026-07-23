@@ -169,3 +169,7 @@
   (multislot orders (type SYMBOL) (default (create$)))
 )
 
+(deftemplate last-game-time
+  (slot game-time (type FLOAT))
+  (slot last-time (type FLOAT))
+)
