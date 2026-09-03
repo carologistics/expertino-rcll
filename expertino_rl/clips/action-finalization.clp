@@ -1,32 +1,3 @@
-(deffunction rl-generate-observations ()
-  (do-for-all-facts ((?pf pddl-fluent))
-    (member$ ?pf:name (create$ at free spawnable usable                                 
-                               token-usable on-shelf buffered 
-                               can-buffer))
-    (assert (rl-observation (name ?pf:name) (params ?pf:params)))
-  )
-  (do-for-all-facts ((?pnf pddl-numeric-fluent))
-    TRUE
-    (bind ?value UNDEFINED)
-    (switch (integer ?pnf:value)
-      (case 0 
-        then
-          (bind ?value ZERO)
-      )
-      (case 1
-        then
-          (bind ?value ONE)
-      )
-      (case 2
-        then
-          (bind ?value TWO)
-      )
-    )
-    (assert (rl-observation (name ?pnf:name) 
-                            (params (create$ ?pnf:params ?value))))
-  )
-)
-
 (deffunction calculate-order-points (?wp)
   (bind ?complexity 0)
   (do-for-all-facts ((?pf pddl-fluent))
@@ -53,14 +24,17 @@
     )
     (case 3
       then
-        (bind ?points 100)  
+        (bind ?points 100) 
     )    
   )
   (return ?points)
 )
 
-(defrule expertino-rl-action-finised-delivery
+(defrule expertino-rl-action-finished-delivery
     (declare (salience 1))
+    (not (rl-episode-end))
+    (not (pddl-action-get-effect (state ~DONE)))
+    (not (pddl-fluent-change (state ?s)))
     (executor (action-id ?action-id) (state SUCCEEDED))
     ?r <- (rl-action (id ?action-id) (is-selected TRUE) (is-finished FALSE))
     (pddl-action (id ?action-id) (name transport) (params ?wp ?from ds-input deliver))
@@ -71,6 +45,9 @@
 )
 
 (defrule expertino-rl-action-finished
+    (not (rl-episode-end))
+    (not (pddl-action-get-effect (state ~DONE)))
+    (not (pddl-fluent-change (state ?s)))
     (executor (action-id ?action-id) (state SUCCEEDED))
     ?r <- (rl-action (id ?action-id) (is-selected TRUE) (is-finished FALSE))
     =>

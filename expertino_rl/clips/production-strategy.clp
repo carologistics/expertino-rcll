@@ -1,5 +1,5 @@
 (defglobal
-  ?*TOTAL-PRODUCTION-THRESHOLD* = 2
+  ?*TOTAL-PRODUCTION-THRESHOLD* = 3
 )
 
 (defrule production-strategy-init-filter

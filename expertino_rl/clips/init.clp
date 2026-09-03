@@ -48,12 +48,47 @@
 (deffunction rl-define-actions ()
   (assert
     (rl-observable-action (name transport) (param-names order) (param-types product))
-    (rl-observable-action (name transport-to-cs) (param-names order) (param-types product))
+    (rl-observable-action (name transport-from-rs-to-cs) (param-names order) (param-types product))
+    (rl-observable-action (name transport-from-bs) (param-names order) (param-types product))
+    (rl-observable-action (name transport-from-bs-to-cs) (param-names order) (param-types product))
     (rl-observable-action (name pay-with-carrier) (param-names c rs) (param-types carrier ring-station))
     (rl-observable-action (name pay-with-base) (param-names p rs) (param-types payment ring-station))
     (rl-observable-action (name carrier-to-input) (param-names c cs) (param-types carrier cap-station))
     (rl-observable-action (name bs-dispense) (param-names order) (param-types product))
     (rl-observable-action (name bs-dispense-pay) (param-names token) (param-types payment))
+  )
+)
+
+(deffunction rl-generate-observations ()
+  (do-for-all-facts ((?obs rl-observation))
+    TRUE
+    (retract ?obs)
+  )
+  (do-for-all-facts ((?pf pddl-fluent))
+    (member$ ?pf:name (create$ at free spawnable usable                                 
+                               token-usable on-shelf buffered 
+                               can-buffer))
+    (assert (rl-observation (name ?pf:name) (params ?pf:params)))
+  )
+  (do-for-all-facts ((?pnf pddl-numeric-fluent))
+    TRUE
+    (bind ?value UNDEFINED)
+    (switch (integer ?pnf:value)
+      (case 0 
+        then
+          (bind ?value ZERO)
+      )
+      (case 1
+        then
+          (bind ?value ONE)
+      )
+      (case 2
+        then
+          (bind ?value TWO)
+      )
+    )
+    (assert (rl-observation (name ?pnf:name) 
+                            (params (create$ ?pnf:params ?value))))
   )
 )
 
@@ -90,8 +125,9 @@
    (rl-observe-functions)
    (rl-add-robots)
    (rl-define-actions)
+   (rl-generate-observations)
    (assert (domain-facts-loaded))
- )
+)
 
 (defrule domain-loaded-save-facts
   (domain-facts-loaded)

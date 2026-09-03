@@ -106,6 +106,15 @@
     (rs-slide rs1 rs1-slide)
     (rs-slide rs2 rs2-slide)
 
+    ;; Side availability
+    (usable bs)
+    (usable cs1)
+    (usable cs2)
+    (usable rs1)
+    (usable rs2)
+    (usable ss)
+    (usable ds)
+
   )
 
   (:goal

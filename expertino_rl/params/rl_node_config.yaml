@@ -5,7 +5,7 @@
 
     training:
       retraining: false
-      max_episodes: 100
+      max_episodes: 50
       timesteps: 100000000
 
     env:
@@ -20,7 +20,7 @@
       max_grad_norm: 0.5
       batch_size: 64
       n_steps: 10
-      n_robots: 1
+      n_robots: 3
       seed: 42
       verbose: 1
       wait_for_all_robots: false

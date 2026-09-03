@@ -5,12 +5,9 @@
   (pddl-action (id ?action-id) (name ?action-name) (params $?action-params))
   (protobuf-peer (name refbox-private) (peer-id ?peer-id))
   (machine (name ?mps) (state IDLE))
-  (test (or 
-    (and (eq ?action-name bs-dispense)
-         (eq ?mps (pddl-place-to-refbox-mps (nth$ 2 ?action-params) ?team-color))
-    )
+  (test 
     (eq ?mps (pddl-place-to-refbox-mps (nth$ 3 ?action-params) ?team-color))
-  ) )
+  )
   (not (sending ?other-action-id&:(neq ?other-action-id ?action-id) ?mps))
   (not (sent ?action-id))
   => 
@@ -20,8 +17,8 @@
     (case bs-dispense
       then
         (bind ?bs-inst (pb-create "llsf_msgs.PrepareInstructionBS"))
-        (pb-set-field ?bs-inst "side" (pddl-place-to-mps-side (nth$ 2 ?action-params)))
-        (pb-set-field ?bs-inst "color" (pddl-task-to-base-color (nth$ 3 ?action-params)))
+        (pb-set-field ?bs-inst "side" (pddl-place-to-mps-side (nth$ 3 ?action-params)))
+        (pb-set-field ?bs-inst "color" (pddl-task-to-base-color (nth$ 4 ?action-params)))
         (pb-set-field ?machine-instruction "instruction_bs" ?bs-inst)
     )
     (case bs-dispense-pay
@@ -76,12 +73,7 @@
   ?pa <- (pddl-action (id ?action-id) (name ?action-name) (params $?action-params))
   (game-state (team-color ?team-color) (phase PRODUCTION))
   =>
-  (if (eq ?action-name bs-dispense)
-   then
-    (bind ?o-mps (pddl-place-to-refbox-mps (nth$ 2 ?action-params) ?team-color))
-   else
-    (bind ?o-mps (pddl-place-to-refbox-mps (nth$ 3 ?action-params) ?team-color))
-  )
+  (bind ?o-mps (pddl-place-to-refbox-mps (nth$ 3 ?action-params) ?team-color))
   (if (eq ?o-mps ?mps)
    then
     (modify ?ex (state SUCCEEDED))

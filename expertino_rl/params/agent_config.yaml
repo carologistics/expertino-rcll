@@ -38,4 +38,4 @@ pddl:
   actions:
     refbox_auto: ["cs-mount-cap", "cs-buffer", "rs-mount-ring", "finalize"]
     refbox_select: ["bs-dispense", "bs-dispense-pay"]
-    robot: ["transport", "transport-to-cs", "carrier-to-input", "pay-with-carrier", "pay-with-base"]
+    robot: ["transport", "transport-from-rs-to-cs", "transport-from-bs", "transport-from-bs-to-cs", "carrier-to-input", "pay-with-carrier", "pay-with-base"]

@@ -5,7 +5,7 @@
   (protobuf-peer (name ?robot) (peer-id ?peer-id))
   (not (agent-task-list (executor-id ?ex-id)))
   ?pa <- (pddl-action (id ?action-id) 
-           (name ?action-name&transport|transport-to-cs|carrier-to-input|pay-with-base|pay-with-carrier)
+           (name ?action-name&transport|transport-from-rs-to-cs|transport-from-bs|transport-from-bs-to-cs|carrier-to-input|pay-with-base|pay-with-carrier)
            (params $?action-params))
   (game-state (team-color ?team-color))
   =>
@@ -22,6 +22,30 @@
       (bind ?from-side (pddl-place-to-mps-side (nth$ 2 ?action-params)))
       (bind ?to-mps (pddl-place-to-refbox-mps (nth$ 3 ?action-params) ?team-color))
       (bind ?to-side (pddl-place-to-mps-side (nth$ 3 ?action-params)))
+    )
+    (case transport-from-rs-to-cs then
+      (bind ?from-mps (pddl-place-to-refbox-mps (nth$ 2 ?action-params) ?team-color))
+      (bind ?from-side (pddl-place-to-mps-side (nth$ 2 ?action-params)))
+      (bind ?to-mps (pddl-place-to-refbox-mps (nth$ 4 ?action-params) ?team-color))
+      (bind ?to-side (pddl-place-to-mps-side (nth$ 4 ?action-params)))
+    )
+    (case transport-from-bs then
+      (bind ?from-mps (pddl-place-to-refbox-mps (nth$ 3 ?action-params) ?team-color))
+      (bind ?from-side (pddl-place-to-mps-side (nth$ 3 ?action-params)))
+      (bind ?to-mps (pddl-place-to-refbox-mps (nth$ 4 ?action-params) ?team-color))
+      (bind ?to-side (pddl-place-to-mps-side (nth$ 4 ?action-params)))
+    )
+    (case transport-from-bs-to-cs then
+      (bind ?from-mps (pddl-place-to-refbox-mps (nth$ 3 ?action-params) ?team-color))
+      (bind ?from-side (pddl-place-to-mps-side (nth$ 3 ?action-params)))
+      (bind ?to-mps (pddl-place-to-refbox-mps (nth$ 5 ?action-params) ?team-color))
+      (bind ?to-side (pddl-place-to-mps-side (nth$ 5 ?action-params)))
+    )
+    (case pay-with-base then
+      (bind ?from-mps (pddl-place-to-refbox-mps (nth$ 3 ?action-params) ?team-color))
+      (bind ?from-side (pddl-place-to-mps-side (nth$ 3 ?action-params)))
+      (bind ?to-mps (pddl-place-to-refbox-mps (nth$ 5 ?action-params) ?team-color))
+      (bind ?to-side (pddl-place-to-mps-side (nth$ 5 ?action-params)))
     )
     (default
       (bind ?from-mps (pddl-place-to-refbox-mps (nth$ 2 ?action-params) ?team-color))

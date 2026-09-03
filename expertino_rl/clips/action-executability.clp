@@ -1,13 +1,19 @@
 (deffunction rl-action-map-params-and-points (?id ?name ?params)
     (switch ?name
-        (case transport-to-cs then
-            (bind ?param-indices (create$ 1))
-            (bind ?points ?*POINTS-ACTION-TRANSPORT-TO-CS*))
         (case transport then
             (bind ?param-indices (create$ 1))
             (bind ?points ?*POINTS-ACTION-TRANSPORT*))
+        (case transport-from-rs-to-cs then
+            (bind ?param-indices (create$ 1))
+            (bind ?points ?*POINTS-ACTION-TRANSPORT-TO-CS*))
+        (case transport-from-bs then
+            (bind ?param-indices (create$ 1))
+            (bind ?points ?*POINTS-ACTION-TRANSPORT*))
+        (case transport-from-bs-to-cs then
+            (bind ?param-indices (create$ 1))
+            (bind ?points ?*POINTS-ACTION-TRANSPORT-TO-CS*))
         (case pay-with-base then
-            (bind ?param-indices (create$ 1 3))
+            (bind ?param-indices (create$ 1 4))
             (bind ?points ?*POINTS-ACTION-PAY-WITH-BASE*))
         (case pay-with-carrier then
             (bind ?param-indices (create$ 1 3))
@@ -25,7 +31,7 @@
     (bind ?action-params (create$))
     (foreach ?index ?param-indices
         (bind ?param (nth$ ?index ?params))
-        (if (member$ ?name (create$ transport transport-to-cs bs-dispense)) then
+        (if (member$ ?name (create$ transport transport-from-rs-to-cs transport-from-bs transport-from-bs-to-cs bs-dispense)) then
             (bind ?prod-name-end (- (str-index "-gen" (str-cat ?param)) 1))
             (bind ?param (sym-cat (sub-string 1 ?prod-name-end (str-cat ?param))))
         )

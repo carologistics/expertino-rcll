@@ -10,9 +10,9 @@
     =>
     (bind ?instance (sym-cat ?instance-str))
     (assert (pddl-action (instance ?instance) (id (gensym*)) 
-                         (name bs-dispense) (params ?wp bs-output ?base-step ?cap-step)))
+                         (name bs-dispense) (params ?wp bs bs-output ?base-step ?cap-step)))
     (assert (pddl-action (instance ?instance) (id (gensym*)) 
-                         (name transport-to-cs) (params ?wp bs-output ?cap-station ?cap-in ?cap-step)))
+                         (name transport-from-bs-to-cs) (params ?wp bs bs-output ?cap-station ?cap-in ?cap-step)))
     (assert (pddl-action (instance ?instance) (id (gensym*))
                          (name carrier-to-input) (params ?carrier ?cap-step ?cap-station ?cap-in)))
     (assert (pddl-action (instance ?instance) (id (gensym*))
@@ -28,9 +28,9 @@
     =>
     (bind ?instance (sym-cat ?instance-str))
     (assert (pddl-action (instance ?instance) (id (gensym*)) 
-                         (name bs-dispense) (params ?wp bs-output ?base-step ?ring-step)))
+                         (name bs-dispense) (params ?wp bs bs-output ?base-step ?ring-step)))
     (assert (pddl-action (instance ?instance) (id (gensym*))
-                         (name transport) (params ?wp bs-output ?ring-place ?ring-step)))
+                         (name transport-from-bs) (params ?wp bs bs-output ?ring-place ?ring-step)))
 )
 
 (defrule pddl-action-from-step-ring-to-ring
@@ -67,7 +67,7 @@
     (assert (pddl-action (instance ?instance) (id (gensym*))
                          (name rs-mount-ring) (params ?wp ?ring-station ?ring-input ?ring-output ?ring-step ?cap-step)))
     (assert (pddl-action (instance ?instance) (id (gensym*)) 
-                         (name transport-to-cs) (params ?wp ?ring-output ?cap-station ?cap-in ?cap-step)))
+                         (name transport-from-rs-to-cs) (params ?wp ?ring-output ?cap-station ?cap-in ?cap-step)))
     (assert (pddl-action (instance ?instance) (id (gensym*))
                          (name carrier-to-input) (params ?carrier ?cap-step ?cap-station ?cap-in)))
     (assert (pddl-action (instance ?instance) (id (gensym*))
@@ -94,6 +94,7 @@
 (defrule pddl-action-pay-with-carrier
     (pddl-fluent (name token-usable) (params ?carrier ?from))
     (test (str-index carrier ?carrier))
+    (pddl-fluent (name token-step) (params ?carrier ?from dispose))
     (pddl-numeric-fluent (name pay-count) (params ?rs) (value ?rs-count))
     (pddl-fluent (name rs-slide) (params ?rs ?slide))
     (test (<= ?rs-count 2))
@@ -116,18 +117,18 @@
     (pddl-numeric-fluent (name pay-count) (params ?rs) (value ?rs-count))
     (pddl-fluent (name rs-slide) (params ?rs ?slide))
     (test (<= ?rs-count ?ring-price))
-    (not (and (pddl-action (id ?action-id) (name pay-with-base) (params pay-token ?bs-place ?rs ?slide))
+    (not (and (pddl-action (id ?action-id) (name pay-with-base) (params pay-token bs ?bs-place ?rs ?slide))
               (not (executor (action-id ?action-id) (state SUCCEEDED)))
     ))
     (confval (path "/pddl/problem_instance") (value ?instance-str))
     =>
     (bind ?instance (sym-cat ?instance-str))
     (assert (pddl-action (instance ?instance) (id (gensym*))
-                         (name pay-with-base) (params pay-token ?bs-place ?rs ?slide)))
+                         (name pay-with-base) (params pay-token bs ?bs-place ?rs ?slide)))
 )
 
 (defrule pddl-action-bs-dispense-pay
-    (pddl-action (id ?action-id) (name pay-with-base) (params pay-token ?bs-place ?rs ?slide))
+    (pddl-action (id ?action-id) (name pay-with-base) (params pay-token bs ?bs-place ?rs ?slide))
     (not (rl-action (id ?action-id) (is-finished TRUE)))
     (not (and (pddl-action (id ?dispense-id) (name bs-dispense-pay) (params pay-token bs ?bs-place))
               (not (rl-action (id ?dispense-id) (is-finished TRUE)))))
